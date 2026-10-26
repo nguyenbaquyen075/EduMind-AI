@@ -1,0 +1,172 @@
+@model LuyenDeViewModel
+@{
+    Layout = "_Layout";
+    var l = Model.DangChon!;
+    var k = l.Khoa;
+    ViewData["Title"] = $"Luyện đề {k.Ten}";
+    var tiep = l.BaiLuyenTiep;
+
+    // Điểm: xanh khi ≥ 80%, cam khi thấp hơn
+    string LopDiem(bool tot) => tot ? "kl-score" : "kl-score vua";
+}
+@section Head {
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="~/css/khoa-hoc.css" asp-append-version="true">
+}
+
+<div class="kh-shell">
+
+<partial name="_MenuTaiKhoan" model="Model.Menu" />
+
+<main class="kh-main">
+<div class="kh-inner">
+
+<nav class="kd-crumb" aria-label="Đường dẫn">
+<a asp-controller="Home" asp-action="LuyenDe" asp-route-id="">Luyện đề</a>
+<svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"></path></svg>
+<span aria-current="page">@k.Ten</span>
+</nav>
+
+@* ---------------------------------------------------------------- Thông tin luyện đề của khoá *@
+<section class="kd-hero don" aria-labelledby="ten-khoa">
+<div>
+<p class="kh-eyebrow">Luyện đề</p>
+<h1 id="ten-khoa" class="kh-title">@k.Ten</h1>
+<p class="kd-desc">Đề thi thử tính giờ và bài tập theo từng bài. Mỗi câu có lời giải chỉ về đúng mục lý thuyết trong khoá.</p>
+@if (k.DaMo)
+{
+<div class="kd-progress">
+<div class="kc-progress-label so"><span><strong>@l.DaLuyen</strong>/@l.TongBai bài đã luyện</span><span>Điểm TB @DinhDang.Diem(l.DiemTrungBinh)</span></div>
+<div class="kc-bar" role="progressbar" aria-label="Tiến độ luyện đề" aria-valuenow="@l.TienDoPhanTram" aria-valuemin="0" aria-valuemax="100"><span style="width: @(l.TienDoPhanTram)%"></span></div>
+</div>
+}
+<div class="kd-actions">
+@if (tiep is not null)
+{
+<a asp-controller="Home" asp-action="LamCauHoi" asp-route-id="@tiep.BaiId" class="kh-btn">@(k.DaMo ? (l.DaLuyen > 0 ? "Luyện tiếp" : "Bắt đầu luyện") : "Luyện thử") Bài @tiep.So
+<svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a>
+}
+<a asp-controller="Home" asp-action="KhoaHoc" asp-route-id="@k.Id" class="kh-btn phu">Xem bài học</a>
+</div>
+</div>
+</section>
+
+@* ---------------------------------------------------------------- Đề thi thử *@
+<section class="kl-section" aria-labelledby="de-thi">
+<div class="kh-section-head"><h2 id="de-thi" class="kh-h2">Đề thi thử</h2></div>
+<ul class="kh-panel kl-list">
+@foreach (var d in l.DeThi)
+{
+<li class="kl-row de@(d.BiKhoa ? " khoa" : "")">
+<span class="kl-ico" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"></circle><path d="M12 9v4l2 2M9 2h6"></path></svg></span>
+<span>
+    @if (d.BiKhoa)
+    {
+<span class="kh-lesson-title">@d.Ten</span>
+    }
+    else
+    {
+<a asp-controller="Home" asp-action="LamCauHoi" asp-route-id="@d.Id" class="kl-link kh-lesson-title">@d.Ten</a>
+    }
+<span class="kh-lesson-meta so">@d.SoCau câu · @d.SoPhut phút</span>
+</span>
+    @if (d.BiKhoa)
+    {
+<span class="kl-score chua">Cần mở khoá</span>
+    }
+    else if (d.Dung is not null)
+    {
+<span class="@LopDiem(d.Tot) so">@d.Dung/@d.SoCau</span>
+    }
+    else
+    {
+<span class="kl-start">Làm bài<svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"></path></svg></span>
+    }
+</li>
+}
+</ul>
+</section>
+
+@* ---------------------------------------------------------------- Bài tập theo chủ đề *@
+<section class="kl-section" aria-labelledby="bai-tap">
+<div class="kh-section-head"><h2 id="bai-tap" class="kh-h2">Luyện tập theo chủ đề</h2></div>
+<div class="kh-panel">
+@for (var c = 0; c < l.Chuong.Count; c++)
+{
+    var chuong = l.Chuong[c];
+    var phan = chuong.Ten.Split(" · ", 2);
+<details class="kh-chapter" id="chu-de-@(c + 1)">
+<summary>
+<span>
+<span class="kh-chapter-label">@phan[0]</span>
+<span class="kh-chapter-name">@(phan.Length > 1 ? phan[1] : "")</span>
+</span>
+<span class="kh-chapter-count so">@chuong.Bai.Count(b => b.DaLam)/@chuong.Bai.Count đã luyện
+<svg class="kh-chevron" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"></path></svg>
+</span>
+</summary>
+<ol class="kh-lessons">
+    @foreach (var b in chuong.Bai)
+    {
+<li class="kl-row@(b.BiKhoa ? " khoa" : "")">
+        @if (b.BiKhoa)
+        {
+<span class="kh-status khoa" role="img" aria-label="Cần mở khoá"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg></span>
+<span><span class="kh-lesson-title">@b.Ten</span><span class="kh-lesson-meta so">Bài @b.So · @b.SoCau câu</span></span>
+<span></span>
+<span></span>
+        }
+        else
+        {
+            if (b.DaLam)
+            {
+<span class="kh-status xong" role="img" aria-label="Đã luyện"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg></span>
+            }
+            else
+            {
+<span class="kh-status chua so" aria-hidden="true">@b.So</span>
+            }
+<span>
+<a asp-controller="Home" asp-action="LamCauHoi" asp-route-id="@b.BaiId" class="kl-link kh-lesson-title">@b.Ten</a>
+<span class="kh-lesson-meta so">Bài @b.So · @b.SoCau câu</span>
+</span>
+            if (b.Dung is not null)
+            {
+<span class="@LopDiem(b.Tot) so" title="Lần làm gần nhất">@b.Dung/@b.SoCau</span>
+            }
+            else
+            {
+<span class="kl-score chua">Chưa làm</span>
+            }
+<a asp-controller="Home" asp-action="BaiHoc" asp-route-id="@b.BaiId" class="kl-theory" aria-label="Ôn lý thuyết bài @b.So" title="Ôn lý thuyết">
+<svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4h6a4 4 0 0 1 4 4v13a3 3 0 0 0-3-3H2z"></path><path d="M22 4h-6a4 4 0 0 0-4 4v13a3 3 0 0 1 3-3h7z"></path></svg>
+</a>
+        }
+</li>
+    }
+</ol>
+</details>
+}
+</div>
+</section>
+
+</div>
+</main>
+
+</div>
+
+@section Scripts {
+<script>
+// Vào từ menu "Luyện tập cả chủ đề" (#chu-de-n): mở sẵn chủ đề đó
+(() => {
+  const mo = () => {
+    const d = location.hash ? document.getElementById(decodeURIComponent(location.hash.slice(1))) : null;
+    if (d && d.tagName === 'DETAILS') { d.open = true; d.scrollIntoView({ block: 'start' }); }
+  };
+  mo();
+  window.addEventListener('hashchange', mo);
+})();
+</script>
+}

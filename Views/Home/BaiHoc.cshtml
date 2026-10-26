@@ -1,0 +1,273 @@
+@model BaiHocViewModel
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Bài học và Hỏi AI";
+}
+@section Head {
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap">
+<link rel="stylesheet" href="~/css/bai-hoc.css" asp-append-version="true">
+}
+
+<div style="min-height: 100vh; background: #FAF8F3; color: #0F1B2D; font-family: 'Be Vietnam Pro', system-ui, sans-serif; font-size: 16px; line-height: 1.6">
+
+<header style="background: #0B1A2B; color: #E6EDF3">
+<div style="padding: 12px 24px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px">
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 14px">
+<a asp-controller="Home" asp-action="KhoaHoc" asp-route-id="@Model.KhoaId" style="display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 12px; border-radius: 10px; border: 1px solid #2E4A66; color: #E6EDF3; text-decoration: none; font-weight: 600">
+<svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"></path></svg>Khoá của tôi</a>
+<span style="font-weight: 700">@Model.TenKhoa</span>
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8FA3B8">@Model.BaiDaHoc/@Model.TongBai bài</span>
+</div>
+<div aria-label="Tài khoản" style="width: 38px; height: 38px; border-radius: 99px; background: #5EEAD4; color: #0B1A2B; font-weight: 700; display: flex; align-items: center; justify-content: center">HS</div>
+</div>
+</header>
+
+<div class="vung-hoc">
+
+<aside id="muc-luc" hidden aria-label="Mục lục" class="muc-luc">
+<p class="ml-nhan">Bài @Model.SoBaiHienTai</p>
+<p class="ml-ten-bai">@Model.TieuDe</p>
+@if (!Model.CoNoiDung)
+{
+<p class="ml-trong">Các mục của bài sẽ hiện khi nạp tài liệu khoá học.</p>
+}
+else
+{
+<ol class="ml-muc">
+@foreach (var muc in Model.NoiDung)
+{
+<li data-muc="muc-@muc.So">
+<a href="#muc-@muc.So" class="ml-link-muc"><span class="ml-so">@muc.So</span>@muc.Ten</a>
+<ul class="ml-con">
+    @foreach (var phan in muc.Phan)
+    {
+<li><a href="#muc-@muc.So-@phan.Id">@phan.TieuDe</a></li>
+    }
+</ul>
+</li>
+}
+</ol>
+}
+</aside>
+
+<main id="noi-dung" class="bai-viet">
+<div class="thanh-cong-cu">
+<button type="button" id="moMucLuc" class="nut-muc-luc" aria-controls="muc-luc" aria-expanded="false" aria-label="Hiện mục lục" title="Mục lục">
+<svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"></path></svg><span>Mục lục</span>
+</button>
+<button type="button" id="moTroLy" class="nut-hoi-ai" aria-controls="tro-ly" aria-expanded="false">
+<svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5l1.9 5.6 5.6 1.9-5.6 1.9L12 17.5l-1.9-5.6L4.5 10l5.6-1.9z"></path><path d="M19 15l.8 2.2 2.2.8-2.2.8L19 21l-.8-2.2-2.2-.8 2.2-.8z" opacity=".7"></path></svg><span>Hỏi AI</span>
+</button>
+</div>
+<header class="muc-bai dau-bai">
+<p style="margin: 0 0 6px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #0E7C66">@Model.NhanBai</p>
+<h1 style="margin: 0; font-size: 32px; font-weight: 800; letter-spacing: -0.5px; line-height: 1.25">@Model.TieuDe</h1>
+</header>
+@if (Model.BiKhoa)
+{
+<div style="padding: 20px; margin-bottom: 28px; border-radius: 12px; background: #FFF7EB; border: 1px solid #F0CF9A; color: #5C3A06">
+<p style="margin: 0 0 4px; font-weight: 700">Bài này thuộc khoá chưa mở</p>
+<p style="margin: 0 0 14px">Em đang học thử. Mở khoá @Model.TenKhoa để học tất cả @Model.TongBai bài.</p>
+<a asp-controller="Home" asp-action="Index" asp-fragment="goi" style="display: inline-flex; align-items: center; min-height: 44px; padding: 0 18px; border-radius: 10px; background: #0E7C66; color: #FFFFFF; text-decoration: none; font-weight: 700">Mở khoá</a>
+</div>
+}
+else if (!Model.CoNoiDung)
+{
+<p style="margin: 0 0 28px; padding: 20px; border-radius: 12px; border: 1px dashed #C5CED6; font-size: 16px; color: #52606D">@Model.MoDau</p>
+}
+else
+{
+    var tongMuc = Model.NoiDung.Count;
+    foreach (var muc in Model.NoiDung)
+    {
+<section class="muc-lon" id="muc-@muc.So" aria-labelledby="muc-@(muc.So)-tieu-de">
+<p class="muc-lon-nhan so">Mục @muc.So/@tongMuc</p>
+<h2 id="muc-@(muc.So)-tieu-de" class="muc-lon-ten">@muc.TieuDe</h2>
+        @foreach (var phan in muc.Phan)
+        {
+            var maPhan = $"muc-{muc.So}-{phan.Id}";
+<section class="muc-bai" id="@maPhan" aria-labelledby="@(maPhan)-tieu-de">
+<h3 id="@(maPhan)-tieu-de" class="ten-muc">@phan.TieuDe</h3>
+            @if (phan.LaGhiNho)
+            {
+<p class="ghi-nho">@string.Join(" ", phan.DoanVan)</p>
+            }
+            else
+            {
+                foreach (var doan in phan.DoanVan)
+                {
+<p class="doan-van">@doan</p>
+                }
+            }
+            @if (phan.Moc is { Count: > 0 })
+            {
+<ol class="dong-thoi-gian">
+                @foreach (var dot in phan.Moc)
+                {
+<li>
+<p class="dtg-moc">@dot.Ten · @dot.ThoiGian</p>
+<p class="dtg-noi-dung">@dot.NoiDung</p>
+</li>
+                }
+</ol>
+            }
+</section>
+        }
+<nav class="nhay-muc" aria-label="Chuyển nhanh giữa các mục">
+        @if (muc.So > 1)
+        {
+<a href="#muc-@(muc.So - 1)">← Mục trước</a>
+        }
+        else
+        {
+<span></span>
+        }
+        @if (muc.So < tongMuc)
+        {
+<a href="#muc-@(muc.So + 1)">Mục sau →</a>
+        }
+</nav>
+</section>
+    }
+
+<div class="ket-bai">
+<p>Bạn đã đọc hết bài @Model.SoBaiHienTai.</p>
+<span class="lat-trang-cuoi">
+<a asp-controller="Home" asp-action="LamCauHoi" asp-route-id="@Model.BaiId" class="nut-trang chinh">Làm câu hỏi bài này</a>
+</span>
+</div>
+}
+</main>
+
+<section id="tro-ly" hidden aria-label="Trợ lý AI" style="scroll-margin-top: 16px; flex: 1 1 340px; max-width: 100%; background: #FFFFFF; border: 1px solid #E1E6EB; border-radius: 16px; overflow: hidden; display: flex; flex-direction: column">
+<div style="padding: 14px 18px; background: #0B1A2B; color: #E6EDF3; display: flex; align-items: center; justify-content: space-between; gap: 10px">
+<span style="display: inline-flex; align-items: center; gap: 10px; font-weight: 700; white-space: nowrap"><span aria-hidden="true" style="width: 30px; height: 30px; border-radius: 9px; background: linear-gradient(135deg, #5EEAD4, #0E7C66); color: #0B1A2B; display: flex; align-items: center; justify-content: center"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5l1.9 5.6 5.6 1.9-5.6 1.9L12 17.5l-1.9-5.6L4.5 10l5.6-1.9z"></path><path d="M19 15l.8 2.2 2.2.8-2.2.8L19 21l-.8-2.2-2.2-.8 2.2-.8z" opacity=".7"></path></svg></span>Trợ lý AI</span>
+<span style="display: inline-flex; align-items: center; gap: 8px">
+<span title="Trợ lý chỉ trả lời theo tài liệu khoá học" style="font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 6px; border: 1px solid #23405C; color: #5EEAD4; white-space: nowrap">tài liệu khoá</span>
+<button type="button" id="dongTroLy" aria-label="Đóng trợ lý" title="Đóng" style="width: 32px; height: 32px; border-radius: 8px; border: 1px solid #23405C; background: transparent; color: #E6EDF3; display: flex; align-items: center; justify-content: center; cursor: pointer">
+<svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+</button>
+</span>
+</div>
+<div style="padding: 18px; display: flex; flex-direction: column; gap: 12px; background: #F8FAFB">
+@if (Model.TinNhanMau.Count == 0)
+{
+<div style="display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 18px 8px; text-align: center; color: #52606D">
+<span aria-hidden="true" style="width: 52px; height: 52px; border-radius: 16px; background: linear-gradient(135deg, #E0F4EF, #C8EFE3); color: #0E7C66; display: flex; align-items: center; justify-content: center"><svg aria-hidden="true" width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5l1.9 5.6 5.6 1.9-5.6 1.9L12 17.5l-1.9-5.6L4.5 10l5.6-1.9z"></path><path d="M19 15l.8 2.2 2.2.8-2.2.8L19 21l-.8-2.2-2.2-.8 2.2-.8z" opacity=".7"></path></svg></span>
+<p style="margin: 0; font-weight: 700; color: #0F1B2D">Hỏi trợ lý về bài này</p>
+<p style="margin: 0; font-size: 14px">Trợ lý trả lời theo tài liệu khoá học, kèm nguồn để em tự đối chiếu.</p>
+</div>
+}
+@foreach (var tn in Model.TinNhanMau)
+{
+    if (tn.LaHocSinh)
+    {
+<div style="align-self: flex-end; max-width: 85%; background: #0B1A2B; color: #FFFFFF; padding: 10px 14px; border-radius: 14px 14px 4px 14px; font-size: 15px">@tn.NoiDung</div>
+    }
+    else if (tn.LaTuChoi)
+    {
+<div style="max-width: 94%; background: #FFF7EB; border: 1px solid #F0CF9A; padding: 12px 14px; border-radius: 14px 14px 14px 4px; font-size: 15px; color: #5C3A06">
+<p style="margin: 0 0 2px; font-weight: 700">Chưa có trong tài liệu khoá</p>
+<p style="margin: 0">@tn.NoiDung</p>
+</div>
+    }
+    else
+    {
+<div style="max-width: 94%; background: #FFFFFF; border: 1px solid #E1E6EB; padding: 12px 14px; border-radius: 14px 14px 14px 4px; font-size: 15px">
+<p style="margin: 0 0 8px">@tn.NoiDung</p>
+<div style="display: flex; align-items: center; gap: 8px">
+        @if (tn.Nguon is not null)
+        {
+<a href="#noi-dung" style="font-family: 'JetBrains Mono', monospace; font-size: 12px; padding: 3px 8px; border-radius: 6px; background: #E0F4EF; color: #0A5C4C; text-decoration: none">@tn.Nguon</a>
+        }
+<button type="button" style="margin-left: auto; min-height: 30px; padding: 0 10px; border-radius: 8px; border: 1px solid #E1E6EB; background: #FFFFFF; color: #52606D; font: inherit; font-size: 13px; cursor: pointer">Báo sai</button>
+</div>
+</div>
+    }
+}
+</div>
+<div style="padding: 14px 18px; border-top: 1px solid #E1E6EB">
+<div style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px">
+@foreach (var goiY in Model.GoiYHoi)
+{
+<button type="button" style="min-height: 34px; padding: 0 12px; border-radius: 99px; border: 1px solid #C5CED6; background: #FFFFFF; color: #334155; font: inherit; font-size: 13px; cursor: pointer">@goiY</button>
+}
+</div>
+<form style="display: flex; gap: 8px">
+<label for="ask" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Câu hỏi cho AI</label>
+<input id="ask" type="text" placeholder="Hỏi về bài học…" style="flex: 1 1 auto; min-width: 0; min-height: 46px; padding: 0 14px; border-radius: 12px; border: 1px solid #C5CED6; font: inherit; color: #0F1B2D">
+<button type="button" aria-label="Gửi" style="flex: 0 0 46px; height: 46px; border-radius: 12px; border: none; background: #0E7C66; display: flex; align-items: center; justify-content: center; cursor: pointer">
+<svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"></path><path d="M22 2l-7 20-4-9-9-4z"></path></svg>
+</button>
+</form>
+</div>
+</section>
+
+</div>
+</div>
+
+
+@section Scripts {
+<script>
+// Khung trợ lý: mặc định ẩn để phần bài học rộng; nút "Hỏi AI" trên đầu trang bật/tắt. Vào bằng #tro-ly thì mở sẵn
+(() => {
+  const khung = document.getElementById('tro-ly');
+  const mo = document.getElementById('moTroLy');
+  const dong = document.getElementById('dongTroLy');
+  const dat = (hien, focus) => {
+    khung.hidden = !hien;
+    mo.setAttribute('aria-expanded', String(hien));
+    mo.classList.toggle('dang-mo', hien);
+    if (hien) { if (focus) document.getElementById('ask')?.focus({ preventScroll: true }); }
+    else if (focus) mo.focus();
+  };
+  mo.addEventListener('click', () => dat(khung.hidden, true));
+  dong.addEventListener('click', () => dat(false, true));
+  if (location.hash === '#tro-ly') dat(true, false);
+})();
+
+// Mục lục bên trái: mặc định ẩn để phần kiến thức rộng tối đa; nút "Mục lục" bật/tắt.
+// Đã mở thì giữ mở khi chuyển sang mục khác (nhớ trong phiên)
+(() => {
+  const KEY = 'sd-muc-luc-mo';
+  const mucLuc = document.getElementById('muc-luc');
+  const nut = document.getElementById('moMucLuc');
+  const dat = (hien) => {
+    mucLuc.hidden = !hien;
+    nut.setAttribute('aria-expanded', String(hien));
+    nut.setAttribute('aria-label', hien ? 'Ẩn mục lục' : 'Hiện mục lục');
+    nut.classList.toggle('dang-mo', hien);
+    try { sessionStorage.setItem(KEY, hien ? '1' : '0'); } catch { }
+  };
+  let daMo = false;
+  try { daMo = sessionStorage.getItem(KEY) === '1'; } catch { }
+  if (daMo) dat(true);
+  nut.addEventListener('click', () => dat(mucLuc.hidden));
+
+  // Bấm mục / phần (trong mục lục hoặc nút Mục trước/sau): cuộn mượt tới đó và làm sáng để thấy đã tới
+  const giam = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  document.querySelectorAll('.ml-muc a[href^="#"], .nhay-muc a[href^="#"]').forEach((a) => a.addEventListener('click', (e) => {
+    const dich = document.getElementById(decodeURIComponent(a.hash.slice(1)));
+    if (!dich) return;
+    e.preventDefault();
+    dich.scrollIntoView({ behavior: giam ? 'auto' : 'smooth', block: 'start' });
+    const sang = dich.classList.contains('muc-lon') ? dich.querySelector('h2') : dich;
+    sang.classList.remove('nhap-nhay'); void sang.offsetWidth; sang.classList.add('nhap-nhay');
+    try { history.replaceState(null, '', a.hash); } catch { }
+  }));
+
+  // Kéo đọc: mục lục tự tô mục đang đọc và mở các phần của mục đó
+  const cacMuc = [...document.querySelectorAll('.muc-lon')];
+  if (cacMuc.length && 'IntersectionObserver' in window) {
+    const toMuc = (id) => mucLuc.querySelectorAll('.ml-muc > li').forEach((li) => li.classList.toggle('dang-doc', li.dataset.muc === id));
+    toMuc(cacMuc[0].id);
+    const theoDoi = new IntersectionObserver((ds) => {
+      const thay = ds.filter((d) => d.isIntersecting).sort((x, y) => x.boundingClientRect.top - y.boundingClientRect.top)[0];
+      if (thay) toMuc(thay.target.id);
+    }, { rootMargin: '0px 0px -65% 0px' });
+    cacMuc.forEach((m) => theoDoi.observe(m));
+  }
+})();
+</script>
+}

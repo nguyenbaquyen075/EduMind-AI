@@ -1,0 +1,34 @@
+@model KhoaHocViewModel
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Khoá của tôi";
+}
+@section Head {
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Serif:wght@600;700&display=swap">
+<link rel="stylesheet" href="~/css/khoa-hoc.css" asp-append-version="true">
+}
+
+<div class="kh-shell">
+
+<partial name="_MenuTaiKhoan" model="Model.Menu" />
+
+<main class="kh-main">
+<div class="kh-inner">
+<h1 class="kh-title kh-title-page">Khoá của tôi</h1>
+
+<div class="ck-grid">
+@foreach (var k in Model.Khoa)
+{
+<partial name="_TheKhoa" model="new TheKhoaModel(k)" />
+}
+</div>
+</div>
+</main>
+
+</div>
+
+@section Scripts {
+<script src="~/js/the-khoa.js" asp-append-version="true"></script>
+}
