@@ -155,3 +155,16 @@ a{color:var(--xanh)}
   .ld-cau{padding:18px}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none !important}.ld-lua-chon:hover{transform:none}}
+/* Lọc câu theo kết quả: ô Đúng / Sai / Bỏ trống bấm được */
+.ld-kq-o li{padding:0;border:0}
+.ld-kq-o button{display:flex;align-items:baseline;gap:6px;padding:8px 14px;border-radius:10px;border:1.5px solid;font:inherit;cursor:pointer;transition:transform .15s ease,box-shadow .15s ease}
+.ld-kq-o button:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 6px 14px -10px rgba(15,27,45,.45)}
+.ld-kq-o button:disabled{cursor:default;opacity:.55}
+.ld-kq-o button.dung{background:var(--xanh-nhat);border-color:var(--xanh-vien);color:var(--xanh-dam)}
+.ld-kq-o button.sai{background:var(--do-nhat);border-color:var(--do-vien);color:var(--do)}
+.ld-kq-o button.trong{background:var(--vang-nhat);border-color:var(--vang-vien);color:var(--vang)}
+.ld-kq-o button[aria-pressed="true"]{border-color:currentColor;box-shadow:0 0 0 3px rgba(15,27,45,.08)}
+.ld-loc-nhan{margin:12px 0 0;font-size:14px;font-weight:600;color:var(--chu-2)}
+.ld-loc-nhan button{padding:0;border:0;background:none;font:inherit;color:var(--xanh);text-decoration:underline;cursor:pointer}
+.ld-cau.an{display:none}
+.ld-o.mo-loc{opacity:.35}

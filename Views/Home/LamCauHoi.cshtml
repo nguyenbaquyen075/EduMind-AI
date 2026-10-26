@@ -65,11 +65,12 @@ else
 <div class="ld-kq-giua">
 <p class="ld-chip @(tot ? "" : "thi")">@(tot ? "Làm tốt lắm!" : "Cần ôn thêm")</p>
 <h1 id="kq" class="ld-ten-de">Kết quả · @Model.TenDe</h1>
-<ul class="ld-kq-o so">
-<li class="dung"><b>@Model.SoDung</b><span>Đúng</span></li>
-<li class="sai"><b>@soSai</b><span>Sai</span></li>
-<li class="trong"><b>@Model.SoBoTrong</b><span>Bỏ trống</span></li>
+<ul class="ld-kq-o so" aria-label="Lọc câu theo kết quả">
+<li><button type="button" class="dung" data-loc="dung" data-ten="đúng" aria-pressed="false" disabled="@(Model.SoDung == 0)"><b>@Model.SoDung</b><span>Đúng</span></button></li>
+<li><button type="button" class="sai" data-loc="sai" data-ten="sai" aria-pressed="false" disabled="@(soSai == 0)"><b>@soSai</b><span>Sai</span></button></li>
+<li><button type="button" class="trong" data-loc="bo-trong" data-ten="bỏ trống" aria-pressed="false" disabled="@(Model.SoBoTrong == 0)"><b>@Model.SoBoTrong</b><span>Bỏ trống</span></button></li>
 </ul>
+<p class="ld-loc-nhan" id="locNhan" hidden aria-live="polite"><span></span> · <button type="button" id="xemTatCa">Xem tất cả</button></p>
 </div>
 <div class="ld-kq-nut">
 <a asp-controller="Home" asp-action="LamCauHoi" asp-route-id="@Model.Id" class="ld-nut">
@@ -185,6 +186,37 @@ else
 }
 
 </div>
+
+@if (Model.DaNop && tong > 0)
+{
+@section Scripts {
+<script>
+// Sau khi nộp: bấm ô Đúng / Sai / Bỏ trống để chỉ xem các câu đó; bấm lại hoặc "Xem tất cả" để hiện hết
+(() => {
+  const nut = [...document.querySelectorAll('.ld-kq-o button')];
+  const cau = [...document.querySelectorAll('.ld-cau')];
+  const nhan = document.getElementById('locNhan');
+  const loc = (kieu) => {
+    nut.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.loc === kieu)));
+    let n = 0;
+    cau.forEach((c) => { const hien = !kieu || c.classList.contains(kieu); c.classList.toggle('an', !hien); if (hien) n++; });
+    document.querySelectorAll('.ld-o[data-o]').forEach((o) => o.classList.toggle('mo-loc', !!kieu && cau[o.dataset.o - 1].classList.contains('an')));
+    nhan.hidden = !kieu;
+    if (kieu) {
+      nhan.querySelector('span').textContent = `Đang xem ${n} câu ${nut.find((b) => b.dataset.loc === kieu).dataset.ten}`;
+      cau.find((c) => !c.classList.contains('an'))?.scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start' });
+    }
+  };
+  nut.forEach((b) => b.addEventListener('click', () => loc(b.getAttribute('aria-pressed') === 'true' ? null : b.dataset.loc)));
+  document.getElementById('xemTatCa').addEventListener('click', () => loc(null));
+  // Bấm ô ở bảng câu khi câu đó đang bị lọc ẩn: bỏ lọc để nhảy tới được
+  document.querySelectorAll('.ld-o[data-o]').forEach((o) => o.addEventListener('click', () => {
+    if (cau[o.dataset.o - 1].classList.contains('an')) loc(null);
+  }));
+})();
+</script>
+}
+}
 
 @if (!Model.DaNop && tong > 0)
 {
