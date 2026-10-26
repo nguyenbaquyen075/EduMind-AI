@@ -1,0 +1,351 @@
+@model TrangChuViewModel
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Trang chủ – Sử Địa";
+}
+@section Head {
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Be+Vietnam+Pro:wght@300;400;500;600&display=swap">
+<link rel="stylesheet" href="~/css/trang-chu.css" asp-append-version="true">
+}
+
+<div style="position: relative; overflow-x: clip; min-height: 100vh; background: #14120F; color: #D9D2C5; font-family: 'Be Vietnam Pro', system-ui, sans-serif; font-size: 16px; line-height: 1.65">
+<div class="stars" aria-hidden="true" style="--star: rgba(255,248,232,0.65); --star2: rgba(226,194,127,0.7); --neb1: rgba(110,92,190,0.12); --neb2: rgba(200,161,90,0.08); --glow: rgba(226,194,127,0.35)">
+<div class="neb"></div>
+<div class="l l1"></div>
+<div class="l l2"></div>
+<div class="l l3"></div>
+<span class="spark" style="left: 41.9%; top: 33.2%; animation-duration: 5.3s; animation-delay: 0.4s"></span>
+<span class="spark" style="left: 29.3%; top: 36.6%; animation-duration: 4.9s; animation-delay: 0.8s"></span>
+<span class="spark" style="left: 31.7%; top: 53.4%; animation-duration: 3.7s; animation-delay: 0.6s"></span>
+<span class="spark" style="left: 48.4%; top: 70.3%; animation-duration: 4.3s; animation-delay: 1.5s"></span>
+<span class="spark" style="left: 34.6%; top: 42.4%; animation-duration: 6.3s; animation-delay: 2.5s"></span>
+<span class="spark spark-sm" style="left: 54.3%; top: 53.8%; animation-duration: 4.6s; animation-delay: 5.0s"></span>
+<span class="spark spark-sm" style="left: 43.4%; top: 55.3%; animation-duration: 4.7s; animation-delay: 1.3s"></span>
+<span class="spark" style="left: 71.1%; top: 33.2%; animation-duration: 3.6s; animation-delay: 1.4s"></span>
+<span class="spark" style="left: 46.3%; top: 43.7%; animation-duration: 5.0s; animation-delay: 5.7s"></span>
+<span class="spark" style="left: 45.3%; top: 44.9%; animation-duration: 4.7s; animation-delay: 2.4s"></span>
+<span class="spark" style="left: 30.1%; top: 36.0%; animation-duration: 3.6s; animation-delay: 2.0s"></span>
+<span class="spark" style="left: 31.7%; top: 53.2%; animation-duration: 4.9s; animation-delay: 5.7s"></span>
+<span class="spark spark-sm" style="left: 30.2%; top: 36.0%; animation-duration: 4.3s; animation-delay: 3.8s"></span>
+<span class="spark spark-sm" style="left: 49.1%; top: 41.0%; animation-duration: 3.5s; animation-delay: 4.5s"></span>
+<span class="spark spark-sm" style="left: 49.0%; top: 59.2%; animation-duration: 4.8s; animation-delay: 1.2s"></span>
+<span class="spark" style="left: 33.7%; top: 52.1%; animation-duration: 3.1s; animation-delay: 3.2s"></span>
+</div>
+
+<header id="siteHead" class="site-head" style="position: sticky; top: 0; z-index: 20">
+<div style="max-width: 1240px; margin: 0 auto; padding: 22px 32px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 20px">
+<a href="#" style="display: flex; align-items: baseline; gap: 12px; text-decoration: none; color: #F4EEE2">
+<span style="font-family: 'Playfair Display', Georgia, serif; font-size: 26px; font-weight: 700; letter-spacing: 0.5px">Sử<span style="color: #C8A15A">·</span>Địa</span>
+<span style="font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: #A39B8E">Học viện ôn thi</span>
+</a>
+<nav aria-label="Menu chính" style="display: flex; flex-wrap: wrap; gap: 32px; font-size: 13px; letter-spacing: 1.5px; text-transform: uppercase">
+<a href="#phuongphap" style="color: #D9D2C5; text-decoration: none">Phương pháp</a>
+<a href="#monhoc" style="color: #D9D2C5; text-decoration: none">Môn học</a>
+<a href="#troly" style="color: #D9D2C5; text-decoration: none">Trợ lý</a>
+<a href="#goi" style="color: #D9D2C5; text-decoration: none">Gói học</a>
+</nav>
+<div style="display: flex; align-items: center; gap: 20px">
+<a asp-controller="Home" asp-action="TongQuan" style="font-size: 14px; color: #D9D2C5; text-decoration: none">Đăng nhập</a>
+<a asp-controller="Home" asp-action="TongQuan" style="display: inline-flex; align-items: center; min-height: 44px; padding: 0 22px; border-radius: 6px; background: #C8A15A; color: #14120F; text-decoration: none; font-size: 14px; font-weight: 600; letter-spacing: 0.3px">Bắt đầu học</a>
+</div>
+</div>
+</header>
+
+<section class="hero-cover" style="position: relative; overflow: hidden; color: #EDE6D8">
+<div class="hero-bg" aria-hidden="true" style="position: absolute; inset: 0"></div>
+<div aria-hidden="true" style="position: absolute; inset: 0; background: linear-gradient(90deg, rgba(15,13,10,0.92) 0%, rgba(15,13,10,0.75) 32%, rgba(15,13,10,0.25) 55%, rgba(15,13,10,0) 70%); -webkit-mask-image: linear-gradient(180deg, #000 84%, transparent 100%); mask-image: linear-gradient(180deg, #000 84%, transparent 100%)"></div>
+<div id="chatDim" hidden aria-hidden="true" style="position: absolute; inset: 0; background: rgba(15,13,10,0.45)"></div>
+
+<div class="hero-inner" style="position: relative; max-width: 1240px; margin: 0 auto; padding: var(--head-h, 89px) 32px 0; min-height: clamp(620px, calc(56.25vw - 89px), 1000px); display: flex; align-items: center">
+
+<div id="heroIntro" style="width: 100%; max-width: 600px; padding: 24px 0 64px">
+<p class="wipe" style="margin: 0 0 14px; font-size: 12px; letter-spacing: 3px; text-transform: uppercase; color: #C8A15A">Ôn thi THPT · Lịch sử &amp; Địa lí 12</p>
+
+<p class="wipe w2" style="margin: 0 0 28px; max-width: 540px; font-size: 18px; font-weight: 300; line-height: 1.6; color: #D9D2C5">Đọc bài, luyện đề, và hỏi bất cứ điều gì bạn chưa hiểu. Trợ lý trả lời đúng theo tài liệu khoá học, kèm nguồn để bạn tự kiểm chứng.</p>
+<form class="pill-in js-ask" method="post" style="position: relative; display: flex; align-items: center; gap: 12px; min-height: 58px; padding: 0 62px 0 20px; border: 1px solid #5C5446; border-radius: 999px; background: rgba(20,18,15,0.72); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px)">
+<svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#BDB5A7" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><path d="M21 21l-4.3-4.3"></path></svg>
+<label for="hero-ask" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Câu hỏi cho trợ lý</label>
+<input id="hero-ask" type="text" placeholder="Hỏi về một sự kiện, nhân vật, mốc năm…" style="flex: 1 1 auto; min-width: 0; min-height: 46px; padding: 0; border: none; background: transparent; font: inherit; font-size: 16px; color: #F4EEE2; outline: none">
+<button type="submit" class="roll-in" aria-label="Gửi câu hỏi" style="position: absolute; top: 5px; left: calc(100% - 52px); width: 46px; height: 46px; border: none; border-radius: 999px; background: #C8A15A; color: #14120F; display: flex; align-items: center; justify-content: center; cursor: pointer"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="M13 6l6 6-6 6"></path></svg></button>
+</form>
+<div class="chips" style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 12px">
+@foreach (var q in Model.CauHoiGoiY)
+{
+<button data-q="@q" type="button" class="chip" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 6px 14px; border: 1px solid #4A443A; border-radius: 10px; background: rgba(20,18,15,0.6); color: #E9DFC6; font: inherit; font-size: 14px; cursor: pointer; text-align: left"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C8A15A" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4h6a4 4 0 0 1 4 4v13a3 3 0 0 0-3-3H2z"></path><path d="M22 4h-6a4 4 0 0 0-4 4v13a3 3 0 0 1 3-3h7z"></path></svg><span>@q</span></button>
+}
+</div>
+</div>
+
+<div id="chatPanel" hidden class="chat-open" style="width: 100%; max-width: 660px; margin: 32px 0 64px; border: 1px solid #4A443A; border-radius: 18px; background: rgba(18,16,13,0.86); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); box-shadow: 0 40px 100px rgba(0,0,0,0.6); overflow: hidden">
+<div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 18px; border-bottom: 1px solid #2E2A24">
+<div style="display: flex; align-items: center; gap: 14px">
+<span aria-hidden="true" style="width: 34px; height: 34px; border-radius: 999px; border: 1px solid #C8A15A; display: flex; align-items: center; justify-content: center; font-family: 'Playfair Display', Georgia, serif; font-size: 14px; color: #C8A15A">S·Đ</span>
+<div>
+<p style="margin: 0; font-family: 'Playfair Display', Georgia, serif; font-size: 18px; color: #F4EEE2">Học cùng AI</p>
+<p style="margin: 0; font-size: 13px; color: #A39B8E">Trả lời theo tài liệu khoá Lịch sử &amp; Địa lí 12</p>
+</div>
+</div>
+<button type="button" id="chatClose" aria-label="Thu nhỏ khung chat" style="width: 40px; height: 40px; border: 1px solid #3A352D; border-radius: 999px; background: transparent; color: #D9D2C5; display: flex; align-items: center; justify-content: center; cursor: pointer">
+<svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18"></path><path d="M6 6l12 12"></path></svg>
+</button>
+</div>
+
+<div id="msgList" style="height: 360px; overflow-y: auto; padding: 18px 20px; display: flex; flex-direction: column; gap: 14px">
+<div id="typing" hidden class="msg" style="align-self: flex-start; display: flex; align-items: center; gap: 12px; color: #A39B8E; font-size: 14px">
+<span aria-hidden="true" style="flex: 0 0 32px; height: 32px; border-radius: 999px; border: 1px solid #C8A15A; display: flex; align-items: center; justify-content: center; font-family: 'Playfair Display', Georgia, serif; font-size: 11px; color: #C8A15A">S·Đ</span>
+<span>Đang tra trong tài liệu khoá</span>
+<span style="display: inline-flex; gap: 4px"><span class="dot"></span><span class="dot dot2"></span><span class="dot dot3"></span></span>
+</div>
+</div>
+
+<div style="padding: 12px 16px 16px; border-top: 1px solid #2E2A24">
+<div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px">
+@foreach (var q in Model.CauHoiGoiY)
+{
+<button data-q="@q" type="button" class="chip" style="min-height: 34px; padding: 0 12px; border: 1px solid #3A352D; border-radius: 999px; background: transparent; color: #BDB5A7; font: inherit; font-size: 13px; cursor: pointer">@q</button>
+}
+</div>
+<form class="js-ask" method="post" style="display: flex; align-items: center; gap: 10px; min-height: 54px; padding: 0 5px 0 18px; border: 1px solid #5C5446; border-radius: 999px; background: rgba(0,0,0,0.25)">
+<label for="chat-ask" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Câu hỏi tiếp theo</label>
+<input id="chat-ask" type="text" placeholder="Hỏi tiếp…" style="flex: 1 1 auto; min-width: 0; min-height: 44px; padding: 0; border: none; background: transparent; font: inherit; font-size: 15px; color: #F4EEE2; outline: none">
+<button type="submit" aria-label="Gửi câu hỏi" style="flex: 0 0 44px; height: 44px; border: none; border-radius: 999px; background: #C8A15A; color: #14120F; display: flex; align-items: center; justify-content: center; cursor: pointer"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="M13 6l6 6-6 6"></path></svg></button>
+</form>
+</div>
+</div>
+
+</div>
+</section>
+
+<section id="phuongphap" class="depth" style="position: relative">
+<div style="max-width: 1240px; margin: 0 auto; padding: 112px 32px">
+<div class="rise" style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 32px; margin-bottom: 64px">
+<h2 style="margin: 0; max-width: 640px; font-family: 'Playfair Display', Georgia, serif; font-size: 52px; font-weight: 600; line-height: 1.1; letter-spacing: -0.5px; color: #F4EEE2">Một phương pháp, <span style="font-style: italic; color: #C8A15A">bốn bước</span> mỗi bài.</h2>
+<p style="margin: 0; max-width: 360px; color: #A39B8E">Không học dàn trải. Mỗi bài được thiết kế để đọc trong một buổi, luyện ngay và hỏi lại chỗ chưa vững.</p>
+</div>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); background: rgba(20,18,15,0.94); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border-top: 1px solid #F4EEE2; padding: 0 28px 24px">
+@{
+    var sdBuoc = new[] { "7s", "8.5s", "7.5s", "9s" };
+    var sdlBuoc = new[] { "0s", "-2s", "-4s", "-1s" };
+}
+@for (var i = 0; i < Model.BuocHoc.Count; i++)
+{
+    var b = Model.BuocHoc[i];
+    var cuoi = i == Model.BuocHoc.Count - 1;
+    var dem = i == 0 ? "" : $" s{i + 1}";
+    var padding = i == 0 ? "28px 28px 8px 0" : cuoi ? "28px 0 8px 28px" : "28px 28px 8px 28px";
+    var vien = cuoi ? "" : " border-right: 1px solid #2E2A24;";
+<div class="@("rise" + dem) sway" style="--sd: @(sdBuoc[i % 4]); --sdl: @(sdlBuoc[i % 4]); padding: @padding;@vien">
+<p style="margin: 0 0 20px; font-family: 'Playfair Display', Georgia, serif; font-size: 44px; font-style: italic; color: #C8A15A; line-height: 1">@b.SoLaMa</p>
+<h3 style="margin: 0 0 8px; font-size: 18px; font-weight: 600; color: #F4EEE2">@b.Ten</h3>
+<p style="margin: 0; color: #A39B8E; font-size: 15px">@b.MoTa</p>
+</div>
+}
+</div>
+</div>
+</section>
+
+<section id="monhoc" class="depth" style="position: relative">
+<div style="max-width: 1240px; margin: 0 auto; padding: 112px 32px">
+<div class="rise" style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 32px; margin-bottom: 56px">
+<div>
+<p style="margin: 0 0 14px; font-size: 12px; letter-spacing: 3px; text-transform: uppercase; color: #C8A15A">Chương trình học</p>
+<h2 style="margin: 0; max-width: 640px; font-family: 'Playfair Display', Georgia, serif; font-size: 52px; font-weight: 600; line-height: 1.1; letter-spacing: -0.5px; color: #F4EEE2">Hai môn thi, <span style="font-style: italic; color: #C8A15A">một lộ trình</span>.</h2>
+</div>
+<p style="margin: 0; max-width: 360px; color: #A39B8E">Bám sát chương trình Lịch sử và Địa lí 12 mới, chia theo chủ đề để ôn chắc từng phần trước khi vào đề.</p>
+</div>
+<div class="mh-grid">
+@for (var i = 0; i < Model.MonHoc.Count; i++)
+{
+    var m = Model.MonHoc[i];
+<article class="mh-card @(i % 2 == 0 ? "from-l" : "from-r")" style="--mau: @m.MauNhan">
+<a asp-controller="Home" asp-action="BaiHoc" asp-route-id="@m.BaiDauId" class="mh-media" tabindex="-1" aria-hidden="true">
+<img src="@m.Anh" alt="" loading="lazy" width="960" height="540">
+<span class="mh-num">@DinhDang.LaMa(i + 1)</span>
+</a>
+<div class="mh-body">
+<p class="mh-label">@m.Nhan</p>
+<h3 class="mh-title">@m.Ten</h3>
+<p class="mh-desc">@m.MoTa</p>
+<ol class="mh-list">
+    @for (var c = 0; c < m.Chuong.Count; c++)
+    {
+<li><span class="mh-roman">@DinhDang.LaMa(c + 1)</span><span>@m.Chuong[c]</span></li>
+    }
+</ol>
+<div class="mh-foot">
+<span>@m.Chuong.Count chủ đề</span>
+<a asp-controller="Home" asp-action="BaiHoc" asp-route-id="@m.BaiDauId" class="mh-link">Đọc thử bài đầu tiên<svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a>
+</div>
+</div>
+</article>
+}
+</div>
+</div>
+</section>
+
+<section id="troly" class="depth" style="position: relative">
+<div style="max-width: 1240px; margin: 0 auto; padding: 120px 32px; display: flex; flex-wrap: wrap; gap: 72px; align-items: center">
+<div class="rise sway" style="--sd: 8s; --sdl: -1.5s; flex: 1 1 420px; min-width: 0; background: rgba(20,18,15,0.94); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); padding: 36px 32px">
+<p style="margin: 0 0 20px; font-size: 12px; letter-spacing: 3px; text-transform: uppercase; color: #C8A15A">Trợ lý học tập</p>
+<h2 style="margin: 0 0 24px; font-family: 'Playfair Display', Georgia, serif; font-size: 52px; font-weight: 600; line-height: 1.1; color: #F4EEE2">Mỗi câu trả lời <span style="font-style: italic; color: #C8A15A">đều có chú thích.</span></h2>
+<p style="margin: 0 0 36px; max-width: 460px; color: #BDB5A7">Trợ lý chỉ đọc tài liệu do giáo viên biên soạn cho khoá của bạn. Không có trong tài liệu, trợ lý sẽ nói rõ — không đoán, không bịa.</p>
+<dl style="margin: 0; display: flex; flex-direction: column; border-top: 1px solid #2E2A24">
+<div style="display: flex; gap: 24px; padding: 18px 0; border-bottom: 1px solid #2E2A24"><dt style="min-width: 150px; font-family: 'Playfair Display', Georgia, serif; font-style: italic; color: #C8A15A; font-size: 18px">Chỉ từ tài liệu</dt><dd style="margin: 0; color: #BDB5A7">Không dùng kiến thức trôi nổi bên ngoài.</dd></div>
+<div style="display: flex; gap: 24px; padding: 18px 0; border-bottom: 1px solid #2E2A24"><dt style="min-width: 150px; font-family: 'Playfair Display', Georgia, serif; font-style: italic; color: #C8A15A; font-size: 18px">Luôn ghi nguồn</dt><dd style="margin: 0; color: #BDB5A7">Bấm chú thích để mở đúng mục lý thuyết.</dd></div>
+<div style="display: flex; gap: 24px; padding: 18px 0; border-bottom: 1px solid #2E2A24"><dt style="min-width: 150px; font-family: 'Playfair Display', Georgia, serif; font-style: italic; color: #C8A15A; font-size: 18px">Được kiểm duyệt</dt><dd style="margin: 0; color: #BDB5A7">Số liệu, mốc năm được đối chiếu trước khi hiển thị.</dd></div>
+</dl>
+</div>
+
+<div class="rise s3 sway" style="--sd: 9.5s; --sdl: -4.5s; flex: 1 1 480px; min-width: 0; background: #F4EEE2; color: #1C1915; padding: 44px 48px 36px; box-shadow: 0 30px 80px rgba(0,0,0,0.5)">
+<div style="display: flex; justify-content: space-between; align-items: baseline; gap: 16px; border-bottom: 1px solid #1C1915; padding-bottom: 12px; margin-bottom: 28px">
+<span style="font-size: 11px; letter-spacing: 2.5px; text-transform: uppercase">Địa lí 12 · Trợ lý</span>
+<span style="font-family: 'Playfair Display', Georgia, serif; font-style: italic; color: #5E574D">tr. 34</span>
+</div>
+<p style="margin: 0 0 18px; font-family: 'Playfair Display', Georgia, serif; font-size: 26px; font-style: italic; line-height: 1.3">“Vì sao Tây Nguyên trồng nhiều cà phê?”</p>
+<p style="margin: 0 0 14px; font-size: 16px; line-height: 1.75">Tây Nguyên có đất badan màu mỡ, phân bố tập trung trên các cao nguyên<sup style="color: #7A1F1F; font-weight: 600">1</sup>, cùng khí hậu cận xích đạo với một mùa mưa và một mùa khô rõ rệt, thuận lợi cho việc phơi sấy và bảo quản<sup style="color: #7A1F1F; font-weight: 600">2</sup>.</p>
+<p style="margin: 0 0 28px; font-size: 16px; line-height: 1.75">Vì vậy cà phê là cây công nghiệp lâu năm quan trọng nhất của vùng<sup style="color: #7A1F1F; font-weight: 600">1</sup>.</p>
+<div style="border-top: 1px solid #CFC6B4; padding-top: 12px; display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: #5E574D">
+<span><sup>1</sup> Chương IV · Vùng Tây Nguyên — Thế mạnh cây công nghiệp</span>
+<span><sup>2</sup> Chương IV · Vùng Tây Nguyên — Điều kiện tự nhiên</span>
+</div>
+<div style="margin-top: 24px; display: flex; gap: 12px">
+<label for="hoi" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Đặt câu hỏi</label>
+<input id="hoi" type="text" placeholder="Đặt câu hỏi về bài học…" style="flex: 1 1 auto; min-width: 0; min-height: 48px; padding: 0 2px; border: none; border-bottom: 1px solid #1C1915; background: transparent; font: inherit; color: #1C1915; outline: none">
+<a asp-controller="Home" asp-action="BaiHoc" style="display: inline-flex; align-items: center; min-height: 48px; padding: 0 22px; background: #14120F; color: #F4EEE2; text-decoration: none; font-size: 14px; font-weight: 500">Hỏi</a>
+</div>
+</div>
+</div>
+</section>
+
+<section id="goi" class="depth" style="position: relative">
+<div style="position: relative; max-width: 1240px; margin: 0 auto; padding: 112px 32px">
+<div class="rise" style="text-align: center; margin-bottom: 64px">
+<p style="margin: 0 0 16px; font-size: 12px; letter-spacing: 3px; text-transform: uppercase; color: #C8A15A">Gói học</p>
+<h2 style="margin: 0; font-family: 'Playfair Display', Georgia, serif; font-size: 52px; font-weight: 600; line-height: 1.1; color: #F4EEE2">Chọn hành trang <span style="font-style: italic; color: #C8A15A">cho kỳ thi.</span></h2>
+</div>
+<div class="rise s2" style="display: flex; flex-wrap: wrap; align-items: stretch; gap: 24px">
+
+@{
+    var sdGoi = new[] { "8s", "9s", "8.5s" };
+    var sdlGoi = new[] { "0s", "-3s", "-5s" };
+}
+@for (var i = 0; i < Model.GoiHoc.Count; i++)
+{
+    var g = Model.GoiHoc[i];
+    var vien = g.NoiBat ? "border: 1px solid #C8A15A; box-shadow: 0 30px 80px rgba(200,161,90,0.12)" : "border: 1px solid #4A443A";
+<div class="sway" style="--sd: @(sdGoi[i % 3]); --sdl: @(sdlGoi[i % 3]); flex: 1 1 300px; display: flex; flex-direction: column; padding: 44px 40px; background: rgba(20,18,15,0.94); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); @vien">
+    @if (g.NoiBat)
+    {
+<div style="display: flex; justify-content: space-between; align-items: baseline; gap: 12px">
+<p style="margin: 0 0 6px; font-size: 11px; letter-spacing: 2.5px; text-transform: uppercase; color: @g.MauNhan">@g.Nhan</p>
+<p style="margin: 0; font-family: 'Playfair Display', Georgia, serif; font-style: italic; color: #C8A15A">Được chọn nhiều nhất</p>
+</div>
+    }
+    else
+    {
+<p style="margin: 0 0 6px; font-size: 11px; letter-spacing: 2.5px; text-transform: uppercase; color: @g.MauNhan">@g.Nhan</p>
+    }
+<h3 style="margin: 0 0 28px; font-family: 'Playfair Display', Georgia, serif; font-size: 30px; font-weight: 600; color: #F4EEE2">@g.Ten</h3>
+<p style="margin: 0 0 4px; font-family: 'Playfair Display', Georgia, serif; font-size: 40px; font-weight: 600; color: #F4EEE2">@(DinhDang.Gia(g.Gia))</p>
+<p style="margin: 0 0 28px; font-size: 14px; color: #A39B8E">cho một năm học</p>
+<ul style="margin: 0 0 36px; padding: 0; list-style: none; flex-grow: 1; border-top: 1px solid #2E2A24">
+    @foreach (var ql in g.QuyenLoi)
+    {
+<li style="padding: 12px 0; border-bottom: 1px solid #2E2A24">@ql</li>
+    }
+</ul>
+    @if (g.NoiBat)
+    {
+<a asp-controller="Home" asp-action="TongQuan" style="display: flex; align-items: center; justify-content: center; min-height: 52px; background: #C8A15A; color: #14120F; text-decoration: none; font-weight: 600">Chọn gói</a>
+    }
+    else
+    {
+<a asp-controller="Home" asp-action="TongQuan" style="display: flex; align-items: center; justify-content: center; min-height: 52px; border: 1px solid #F4EEE2; color: #F4EEE2; text-decoration: none; font-weight: 500">Chọn gói</a>
+    }
+</div>
+}
+</div>
+
+<div class="rise" style="margin-top: 56px; overflow-x: auto; background: rgba(20,18,15,0.94); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); padding: 24px 28px">
+<table style="width: 100%; min-width: 640px; border-collapse: collapse; font-size: 15px">
+<caption style="text-align: left; padding-bottom: 16px; font-family: 'Playfair Display', Georgia, serif; font-size: 24px; font-weight: 600; color: #F4EEE2">So sánh chi tiết</caption>
+<thead>
+<tr style="text-align: left; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: #A39B8E; border-top: 1px solid #F4EEE2; border-bottom: 1px solid #F4EEE2">
+<th scope="col" style="padding: 14px 0; font-weight: 500">Quyền lợi</th>
+<th scope="col" style="padding: 14px 16px; font-weight: 500">Học thử</th>
+<th scope="col" style="padding: 14px 16px; font-weight: 500">Một môn</th>
+<th scope="col" style="padding: 14px 16px; font-weight: 500; color: #C8A15A">Trọn bộ</th>
+</tr>
+</thead>
+<tbody>
+@for (var i = 0; i < Model.SoSanh.Count; i++)
+{
+    var d = Model.SoSanh[i];
+    var vien = i == Model.SoSanh.Count - 1 ? "#F4EEE2" : "#2E2A24";
+<tr style="border-bottom: 1px solid @vien"><th scope="row" style="padding: 14px 0; text-align: left; font-weight: 500; color: #F4EEE2">@d.QuyenLoi</th><td style="padding: 14px 16px; color: #A39B8E">@d.HocThu</td><td style="padding: 14px 16px">@d.MotMon</td><td style="padding: 14px 16px; font-weight: 600; color: #F4EEE2">@d.TronBo</td></tr>
+}
+</tbody>
+</table>
+</div>
+</div>
+</section>
+
+<section style="position: relative">
+<div style="position: relative; max-width: 1240px; margin: 0 auto; padding: 112px 32px; text-align: center">
+<p class="rise" style="margin: 0 auto 40px; max-width: 900px; font-family: 'Playfair Display', Georgia, serif; font-size: 56px; font-weight: 500; line-height: 1.15; color: #F4EEE2">Lịch sử không cần học thuộc. <span style="font-style: italic; color: #C8A15A">Cần được hiểu.</span></p>
+<a asp-controller="Home" asp-action="TongQuan" style="display: inline-flex; align-items: center; min-height: 56px; padding: 0 38px; background: #C8A15A; color: #14120F; text-decoration: none; font-size: 15px; font-weight: 600; letter-spacing: 0.5px">Bắt đầu học miễn phí</a>
+</div>
+</section>
+
+<footer style="position: relative">
+<div style="max-width: 1240px; margin: 0 auto; padding: 64px 32px 32px">
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 40px; margin-bottom: 48px">
+<div>
+<p style="margin: 0 0 12px; font-family: 'Playfair Display', Georgia, serif; font-size: 26px; font-weight: 700; color: #F4EEE2">Sử<span style="color: #C8A15A">·</span>Địa</p>
+<p style="margin: 0; font-size: 14px; color: #A39B8E">Học viện ôn thi Lịch sử và Địa lí lớp 12.</p>
+</div>
+<div>
+<p style="margin: 0 0 14px; font-size: 11px; letter-spacing: 2.5px; text-transform: uppercase; color: #C8A15A">Khoá học</p>
+<div style="display: flex; flex-direction: column; gap: 8px; font-size: 14px">
+<a href="#monhoc" style="color: #BDB5A7; text-decoration: none">Lịch sử 12</a>
+<a href="#monhoc" style="color: #BDB5A7; text-decoration: none">Địa lí 12</a>
+<a href="#goi" style="color: #BDB5A7; text-decoration: none">Trọn bộ Sử &amp; Địa</a>
+</div>
+</div>
+<div>
+<p style="margin: 0 0 14px; font-size: 11px; letter-spacing: 2.5px; text-transform: uppercase; color: #C8A15A">Hỗ trợ</p>
+<div style="display: flex; flex-direction: column; gap: 8px; font-size: 14px">
+<a href="#" style="color: #BDB5A7; text-decoration: none">Hướng dẫn thanh toán</a>
+<a href="#" style="color: #BDB5A7; text-decoration: none">Chính sách bảo mật</a>
+</div>
+</div>
+<div>
+<p style="margin: 0 0 14px; font-size: 11px; letter-spacing: 2.5px; text-transform: uppercase; color: #C8A15A">Liên hệ</p>
+<div style="display: flex; flex-direction: column; gap: 8px; font-size: 14px; color: #BDB5A7">
+<span>[EMAIL]</span>
+<span>[SỐ ĐIỆN THOẠI]</span>
+<span>[ĐỊA CHỈ]</span>
+</div>
+</div>
+</div>
+<p style="margin: 0; padding-top: 24px; border-top: 1px solid #2E2A24; font-size: 13px; color: #A39B8E">© 2026 Sử·Địa</p>
+</div>
+</footer>
+
+</div>
+
+<template id="tplUser"><div class="msg" style="align-self: flex-end; max-width: 78%; padding: 12px 18px; border-radius: 16px 16px 4px 16px; background: #C8A15A; color: #14120F; font-size: 15px; line-height: 1.55"></div></template>
+<template id="tplAi"><div class="msg" style="align-self: flex-start; display: flex; gap: 12px; max-width: 88%">
+<span aria-hidden="true" style="flex: 0 0 32px; height: 32px; border-radius: 999px; border: 1px solid #C8A15A; display: flex; align-items: center; justify-content: center; font-family: 'Playfair Display', Georgia, serif; font-size: 11px; color: #C8A15A">S·Đ</span>
+<div style="padding: 12px 14px; border-radius: 4px 16px 16px 16px; border: 1px solid #3A352D; background: rgba(255,255,255,0.04)">
+<p style="margin: 0 0 4px; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: #C8A15A" data-f="label"></p>
+<p style="margin: 0; font-size: 15px; line-height: 1.65; color: #EDE6D8; white-space: pre-line"><span data-f="text"></span><sup style="color: #C8A15A; font-weight: 600" data-f="mark"></sup></p>
+<p style="margin: 12px 0 0; padding-top: 10px; border-top: 1px solid #2E2A24; font-size: 13px; color: #A39B8E; white-space: pre-line" data-f="source"></p>
+</div>
+</div></template>
+@Html.AntiForgeryToken()
+
+@section Scripts {
+<script src="~/js/trang-chu.js" asp-append-version="true"></script>
+}
