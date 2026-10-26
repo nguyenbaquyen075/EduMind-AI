@@ -1,105 +1,174 @@
-@model LamCauHoiViewModel
+@model LamDeViewModel
 @{
     Layout = "_Layout";
-    ViewData["Title"] = "Làm câu hỏi";
+    ViewData["Title"] = Model.TenDe;
+    var tong = Model.CauHoi.Count;
 }
 @section Head {
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
 <link rel="stylesheet" href="~/css/lam-cau-hoi.css" asp-append-version="true">
 }
 
-<div style="min-height: 100vh; background: #F4F6F8; color: #0F1B2D; font-family: 'Be Vietnam Pro', system-ui, sans-serif; font-size: 16px; line-height: 1.6">
+<div class="ld">
 
-<header style="background: #0B1A2B; color: #E6EDF3">
-<div style="padding: 12px 24px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px">
-<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 14px">
-<a asp-controller="Home" asp-action="LuyenDe" asp-route-id="@Model.KhoaId" style="display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 12px; border-radius: 10px; border: 1px solid #2E4A66; color: #E6EDF3; text-decoration: none; font-weight: 600">
+<header class="ld-head">
+<a asp-controller="Home" asp-action="LuyenDe" asp-route-id="@Model.KhoaId" class="ld-back">
 <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"></path></svg>Luyện đề</a>
-<span style="font-weight: 700">@Model.TenBai</span>
-</div>
-<span style="display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 10px; background: #11263B; border: 1px solid #23405C; font-family: 'JetBrains Mono', monospace; font-weight: 600; color: #5EEAD4">
-<svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"></circle><path d="M12 9v4l2 2"></path><path d="M9 2h6"></path></svg>@Model.ThoiGianConLai</span>
-</div>
+<span class="ld-ten">@Model.TenDe</span>
+@if (Model.SoPhut is not null && !Model.DaNop && tong > 0)
+{
+<span class="ld-gio so" id="dongHo" data-giay="@(Model.SoPhut * 60)" role="timer" aria-live="off">
+<svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"></circle><path d="M12 9v4l2 2"></path><path d="M9 2h6"></path></svg><span>@(Model.SoPhut):00</span></span>
+}
 </header>
 
-<div style="max-width: 1160px; margin: 0 auto; padding: 28px 24px 48px; display: flex; flex-wrap: wrap; align-items: flex-start; gap: 24px">
-
-<div style="flex: 999 1 560px; min-width: 0">
-<div style="display: flex; align-items: center; gap: 14px; margin-bottom: 18px">
-<span style="font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600; color: #52606D">CÂU @Model.CauSo/@Model.TongCau</span>
-<div style="flex: 1 1 auto; height: 8px; border-radius: 99px; background: #E1E6EB"><div style="width: @(Model.TienDoPhanTram)%; height: 8px; border-radius: 99px; background: #0E7C66"></div></div>
-</div>
-
-<main style="background: #FFFFFF; border: 1px solid #E1E6EB; border-radius: 16px; padding: 32px 36px">
-<span style="display: inline-block; margin-bottom: 14px; font-family: 'JetBrains Mono', monospace; font-size: 12px; padding: 3px 10px; border-radius: 6px; background: #E0F4EF; color: #0A5C4C">@Model.MucDo</span>
-<h1 style="margin: 0 0 26px; font-size: 23px; line-height: 1.4; font-weight: 700">@Model.NoiDung</h1>
-
-<form asp-controller="Home" asp-action="LamCauHoi" asp-route-id="@Model.Id" method="post">
-<div role="group" aria-label="Các phương án" style="display: flex; flex-direction: column; gap: 12px">
-@foreach (var pa in Model.PhuongAn)
+@if (tong == 0)
 {
-    // Màu từng phương án: chưa trả lời -> trung tính; đã trả lời -> đáp án đúng xanh, lựa chọn sai đỏ
-    var nen = "#FFFFFF"; var vien = "1px solid #D5DCE2"; var nenKy = "#F4F6F8"; var chuKy = "#0F1B2D";
-    if (Model.DaTraLoi && pa.Ky == Model.DapAnDung) { nen = "#E0F4EF"; vien = "2px solid #0E7C66"; nenKy = "#0E7C66"; chuKy = "#FFFFFF"; }
-    else if (Model.DaTraLoi && pa.Ky == Model.DapAnDaChon) { nen = "#FDECE4"; vien = "2px solid #C2410C"; nenKy = "#C2410C"; chuKy = "#FFFFFF"; }
-<button type="submit" name="dapAn" value="@pa.Ky" aria-pressed="@(pa.Ky == Model.DapAnDaChon ? "true" : "false")" disabled="@Model.DaTraLoi" style="display: flex; align-items: center; gap: 14px; width: 100%; min-height: 56px; padding: 10px 16px; border-radius: 12px; font: inherit; font-size: 17px; color: #0F1B2D; cursor: @(Model.DaTraLoi ? "default" : "pointer"); background: @nen; border: @vien;">
-<span style="flex: 0 0 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-family: 'JetBrains Mono', monospace; font-weight: 600; background: @nenKy; color: @chuKy;">@pa.Ky</span>
-<span style="flex: 1 1 auto; text-align: left">@pa.NoiDung</span>
-</button>
+<main class="ld-trong">
+<p class="ld-trong-tieu">Chưa có câu hỏi cho phần này</p>
+<p>Câu hỏi sẽ có khi nạp ngân hàng câu hỏi của khoá. Bạn có thể luyện Bài 6, Bài 7 hoặc đề thi thử.</p>
+<a asp-controller="Home" asp-action="LuyenDe" asp-route-id="@Model.KhoaId" class="ld-nut chinh">Về trang luyện đề</a>
+</main>
 }
+else
+{
+<div class="ld-body">
+
+@* ---------------------------------------------------------------- Kết quả sau khi nộp *@
+<main class="ld-main">
+@if (Model.DaNop)
+{
+    var tot = Model.SoDung >= tong * 0.8;
+<section class="ld-ketqua @(tot ? "tot" : "vua")" aria-labelledby="kq">
+<div>
+<p class="ld-kq-nhan">Kết quả</p>
+<h1 id="kq" class="ld-kq-diem so">@DinhDang.Diem(Model.Diem) <small>điểm</small></h1>
+<p class="ld-kq-chi-tiet so">Đúng @Model.SoDung/@tong câu@(Model.SoBoTrong > 0 ? $" · bỏ trống {Model.SoBoTrong} câu" : "")</p>
 </div>
+<div class="ld-kq-nut">
+<a asp-controller="Home" asp-action="LamCauHoi" asp-route-id="@Model.Id" class="ld-nut">Làm lại</a>
+<a asp-controller="Home" asp-action="LuyenDe" asp-route-id="@Model.KhoaId" class="ld-nut chinh">Về luyện đề</a>
+</div>
+</section>
+}
+else
+{
+<p class="ld-huong-dan">@tong câu · chọn một đáp án cho mỗi câu. Đáp án và lời giải hiện sau khi nộp bài.</p>
+}
+
+<form asp-controller="Home" asp-action="LamCauHoi" asp-route-id="@Model.Id" method="post" id="formDe">
+<ol class="ld-ds">
+@for (var i = 1; i <= tong; i++)
+{
+    var c = Model.CauHoi[i - 1];
+    var chon = Model.Chon(i);
+    var trangThai = !Model.DaNop ? "" : chon is null ? " bo-trong" : Model.Dung(i) ? " dung" : " sai";
+<li class="ld-cau@(trangThai)" id="cau-@i">
+<fieldset>
+<legend><span class="ld-so">Câu @i</span>@c.NoiDung</legend>
+<div class="ld-pa">
+    @foreach (var pa in c.PhuongAn)
+    {
+        var la = !Model.DaNop ? "" : pa.Ky == c.DapAnDung ? " la-dung" : pa.Ky == chon ? " la-sai" : "";
+<label class="ld-lua-chon@(la)">
+<input type="radio" name="cau-@i" value="@pa.Ky" checked="@(pa.Ky == chon)" disabled="@Model.DaNop">
+<span class="ld-ky">@pa.Ky</span><span class="ld-nd">@pa.NoiDung</span>
+        @if (la == " la-dung")
+        {
+<span class="ld-dau" aria-label="Đáp án đúng">✓</span>
+        }
+        else if (la == " la-sai")
+        {
+<span class="ld-dau" aria-label="Bạn chọn, chưa đúng">✗</span>
+        }
+</label>
+    }
+</div>
+    @if (Model.DaNop)
+    {
+<div class="ld-giai">
+<p class="ld-giai-dau">@(chon is null ? $"Bạn bỏ trống. Đáp án đúng: {c.DapAnDung}." : Model.Dung(i) ? "Chính xác." : $"Chưa đúng. Đáp án đúng: {c.DapAnDung}.")</p>
+<p>@c.GiaiThich</p>
+<a asp-controller="Home" asp-action="BaiHoc" asp-route-id="@c.BaiId" asp-fragment="@(c.Muc is null ? null : $"muc-{c.Muc}")" class="ld-nguon">Xem lại: @c.NguonHienThi →</a>
+</div>
+    }
+</fieldset>
+</li>
+}
+</ol>
+@if (!Model.DaNop)
+{
+<div class="ld-nop">
+<span id="conTrong" class="so" aria-live="polite">Đã làm 0/@tong câu</span>
+<button type="submit" class="ld-nut chinh">Nộp bài</button>
+</div>
+}
 </form>
-
-@if (Model.DaTraLoi)
-{
-<div style="margin-top: 22px; padding: 18px 20px; border-radius: 12px; background: #F4F6F8">
-    @if (Model.TraLoiDung)
-    {
-<p style="margin: 0 0 6px; font-weight: 700; color: #0A5C4C">Chính xác!</p>
-    }
-    else
-    {
-<p style="margin: 0 0 6px; font-weight: 700; color: #9A3412">Chưa đúng. Đáp án đúng là @Model.DapAnDung.</p>
-    }
-<p style="margin: 0 0 12px; color: #334155">@Model.GiaiThich</p>
-<div style="display: flex; flex-wrap: wrap; gap: 8px">
-<a asp-controller="Home" asp-action="BaiHoc" style="display: inline-flex; align-items: center; min-height: 38px; padding: 0 12px; border-radius: 8px; background: #E0F4EF; color: #0A5C4C; text-decoration: none; font-weight: 600; font-size: 14px">Xem lại @Model.NguonMuc</a>
-<a asp-controller="Home" asp-action="BaiHoc" style="display: inline-flex; align-items: center; min-height: 38px; padding: 0 12px; border-radius: 8px; border: 1px solid #C5CED6; color: #0F1B2D; text-decoration: none; font-weight: 600; font-size: 14px">Hỏi AI về câu này</a>
-</div>
-</div>
-}
 </main>
 
-<div style="display: flex; justify-content: space-between; gap: 12px; margin-top: 20px">
-<a asp-controller="Home" asp-action="LamCauHoi" asp-route-id="@Model.Id" style="display: inline-flex; align-items: center; min-height: 50px; padding: 0 22px; border-radius: 12px; border: 1px solid #C5CED6; background: #FFFFFF; color: #0F1B2D; text-decoration: none; font-weight: 600">Câu trước</a>
-<a asp-controller="Home" asp-action="LamCauHoi" asp-route-id="@Model.Id" style="display: inline-flex; align-items: center; min-height: 50px; padding: 0 28px; border-radius: 12px; background: #0E7C66; color: #FFFFFF; text-decoration: none; font-weight: 700">Câu tiếp theo</a>
-</div>
-</div>
-
-<aside aria-label="Bảng câu hỏi" style="flex: 1 1 260px; max-width: 100%; background: #FFFFFF; border: 1px solid #E1E6EB; border-radius: 16px; padding: 22px">
-<p style="margin: 0 0 14px; font-weight: 700">Bảng câu hỏi</p>
-<div style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; margin-bottom: 18px">
-@foreach (var o in Model.BangCau)
+@* ---------------------------------------------------------------- Bảng câu *@
+<aside class="ld-bang" aria-label="Bảng câu hỏi">
+<p class="ld-bang-tieu">Bảng câu</p>
+<div class="ld-o-luoi">
+@for (var i = 1; i <= tong; i++)
 {
-    var vienDangLam = o.DangLam ? "2px solid #0F1B2D" : "none";
-    var kieu = o.TrangThai switch
-    {
-        TrangThaiCau.Dung => $"background: #0E7C66; color: #FFFFFF; border: {vienDangLam};",
-        TrangThaiCau.Sai => $"background: #C2410C; color: #FFFFFF; border: {vienDangLam};",
-        _ when o.DangLam => "background: #FFFFFF; color: #0F1B2D; border: 2px solid #0F1B2D;",
-        _ => "background: #F4F6F8; color: #52606D; border: none;",
-    };
-<button type="button" aria-label="Câu @o.So" style="height: 42px; border-radius: 10px; font-family: 'JetBrains Mono', monospace; font-weight: 600; font-size: 14px; cursor: pointer; @kieu">@o.So</button>
+    var o = !Model.DaNop ? "" : Model.Chon(i) is null ? " bo-trong" : Model.Dung(i) ? " dung" : " sai";
+<a href="#cau-@i" class="ld-o@(o)" data-o="@i">@i</a>
 }
 </div>
-<div style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: #52606D; margin-bottom: 20px">
-<span style="display: flex; align-items: center; gap: 8px"><span style="width: 12px; height: 12px; border-radius: 3px; background: #0E7C66"></span>Đúng</span>
-<span style="display: flex; align-items: center; gap: 8px"><span style="width: 12px; height: 12px; border-radius: 3px; background: #C2410C"></span>Sai</span>
-<span style="display: flex; align-items: center; gap: 8px"><span style="width: 12px; height: 12px; border-radius: 3px; border: 2px solid #0F1B2D"></span>Đang làm</span>
-</div>
-<button type="button" style="width: 100%; min-height: 48px; border-radius: 12px; border: none; background: #0B1A2B; color: #FFFFFF; font: inherit; font-weight: 700; cursor: pointer">Nộp bài</button>
+@if (Model.DaNop)
+{
+<p class="ld-chu-giai"><span class="ld-o mau dung"></span>Đúng <span class="ld-o mau sai"></span>Sai <span class="ld-o mau bo-trong"></span>Bỏ trống</p>
+}
+else
+{
+<button type="submit" form="formDe" class="ld-nut chinh ld-nop-ben">Nộp bài</button>
+}
 </aside>
 
 </div>
+}
+
 </div>
+
+@if (!Model.DaNop && tong > 0)
+{
+@section Scripts {
+<script>
+// Đang làm: đếm câu đã chọn, tô ô ở bảng câu, hỏi lại nếu còn bỏ trống; đề thi có đồng hồ, hết giờ tự nộp
+(() => {
+  const form = document.getElementById('formDe');
+  const tong = @tong;
+  const dem = document.getElementById('conTrong');
+  const daLam = () => new Set([...form.querySelectorAll('input[type=radio]:checked')].map((r) => r.name)).size;
+  const capNhat = () => {
+    dem.textContent = `Đã làm ${daLam()}/${tong} câu`;
+    for (let i = 1; i <= tong; i++)
+      document.querySelector(`[data-o="${i}"]`).classList.toggle('da-lam', !!form.querySelector(`input[name="cau-${i}"]:checked`));
+  };
+  form.addEventListener('change', capNhat);
+  capNhat();
+
+  let tuNop = false;
+  form.addEventListener('submit', (e) => {
+    const trong = tong - daLam();
+    if (!tuNop && trong > 0 && !confirm(`Còn ${trong} câu chưa làm. Vẫn nộp bài?`)) e.preventDefault();
+  });
+
+  const dongHo = document.getElementById('dongHo');
+  if (dongHo) {
+    let giay = Number(dongHo.dataset.giay);
+    const hien = dongHo.querySelector('span');
+    const chay = setInterval(() => {
+      giay--;
+      hien.textContent = `${Math.floor(giay / 60)}:${String(giay % 60).padStart(2, '0')}`;
+      dongHo.classList.toggle('sap-het', giay <= 300);
+      if (giay <= 0) { clearInterval(chay); tuNop = true; form.requestSubmit(); }
+    }, 1000);
+  }
+})();
+</script>
+}
+}

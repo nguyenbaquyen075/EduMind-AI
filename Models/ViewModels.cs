@@ -186,32 +186,32 @@ public class BaiHocViewModel
     public IReadOnlyList<string> GoiYHoi { get; init; } = [];
 }
 
-// ======================================================= Làm câu hỏi
-public enum TrangThaiCau { ChuaLam, Dung, Sai }
-
+// ======================================================= Làm đề (nộp bài mới hiện đáp án)
 public record PhuongAn(string Ky, string NoiDung);
 
-public record OCauHoi(int So, TrangThaiCau TrangThai, bool DangLam);
+/// <param name="BaiId">Bài chứa kiến thức của câu, để dẫn về lý thuyết</param>
+/// <param name="Muc">Mục trong bài (neo #muc-n); null nếu bài chưa có nội dung theo mục</param>
+public record CauHoiDe(string NoiDung, IReadOnlyList<PhuongAn> PhuongAn, string DapAnDung, string GiaiThich,
+    int BaiId, int? Muc, string NguonHienThi);
 
-public class LamCauHoiViewModel
+public class LamDeViewModel
 {
     public int Id { get; init; }
     public string KhoaId { get; init; } = "";
-    public string TenBai { get; init; } = "";
-    public int CauSo { get; init; }
-    public int TongCau { get; init; }
-    public int TienDoPhanTram => TongCau == 0 ? 0 : (int)Math.Round(CauSo * 100.0 / TongCau);
-    public string MucDo { get; init; } = "";
-    public string NoiDung { get; init; } = "";
-    public IReadOnlyList<PhuongAn> PhuongAn { get; init; } = [];
-    public string DapAnDung { get; init; } = "";
-    public string? DapAnDaChon { get; init; }
-    public bool DaTraLoi => DapAnDaChon is not null;
-    public bool TraLoiDung => DapAnDaChon == DapAnDung;
-    public string GiaiThich { get; init; } = "";
-    public string NguonMuc { get; init; } = "";
-    public IReadOnlyList<OCauHoi> BangCau { get; init; } = [];
-    public string ThoiGianConLai { get; init; } = "";
+    public string TenDe { get; init; } = "";
+    public bool LaDeThi { get; init; }
+    public int? SoPhut { get; init; }              // đề thi thử có giờ; bài tập không giới hạn
+    public IReadOnlyList<CauHoiDe> CauHoi { get; init; } = [];
+
+    /// <summary>null = đang làm (chưa nộp, không gửi đáp án xuống trình duyệt). Khoá là số câu (1..n).</summary>
+    public IReadOnlyDictionary<int, string>? DaChon { get; init; }
+    public bool DaNop => DaChon is not null;
+
+    public string? Chon(int so) => DaChon is not null && DaChon.TryGetValue(so, out var x) ? x : null;
+    public bool Dung(int so) => Chon(so) == CauHoi[so - 1].DapAnDung;
+    public int SoDung => DaNop ? Enumerable.Range(1, CauHoi.Count).Count(Dung) : 0;
+    public int SoBoTrong => DaNop ? Enumerable.Range(1, CauHoi.Count).Count(i => Chon(i) is null) : 0;
+    public double Diem => CauHoi.Count == 0 ? 0 : Math.Round(SoDung * 10.0 / CauHoi.Count, 1);
 }
 
 // ======================================================= Định dạng dùng chung
