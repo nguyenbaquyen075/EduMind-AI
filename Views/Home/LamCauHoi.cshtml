@@ -3,11 +3,13 @@
     Layout = "_Layout";
     ViewData["Title"] = Model.TenDe;
     var tong = Model.CauHoi.Count;
+    var soSai = tong - Model.SoDung - Model.SoBoTrong;
+    var tenKhoa = Model.KhoaId.StartsWith("dia") ? "Địa lí 12" : "Lịch sử 12";
 }
 @section Head {
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
 <link rel="stylesheet" href="~/css/lam-cau-hoi.css" asp-append-version="true">
 }
 
@@ -16,72 +18,110 @@
 <header class="ld-head">
 <a asp-controller="Home" asp-action="LuyenDe" asp-route-id="@Model.KhoaId" class="ld-back">
 <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"></path></svg>Luyện đề</a>
-<span class="ld-ten">@Model.TenDe</span>
-@if (Model.SoPhut is not null && !Model.DaNop && tong > 0)
-{
-<span class="ld-gio so" id="dongHo" data-giay="@(Model.SoPhut * 60)" role="timer" aria-live="off">
-<svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"></circle><path d="M12 9v4l2 2"></path><path d="M9 2h6"></path></svg><span>@(Model.SoPhut):00</span></span>
-}
+<span class="ld-head-ten">@tenKhoa<span aria-hidden="true"> · </span>@Model.TenDe</span>
 </header>
 
 @if (tong == 0)
 {
 <main class="ld-trong">
+<span class="ld-trong-ico" aria-hidden="true"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"></rect><path d="M9 8h6M9 12h6M9 16h3"></path></svg></span>
 <p class="ld-trong-tieu">Chưa có câu hỏi cho phần này</p>
-<p>Câu hỏi sẽ có khi nạp ngân hàng câu hỏi của khoá. Bạn có thể luyện Bài 6, Bài 7 hoặc đề thi thử.</p>
+<p>Câu hỏi sẽ có khi nạp ngân hàng câu hỏi của khoá. Bạn có thể luyện Bài 6, Bài 7 hoặc làm đề thi thử.</p>
 <a asp-controller="Home" asp-action="LuyenDe" asp-route-id="@Model.KhoaId" class="ld-nut chinh">Về trang luyện đề</a>
 </main>
 }
 else
 {
 <div class="ld-body">
-
-@* ---------------------------------------------------------------- Kết quả sau khi nộp *@
 <main class="ld-main">
-@if (Model.DaNop)
+
+@* ---------------------------------------------------------------- Khung đầu bài / kết quả *@
+@if (!Model.DaNop)
 {
-    var tot = Model.SoDung >= tong * 0.8;
-<section class="ld-ketqua @(tot ? "tot" : "vua")" aria-labelledby="kq">
-<div>
-<p class="ld-kq-nhan">Kết quả</p>
-<h1 id="kq" class="ld-kq-diem so">@DinhDang.Diem(Model.Diem) <small>điểm</small></h1>
-<p class="ld-kq-chi-tiet so">Đúng @Model.SoDung/@tong câu@(Model.SoBoTrong > 0 ? $" · bỏ trống {Model.SoBoTrong} câu" : "")</p>
+<section class="ld-dau-bai" aria-labelledby="ten-de">
+<div class="ld-dau-trai">
+<p class="ld-chip @(Model.LaDeThi ? "thi" : "")">@(Model.LaDeThi ? "Đề thi thử" : "Luyện tập theo bài")</p>
+<h1 id="ten-de" class="ld-ten-de">@Model.TenDe</h1>
+<ul class="ld-meta so">
+<li><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3" width="14" height="18" rx="2"></rect><path d="M9 8h6M9 12h6M9 16h3"></path></svg>@tong câu trắc nghiệm</li>
+<li><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"></circle><path d="M12 9v4l2 2M9 2h6"></path></svg>@(Model.SoPhut is null ? "Không giới hạn thời gian" : $"{Model.SoPhut} phút")</li>
+<li><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 4v5c0 4.5-3.4 8.3-8 9-4.6-.7-8-4.5-8-9V7z"></path></svg>Đáp án hiện sau khi nộp</li>
+</ul>
 </div>
-<div class="ld-kq-nut">
-<a asp-controller="Home" asp-action="LamCauHoi" asp-route-id="@Model.Id" class="ld-nut">Làm lại</a>
-<a asp-controller="Home" asp-action="LuyenDe" asp-route-id="@Model.KhoaId" class="ld-nut chinh">Về luyện đề</a>
+<div class="ld-tien-do" aria-hidden="true">
+<div class="ld-tien-do-chu so"><span id="soDaLam">0</span>/@tong câu đã làm</div>
+<div class="ld-thanh"><span id="thanhDaLam" style="width: 0%"></span></div>
 </div>
 </section>
 }
 else
 {
-<p class="ld-huong-dan">@tong câu · chọn một đáp án cho mỗi câu. Đáp án và lời giải hiện sau khi nộp bài.</p>
+    var pt = (int)Math.Round(Model.SoDung * 100.0 / tong);
+    var tot = Model.SoDung >= tong * 0.8;
+<section class="ld-ketqua @(tot ? "tot" : "vua")" aria-labelledby="kq">
+<div class="ld-vong so" style="--pt: @pt" role="img" aria-label="Đúng @Model.SoDung trên @tong câu">
+<span><b>@DinhDang.Diem(Model.Diem)</b><small>điểm</small></span>
+</div>
+<div class="ld-kq-giua">
+<p class="ld-chip @(tot ? "" : "thi")">@(tot ? "Làm tốt lắm!" : "Cần ôn thêm")</p>
+<h1 id="kq" class="ld-ten-de">Kết quả · @Model.TenDe</h1>
+<ul class="ld-kq-o so">
+<li class="dung"><b>@Model.SoDung</b><span>Đúng</span></li>
+<li class="sai"><b>@soSai</b><span>Sai</span></li>
+<li class="trong"><b>@Model.SoBoTrong</b><span>Bỏ trống</span></li>
+</ul>
+</div>
+<div class="ld-kq-nut">
+<a asp-controller="Home" asp-action="LamCauHoi" asp-route-id="@Model.Id" class="ld-nut">
+<svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"></path><path d="M3 3v5h5"></path></svg>Làm lại</a>
+<a asp-controller="Home" asp-action="LuyenDe" asp-route-id="@Model.KhoaId" class="ld-nut chinh">Về luyện đề</a>
+</div>
+</section>
 }
 
+@* ---------------------------------------------------------------- Các câu hỏi *@
 <form asp-controller="Home" asp-action="LamCauHoi" asp-route-id="@Model.Id" method="post" id="formDe">
 <ol class="ld-ds">
 @for (var i = 1; i <= tong; i++)
 {
     var c = Model.CauHoi[i - 1];
     var chon = Model.Chon(i);
-    var trangThai = !Model.DaNop ? "" : chon is null ? " bo-trong" : Model.Dung(i) ? " dung" : " sai";
-<li class="ld-cau@(trangThai)" id="cau-@i">
+    var tt = !Model.DaNop ? "" : chon is null ? "bo-trong" : Model.Dung(i) ? "dung" : "sai";
+<li class="ld-cau @tt" id="cau-@i">
 <fieldset>
-<legend><span class="ld-so">Câu @i</span>@c.NoiDung</legend>
+<div class="ld-cau-dau">
+<span class="ld-so so">Câu @i<span>/@tong</span></span>
+    @if (Model.DaNop)
+    {
+<span class="ld-tt @tt">@(tt == "dung" ? "✓ Đúng" : tt == "sai" ? "✗ Sai" : "— Bỏ trống")</span>
+    }
+</div>
+<legend class="ld-hoi">@c.NoiDung</legend>
 <div class="ld-pa">
     @foreach (var pa in c.PhuongAn)
     {
-        var la = !Model.DaNop ? "" : pa.Ky == c.DapAnDung ? " la-dung" : pa.Ky == chon ? " la-sai" : "";
+        var la = !Model.DaNop ? "" : pa.Ky == c.DapAnDung ? " la-dung" : pa.Ky == chon ? " la-sai" : " mo";
 <label class="ld-lua-chon@(la)">
 <input type="radio" name="cau-@i" value="@pa.Ky" checked="@(pa.Ky == chon)" disabled="@Model.DaNop">
-<span class="ld-ky">@pa.Ky</span><span class="ld-nd">@pa.NoiDung</span>
+<span class="ld-ky">@pa.Ky</span>
+<span class="ld-nd">@pa.NoiDung</span>
+<span class="ld-dau" aria-hidden="true">
+        @if (la == " la-sai")
+        {
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+        }
+        else
+        {
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg>
+        }
+</span>
         @if (la == " la-dung")
         {
-<span class="ld-dau" aria-label="Đáp án đúng">✓</span>
+<span class="sr-only">(đáp án đúng)</span>
         }
         else if (la == " la-sai")
         {
-<span class="ld-dau" aria-label="Bạn chọn, chưa đúng">✗</span>
+<span class="sr-only">(bạn chọn, chưa đúng)</span>
         }
 </label>
     }
@@ -89,9 +129,13 @@ else
     @if (Model.DaNop)
     {
 <div class="ld-giai">
-<p class="ld-giai-dau">@(chon is null ? $"Bạn bỏ trống. Đáp án đúng: {c.DapAnDung}." : Model.Dung(i) ? "Chính xác." : $"Chưa đúng. Đáp án đúng: {c.DapAnDung}.")</p>
-<p>@c.GiaiThich</p>
-<a asp-controller="Home" asp-action="BaiHoc" asp-route-id="@c.BaiId" asp-fragment="@(c.Muc is null ? null : $"muc-{c.Muc}")" class="ld-nguon">Xem lại: @c.NguonHienThi →</a>
+<p class="ld-giai-tieu">
+<svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 21h4"></path><path d="M12 3a6 6 0 0 0-4 10.5c.7.7 1 1.5 1 2.5h6c0-1 .3-1.8 1-2.5A6 6 0 0 0 12 3z"></path></svg>
+@(chon is null ? $"Bạn bỏ trống · Đáp án đúng: {c.DapAnDung}" : Model.Dung(i) ? "Giải thích" : $"Bạn chọn {chon} · Đáp án đúng: {c.DapAnDung}")
+</p>
+<p class="ld-giai-nd">@c.GiaiThich</p>
+<a asp-controller="Home" asp-action="BaiHoc" asp-route-id="@c.BaiId" asp-fragment="@(c.Muc is null ? null : $"muc-{c.Muc}")" class="ld-nguon">
+<svg aria-hidden="true" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4h6a4 4 0 0 1 4 4v13a3 3 0 0 0-3-3H2z"></path><path d="M22 4h-6a4 4 0 0 0-4 4v13a3 3 0 0 1 3-3h7z"></path></svg>Xem lại: @c.NguonHienThi</a>
 </div>
     }
 </fieldset>
@@ -101,29 +145,38 @@ else
 @if (!Model.DaNop)
 {
 <div class="ld-nop">
-<span id="conTrong" class="so" aria-live="polite">Đã làm 0/@tong câu</span>
-<button type="submit" class="ld-nut chinh">Nộp bài</button>
+<p>Kiểm tra lại các câu trước khi nộp. Sau khi nộp sẽ không sửa được đáp án.</p>
+<button type="submit" class="ld-nut chinh lon">Nộp bài
+<svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></button>
 </div>
 }
 </form>
 </main>
 
-@* ---------------------------------------------------------------- Bảng câu *@
+@* ---------------------------------------------------------------- Cột bên: đồng hồ, tiến độ, bảng câu *@
 <aside class="ld-bang" aria-label="Bảng câu hỏi">
-<p class="ld-bang-tieu">Bảng câu</p>
+@if (Model.SoPhut is not null && !Model.DaNop)
+{
+<div class="ld-gio" id="dongHo" data-giay="@(Model.SoPhut * 60)">
+<span class="ld-gio-nhan">Thời gian còn lại</span>
+<span class="ld-gio-so so" role="timer" aria-live="off">@(Model.SoPhut):00</span>
+</div>
+}
+<p class="ld-bang-tieu">Bảng câu<span class="so" id="demBang">@(Model.DaNop ? $"{Model.SoDung}/{tong} đúng" : $"0/{tong}")</span></p>
 <div class="ld-o-luoi">
 @for (var i = 1; i <= tong; i++)
 {
     var o = !Model.DaNop ? "" : Model.Chon(i) is null ? " bo-trong" : Model.Dung(i) ? " dung" : " sai";
-<a href="#cau-@i" class="ld-o@(o)" data-o="@i">@i</a>
+<a href="#cau-@i" class="ld-o@(o)" data-o="@i" aria-label="Câu @i">@i</a>
 }
 </div>
 @if (Model.DaNop)
 {
-<p class="ld-chu-giai"><span class="ld-o mau dung"></span>Đúng <span class="ld-o mau sai"></span>Sai <span class="ld-o mau bo-trong"></span>Bỏ trống</p>
+<p class="ld-chu-giai"><span><i class="dung"></i>Đúng</span><span><i class="sai"></i>Sai</span><span><i class="bo-trong"></i>Bỏ trống</span></p>
 }
 else
 {
+<p class="ld-chu-giai"><span><i class="da-lam"></i>Đã làm</span><span><i></i>Chưa làm</span></p>
 <button type="submit" form="formDe" class="ld-nut chinh ld-nop-ben">Nộp bài</button>
 }
 </aside>
@@ -137,14 +190,16 @@ else
 {
 @section Scripts {
 <script>
-// Đang làm: đếm câu đã chọn, tô ô ở bảng câu, hỏi lại nếu còn bỏ trống; đề thi có đồng hồ, hết giờ tự nộp
+// Đang làm: đếm câu đã chọn (khung đầu bài + bảng câu), hỏi lại nếu còn bỏ trống; đề thi có đồng hồ, hết giờ tự nộp
 (() => {
   const form = document.getElementById('formDe');
   const tong = @tong;
-  const dem = document.getElementById('conTrong');
   const daLam = () => new Set([...form.querySelectorAll('input[type=radio]:checked')].map((r) => r.name)).size;
   const capNhat = () => {
-    dem.textContent = `Đã làm ${daLam()}/${tong} câu`;
+    const n = daLam();
+    document.getElementById('soDaLam').textContent = n;
+    document.getElementById('thanhDaLam').style.width = `${Math.round(n * 100 / tong)}%`;
+    document.getElementById('demBang').textContent = `${n}/${tong}`;
     for (let i = 1; i <= tong; i++)
       document.querySelector(`[data-o="${i}"]`).classList.toggle('da-lam', !!form.querySelector(`input[name="cau-${i}"]:checked`));
   };
@@ -160,7 +215,7 @@ else
   const dongHo = document.getElementById('dongHo');
   if (dongHo) {
     let giay = Number(dongHo.dataset.giay);
-    const hien = dongHo.querySelector('span');
+    const hien = dongHo.querySelector('.ld-gio-so');
     const chay = setInterval(() => {
       giay--;
       hien.textContent = `${Math.floor(giay / 60)}:${String(giay % 60).padStart(2, '0')}`;
