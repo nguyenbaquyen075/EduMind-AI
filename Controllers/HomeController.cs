@@ -34,17 +34,20 @@ public class HomeController : Controller
     // Bài học + khung trợ lý. Khi có dữ liệu thật: kiểm tra học sinh đã mua khoá chứa bài này
     public IActionResult BaiHoc(int? id) => View(_svc.LayBaiHoc(id));
 
-    // Làm câu hỏi: hiển thị câu hỏi
+    // Làm đề: hiện câu hỏi, chưa có đáp án
     [HttpGet]
-    public IActionResult LamCauHoi(int? id) => View(_svc.LayCauHoi(id, null));
+    public IActionResult LamCauHoi(int? id) => View(_svc.LayDe(id, null));
 
-    // Làm câu hỏi: học sinh chọn đáp án, chấm ở server
+    // Nộp bài: chấm ở server rồi mới hiện đáp án + giải thích. Ô chọn tên "cau-1", "cau-2"…
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public IActionResult LamCauHoi(int? id, string? dapAn)
+    public IActionResult LamCauHoi(int? id, IFormCollection form)
     {
-        var hopLe = dapAn is "A" or "B" or "C" or "D";
-        return View(_svc.LayCauHoi(id, hopLe ? dapAn : null));
+        var daChon = new Dictionary<int, string>();
+        foreach (var (key, value) in form)
+            if (key.StartsWith("cau-") && int.TryParse(key[4..], out var so) && value.ToString() is "A" or "B" or "C" or "D")
+                daChon[so] = value.ToString();
+        return View(_svc.LayDe(id, daChon));
     }
 
     public IActionResult Error() => View();

@@ -150,12 +150,16 @@ public class DuLieuMauService : IKhoaHocService
 
     private static KhoaLuyen TaoKhoaLuyen(KhoaHocChinh k) => new(k,
         k.Chuong.Select(c => new ChuongLuyen(c.Ten, c.Bai.Select(b => new BaiLuyen(
-            b.Id, b.So, b.Ten, 10,
-            b.TrangThai == TrangThaiBai.DaHoc ? DiemMau[b.So % DiemMau.Length] : null,
+            b.Id, b.So, b.Ten, NganHangMau.GetValueOrDefault(b.Id)?.Count ?? 10,
+            b.TrangThai == TrangThaiBai.DaHoc
+                ? Math.Min(DiemMau[b.So % DiemMau.Length], NganHangMau.GetValueOrDefault(b.Id)?.Count ?? 10)
+                : null,
             b.BiKhoa)).ToList())).ToList(),
         k.DaMo
-            ? [new(1001, "Đề thi thử số 1", 40, 50, 33, false), new(1002, "Đề thi thử số 2", 40, 50, 31, false), new(1003, "Đề thi thử số 3", 40, 50, null, false)]
-            : [new(2001, "Đề thi thử số 1", 40, 50, null, true)]);
+            ? [new(1001, "Đề thi thử số 1", SoCauDeThi, 50, SoCauDeThi - 2, false), new(1002, "Đề thi thử số 2", SoCauDeThi, 50, SoCauDeThi - 4, false), new(1003, "Đề thi thử số 3", SoCauDeThi, 50, null, false)]
+            : [new(2001, "Đề thi thử số 1", SoCauDeThi, 50, null, true)]);
+
+    private static int SoCauDeThi => NganHangMau.Values.Sum(x => x.Count);
 
     public LuyenDeViewModel LayLuyenDe(string? khoaId)
     {
@@ -174,6 +178,25 @@ public class DuLieuMauService : IKhoaHocService
     // Khi có database: đọc mục/phần của bài từ tài liệu khoá đã nạp
     private static readonly Dictionary<int, IReadOnlyList<MucNoiDung>> NoiDungMau = new()
     {
+        [6] =
+        [
+            new(1, "Tổng khởi nghĩa giành chính quyền", "Tổng khởi nghĩa giành chính quyền", 4,
+            [
+                new("dien-bien", "Diễn biến",
+                    ["Cuộc Tổng khởi nghĩa tháng Tám năm 1945 diễn ra từ ngày 14/8 đến ngày 28/8/1945, giành chính quyền trong cả nước."],
+                    [
+                        new("HÀ NỘI", "19/8/1945", "Nhân dân giành chính quyền."),
+                        new("HUẾ", "23/8/1945", "Nhân dân giành chính quyền."),
+                        new("SÀI GÒN", "25/8/1945", "Nhân dân giành chính quyền."),
+                    ]),
+                new("ghi-nho", "Ghi nhớ nhanh", ["14/8 – 28/8/1945 Tổng khởi nghĩa · 19/8 Hà Nội · 23/8 Huế · 25/8 Sài Gòn"], LaGhiNho: true),
+            ]),
+            new(2, "Tuyên ngôn Độc lập", "Tuyên ngôn Độc lập", 3,
+            [
+                new("su-kien", "Sự kiện", ["Ngày 2/9/1945, tại Quảng trường Ba Đình (Hà Nội), Chủ tịch Hồ Chí Minh đọc Tuyên ngôn Độc lập, khai sinh nước Việt Nam Dân chủ Cộng hoà."]),
+                new("ghi-nho", "Ghi nhớ nhanh", ["2/9/1945: Tuyên ngôn Độc lập, khai sinh nước Việt Nam Dân chủ Cộng hoà."], LaGhiNho: true),
+            ]),
+        ],
         [7] =
         [
             new(1, "Bối cảnh", "Bối cảnh cuộc kháng chiến", 3,
@@ -242,54 +265,98 @@ public class DuLieuMauService : IKhoaHocService
         };
     }
 
-    public LamCauHoiViewModel LayCauHoi(int? id, string? dapAnDaChon)
+    // ======================================================= Làm đề
+
+    private static PhuongAn[] PA(string a, string b, string c, string d) => [new("A", a), new("B", b), new("C", c), new("D", d)];
+
+    // Ngân hàng câu hỏi mẫu theo bài, soạn từ TaiLieu/lich-su-12.md. Khi có database: đọc từ bảng câu hỏi của khoá
+    private static readonly Dictionary<int, IReadOnlyList<CauHoiDe>> NganHangMau = new()
     {
-        const string dapAnDung = "B";
-        var cauSo = 3;
-        var bang = new List<OCauHoi>();
-        for (var i = 1; i <= 10; i++)
-        {
-            var tt = i switch
-            {
-                1 => TrangThaiCau.Dung,
-                2 => TrangThaiCau.Sai,
-                _ when i == cauSo && dapAnDaChon is not null =>
-                    dapAnDaChon == dapAnDung ? TrangThaiCau.Dung : TrangThaiCau.Sai,
-                _ => TrangThaiCau.ChuaLam,
-            };
-            bang.Add(new OCauHoi(i, tt, i == cauSo));
-        }
+        [6] =
+        [
+            new("Cuộc Tổng khởi nghĩa tháng Tám năm 1945 diễn ra trong khoảng thời gian nào?",
+                PA("Từ 14/8 đến 28/8/1945", "Từ 19/8 đến 2/9/1945", "Từ 2/9 đến 19/12/1945", "Từ 23/8 đến 25/8/1945"), "A",
+                "Tổng khởi nghĩa tháng Tám năm 1945 diễn ra từ ngày 14/8 đến ngày 28/8/1945, giành chính quyền trong cả nước.",
+                6, 1, "Bài 6 · Mục 1 — Tổng khởi nghĩa giành chính quyền"),
+            new("Nhân dân giành chính quyền ở Hà Nội vào ngày nào?",
+                PA("23/8/1945", "19/8/1945", "25/8/1945", "2/9/1945"), "B",
+                "Nhân dân giành chính quyền ở Hà Nội ngày 19/8/1945; ở Huế ngày 23/8/1945 và ở Sài Gòn ngày 25/8/1945.",
+                6, 1, "Bài 6 · Mục 1 — Tổng khởi nghĩa giành chính quyền"),
+            new("Nhân dân giành chính quyền ở Sài Gòn vào ngày nào?",
+                PA("19/8/1945", "23/8/1945", "25/8/1945", "28/8/1945"), "C",
+                "Nhân dân giành chính quyền ở Sài Gòn ngày 25/8/1945.",
+                6, 1, "Bài 6 · Mục 1 — Tổng khởi nghĩa giành chính quyền"),
+            new("Ngày 2/9/1945, tại Quảng trường Ba Đình (Hà Nội), sự kiện nào đã diễn ra?",
+                PA("Tổng khởi nghĩa giành chính quyền bắt đầu", "Cuộc kháng chiến toàn quốc bùng nổ",
+                   "Chủ tịch Hồ Chí Minh đọc Tuyên ngôn Độc lập", "Ký Hiệp định Giơnevơ"), "C",
+                "Ngày 2/9/1945, tại Quảng trường Ba Đình, Chủ tịch Hồ Chí Minh đọc Tuyên ngôn Độc lập, khai sinh nước Việt Nam Dân chủ Cộng hoà.",
+                6, 2, "Bài 6 · Mục 2 — Tuyên ngôn Độc lập"),
+        ],
+        [7] =
+        [
+            new("Cuộc kháng chiến toàn quốc chống thực dân Pháp bùng nổ vào thời gian nào?",
+                PA("Ngày 2/9/1945", "Đêm 19/12/1946", "Ngày 7/10/1947", "Ngày 16/9/1950"), "B",
+                "Đêm 19/12/1946, cuộc kháng chiến toàn quốc chống thực dân Pháp bùng nổ.",
+                7, 1, "Bài 7 · Mục 1 — Bối cảnh"),
+            new("Chiến dịch Việt Bắc thu – đông diễn ra vào năm nào?",
+                PA("1946", "1947", "1950", "1954"), "B",
+                "Chiến dịch Việt Bắc thu – đông năm 1947 diễn ra từ ngày 7/10 đến ngày 19/12/1947.",
+                7, 2, "Bài 7 · Mục 2 — Các chiến dịch lớn"),
+            new("Chiến dịch Biên giới thu – đông năm 1950 diễn ra trong khoảng thời gian nào?",
+                PA("Từ 7/10 đến 19/12/1947", "Từ 13/3 đến 7/5/1954", "Từ 16/9 đến 22/10/1950", "Từ 8/5 đến 21/7/1954"), "C",
+                "Chiến dịch Biên giới thu – đông năm 1950 diễn ra từ ngày 16/9 đến ngày 22/10/1950.",
+                7, 2, "Bài 7 · Mục 2 — Các chiến dịch lớn"),
+            new("Chiến dịch Điện Biên Phủ diễn ra trong khoảng thời gian nào?",
+                PA("Từ 13/3 đến 7/5/1954", "Từ 7/10 đến 19/12/1947", "Từ 16/9 đến 22/10/1950", "Từ 8/5 đến 21/7/1954"), "A",
+                "Chiến dịch Điện Biên Phủ diễn ra từ ngày 13/3 đến ngày 7/5/1954.",
+                7, 3, "Bài 7 · Mục 3 — Chiến dịch Điện Biên Phủ"),
+            new("Chiến dịch Điện Biên Phủ được chia làm mấy đợt tấn công?",
+                PA("Hai đợt", "Ba đợt", "Bốn đợt", "Năm đợt"), "B",
+                "Chiến dịch Điện Biên Phủ chia làm ba đợt: đợt 1 (13/3 – 17/3/1954), đợt 2 (30/3 – 26/4/1954), đợt 3 (1/5 – 7/5/1954).",
+                7, 3, "Bài 7 · Mục 3 — Chiến dịch Điện Biên Phủ"),
+            new("Trong đợt 1 của chiến dịch Điện Biên Phủ, quân ta đã tiêu diệt",
+                PA("cụm cứ điểm Him Lam và toàn bộ phân khu Bắc.", "các cứ điểm phía đông phân khu Trung tâm.",
+                   "Bộ chỉ huy tập đoàn cứ điểm.", "toàn bộ phân khu Nam."), "A",
+                "Đợt 1 (13/3 – 17/3/1954): tiêu diệt cụm cứ điểm Him Lam và toàn bộ phân khu Bắc. Đánh các cứ điểm phía đông phân khu Trung tâm là đợt 2.",
+                7, 3, "Bài 7 · Mục 3 — Chiến dịch Điện Biên Phủ"),
+            new("Hiệp định Giơnevơ được ký vào ngày nào?",
+                PA("8/5/1954", "7/5/1954", "21/7/1954", "19/12/1946"), "C",
+                "Hội nghị Giơnevơ khai mạc ngày 8/5/1954; Hiệp định Giơnevơ được ký ngày 21/7/1954.",
+                7, 4, "Bài 7 · Mục 4 — Hiệp định Giơnevơ"),
+            new("Theo Hiệp định Giơnevơ, giới tuyến quân sự tạm thời ở Việt Nam là",
+                PA("vĩ tuyến 15.", "vĩ tuyến 16.", "vĩ tuyến 17.", "vĩ tuyến 18."), "C",
+                "Theo Hiệp định Giơnevơ, Việt Nam tạm thời chia làm hai miền, lấy vĩ tuyến 17 làm giới tuyến quân sự tạm thời.",
+                7, 4, "Bài 7 · Mục 4 — Hiệp định Giơnevơ"),
+        ],
+    };
 
-        // Mã 1001+ / 2001+ là đề thi thử (Lịch sử / Địa lí); còn lại là bài tập theo bài
-        var khoa = DanhMuc.FirstOrDefault(k => k.TatCaBai.Any(b => b.Id == id))
-                   ?? (id >= 2000 ? DanhMuc[1] : DanhMuc[0]);
-        var bai = khoa.TatCaBai.FirstOrDefault(b => b.Id == id);
-        var tenBai = bai is not null ? $"Luyện tập · Bài {bai.So}"
-                   : id >= 1000 ? $"Đề thi thử số {id % 1000}"
-                   : "Luyện tập · Bài 7";
+    // Đề thi thử Lịch sử (mã 1001–1003): ghép câu của các bài có ngân hàng, mỗi đề một thứ tự khác
+    private static IReadOnlyList<CauHoiDe> TaoDeThi(int id)
+    {
+        var tatCa = NganHangMau.Values.SelectMany(x => x).ToList();
+        var lech = (id % 1000 - 1) * 3;
+        return tatCa.Skip(lech % tatCa.Count).Concat(tatCa.Take(lech % tatCa.Count)).ToList();
+    }
 
-        return new LamCauHoiViewModel
+    public LamDeViewModel LayDe(int? id, IReadOnlyDictionary<int, string>? daChon)
+    {
+        var ma = id ?? 7;
+        var laDeThi = ma >= 1000;
+        var khoa = laDeThi ? (ma >= 2000 ? DanhMuc[1] : DanhMuc[0])
+                           : DanhMuc.FirstOrDefault(k => k.TatCaBai.Any(b => b.Id == ma)) ?? DanhMuc[0];
+        var bai = khoa.TatCaBai.FirstOrDefault(b => b.Id == ma);
+        var cauHoi = laDeThi ? (khoa.DaMo ? TaoDeThi(ma) : [])
+                   : bai is null || bai.BiKhoa ? [] : NganHangMau.GetValueOrDefault(ma) ?? [];
+
+        return new LamDeViewModel
         {
-            Id = id ?? 7,
+            Id = ma,
             KhoaId = khoa.Id,
-            TenBai = tenBai,
-            CauSo = cauSo,
-            TongCau = 10,
-            MucDo = "NHẬN BIẾT",
-            NoiDung = "Chiến dịch Điện Biên Phủ kết thúc thắng lợi vào ngày nào?",
-            PhuongAn =
-            [
-                new("A", "13/3/1954"),
-                new("B", "7/5/1954"),
-                new("C", "21/7/1954"),
-                new("D", "19/12/1946"),
-            ],
-            DapAnDung = dapAnDung,
-            DapAnDaChon = dapAnDaChon,
-            GiaiThich = "Chiều 7/5/1954, toàn bộ tập đoàn cứ điểm Điện Biên Phủ bị tiêu diệt. Ngày 21/7/1954 là ngày ký Hiệp định Giơnevơ.",
-            NguonMuc = "Bài 7 · Mục 3",
-            BangCau = bang,
-            ThoiGianConLai = "08:42",
+            TenDe = laDeThi ? $"Đề thi thử số {ma % 1000}" : bai is null ? "Bài tập" : $"Luyện tập · Bài {bai.So}",
+            LaDeThi = laDeThi,
+            SoPhut = laDeThi ? 50 : null,
+            CauHoi = cauHoi,
+            DaChon = daChon,
         };
     }
 }
