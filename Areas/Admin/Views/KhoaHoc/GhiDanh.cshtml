@@ -1,0 +1,43 @@
+@{
+    var khoa = (Khoa)ViewBag.Khoa;
+    ViewData["Title"] = $"Ghi danh {khoa.Ten} – Quản trị";
+    ViewData["TieuDe"] = $"Ghi danh · {khoa.Ten}";
+    ViewData["Muc"] = "KhoaHoc";
+    ViewData["Crumb"] = "<a href=\"/Admin/KhoaHoc\">Khoá học & ghi danh</a>";
+    int tong = ViewBag.TongBai;
+}
+<section class="ql-khoi">
+<div class="ql-khoi-dau"><h2>Ghi danh học viên</h2><p>Học viên phải có tài khoản trước (tự đăng ký hoặc tạo ở mục Người dùng).</p></div>
+<form method="post" asp-action="ThemGhiDanh" class="ql-khoi-than ql-hang-nut" style="align-items: end">
+<input type="hidden" name="id" value="@khoa.Id">
+<div class="ql-truong" style="margin: 0; flex: 1 1 280px"><label for="email">Email học viên</label><input id="email" type="email" name="email" required></div>
+<div class="ql-truong" style="margin: 0"><label for="hanDen">Hạn học (bỏ trống = không giới hạn)</label><input id="hanDen" type="date" name="hanDen"></div>
+<button class="ql-nut">Ghi danh</button>
+</form>
+</section>
+<section class="ql-khoi">
+<div class="ql-khoi-dau"><h2>Đang ghi danh</h2><p>@ViewBag.Ds.Count học viên</p></div>
+@if (ViewBag.Ds.Count == 0)
+{
+<p class="ql-trong">Chưa có học viên.</p>
+}
+else
+{
+<table class="ql-bang so">
+<thead><tr><th>Học viên</th><th>Tiến độ</th><th>Hạn học</th><th></th></tr></thead>
+<tbody>
+@foreach (var g in ViewBag.Ds)
+{
+    DateTime? han = g.HanDen;
+    var pt = tong == 0 ? 0 : (int)Math.Round(g.DaHoc * 100.0 / tong);
+<tr><td>@g.HoTen<span class="ql-phu">@g.Email · ghi danh @(((DateTime)g.NgayTao).ToLocalTime().ToString("dd/MM/yyyy"))</span></td>
+<td><span class="ql-phu">@g.DaHoc/@tong bài</span><div class="ql-thanh"><span style="width: @(pt)%"></span></div></td>
+<td><form method="post" asp-action="DoiHan" class="ql-hang-nut"><input type="hidden" name="id" value="@khoa.Id"><input type="hidden" name="nguoiDungId" value="@g.NguoiDungId">
+<span class="ql-truong" style="margin: 0"><input type="date" name="hanDen" value="@(han?.ToLocalTime().ToString("yyyy-MM-dd"))" aria-label="Hạn học của @g.Email"></span><button class="ql-nut phu nho">Lưu hạn</button></form>
+@if (han is not null && han < DateTime.UtcNow) {<span class="ql-chip do">Đã hết hạn</span>}</td>
+<td class="hanh-dong"><form method="post" asp-action="HuyGhiDanh" data-hoi="Huỷ ghi danh @g.Email khỏi @khoa.Ten?"><input type="hidden" name="id" value="@khoa.Id"><input type="hidden" name="nguoiDungId" value="@g.NguoiDungId"><button class="ql-nut xoa nho">Huỷ ghi danh</button></form></td></tr>
+}
+</tbody>
+</table>
+}
+</section>

@@ -1,9 +1,14 @@
+using Microsoft.Extensions.Options;
 using SuDia.Web.Models;
 
 namespace SuDia.Web.Services;
 
 public class DuLieuMauService : IKhoaHocService
 {
+    private readonly HocOnlineOptions _hocOnline;
+
+    public DuLieuMauService(IOptions<HocOnlineOptions> hocOnline) => _hocOnline = hocOnline.Value;
+
     public TrangChuViewModel LayTrangChu() => new()
     {
         CauHoiGoiY =
@@ -85,7 +90,7 @@ public class DuLieuMauService : IKhoaHocService
     private const int LuotHoiDaDung = 12, LuotHoiToiDa = 30;
 
     // Danh mục mẫu. Khi có database: đọc khoá học sinh đã mua + tiến độ từng bài
-    private static readonly IReadOnlyList<KhoaHocChinh> DanhMuc = [TaoLichSu(), TaoDiaLi()];
+    internal static readonly IReadOnlyList<KhoaHocChinh> DanhMuc = [TaoLichSu(), TaoDiaLi()];
 
     private static KhoaHocChinh TaoLichSu()
     {
@@ -141,7 +146,23 @@ public class DuLieuMauService : IKhoaHocService
         Menu = new MenuTaiKhoan("KhoaHoc", LuotHoiDaDung, LuotHoiToiDa),
         Khoa = DanhMuc,
         DangChon = DanhMuc.FirstOrDefault(k => k.Id == khoaId),
+        HocOnline = LayHocOnline(DanhMuc.FirstOrDefault(k => k.Id == khoaId)),
     };
+
+    // Link Meet của từng bài: link riêng của bài (nếu có) hoặc link chung. Chỉ nhận link https
+    private Dictionary<int, BuoiOnline> LayHocOnline(KhoaHocChinh? khoa)
+    {
+        var kq = new Dictionary<int, BuoiOnline>();
+        if (khoa is null) return kq;
+        foreach (var b in khoa.TatCaBai.Where(b => !b.BiKhoa))
+        {
+            var rieng = _hocOnline.TheoBai.GetValueOrDefault(b.Id);
+            var link = string.IsNullOrWhiteSpace(rieng?.Link) ? _hocOnline.LinkChung : rieng.Link;
+            if (Uri.TryCreate(link?.Trim(), UriKind.Absolute, out var uri) && uri.Scheme == Uri.UriSchemeHttps)
+                kq[b.Id] = new BuoiOnline(uri.ToString(), rieng?.ThoiGian);
+        }
+        return kq;
+    }
 
     // ======================================================= Luyện đề
 
@@ -176,7 +197,7 @@ public class DuLieuMauService : IKhoaHocService
 
     // Nội dung mẫu theo bài (mã bài -> các mục). Lấy từ TaiLieu/lich-su-12.md.
     // Khi có database: đọc mục/phần của bài từ tài liệu khoá đã nạp
-    private static readonly Dictionary<int, IReadOnlyList<MucNoiDung>> NoiDungMau = new()
+    internal static readonly Dictionary<int, IReadOnlyList<MucNoiDung>> NoiDungMau = new()
     {
         [6] =
         [
@@ -270,7 +291,7 @@ public class DuLieuMauService : IKhoaHocService
     private static PhuongAn[] PA(string a, string b, string c, string d) => [new("A", a), new("B", b), new("C", c), new("D", d)];
 
     // Ngân hàng câu hỏi mẫu theo bài, soạn từ TaiLieu/lich-su-12.md. Khi có database: đọc từ bảng câu hỏi của khoá
-    private static readonly Dictionary<int, IReadOnlyList<CauHoiDe>> NganHangMau = new()
+    internal static readonly Dictionary<int, IReadOnlyList<CauHoiDe>> NganHangMau = new()
     {
         [6] =
         [
@@ -331,12 +352,15 @@ public class DuLieuMauService : IKhoaHocService
     };
 
     // Đề thi thử Lịch sử (mã 1001–1003): ghép câu của các bài có ngân hàng, mỗi đề một thứ tự khác
-    private static IReadOnlyList<CauHoiDe> TaoDeThi(int id)
+    internal static IReadOnlyList<CauHoiDe> TaoDeThi(int id)
     {
         var tatCa = NganHangMau.Values.SelectMany(x => x).ToList();
         var lech = (id % 1000 - 1) * 3;
         return tatCa.Skip(lech % tatCa.Count).Concat(tatCa.Take(lech % tatCa.Count)).ToList();
     }
+
+    // Dữ liệu mẫu không lưu bài làm
+    public void LuuBaiLam(LamDeViewModel daNop) { }
 
     public LamDeViewModel LayDe(int? id, IReadOnlyDictionary<int, string>? daChon)
     {

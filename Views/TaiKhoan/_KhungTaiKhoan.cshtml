@@ -1,0 +1,21 @@
+@{
+    Layout = "_Layout";
+}
+@section Head {
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="~/css/tai-khoan.css" asp-append-version="true">
+}
+@* Khung chung trang Đăng nhập / Đăng ký: ảnh bìa bên trái, biểu mẫu bên phải *@
+<div class="tk">
+<div class="tk-anh">
+<a href="/" class="tk-logo">Sử<span>·</span>Địa</a>
+<p class="tk-cau">Ôn thi Lịch sử &amp; Địa lí 12 cùng trợ lý trả lời đúng theo tài liệu khoá.<small>Đọc bài, luyện đề, hỏi chỗ chưa hiểu — mỗi câu trả lời đều có nguồn.</small></p>
+</div>
+<div class="tk-form">
+<div class="tk-hop">
+@RenderBody()
+</div>
+</div>
+</div>

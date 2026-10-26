@@ -1,0 +1,8 @@
+@model List<AdminNgay>
+@{ var max = Math.Max(1, Model.Select(n => Math.Max(n.LuyenTap,n.BaiNop)).DefaultIfEmpty().Max()); }
+<div class="ad-chart-scroll"><div class="ad-chart" aria-label="Số lượt luyện tập và bài tập nộp theo ngày">
+@foreach (var n in Model)
+{
+<div class="ad-chart-day"><strong class="so">@n.Tong</strong><div class="ad-chart-bars" role="img" aria-label="@n.Ngay.ToString("dd/MM"): @n.LuyenTap lượt luyện tập, @n.BaiNop bài tập nộp"><span class="practice" style="height:@(n.LuyenTap * 100 / max)%" title="@n.LuyenTap lượt luyện tập"></span><span class="assignment" style="height:@(n.BaiNop * 100 / max)%" title="@n.BaiNop bài tập nộp"></span></div><small>@n.Ngay.ToString("dd/MM")</small></div>
+}
+</div></div><p class="ad-chart-legend"><span><i></i>Luyện tập / đề thi</span><span><i class="assignment"></i>Bài tập theo buổi</span></p>

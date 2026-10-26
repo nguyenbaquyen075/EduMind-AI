@@ -1,0 +1,45 @@
+@{
+    ViewData["Title"] = "Học viên – Giảng viên";
+    ViewData["TieuDe"] = "Học viên";
+    ViewData["Muc"] = "HocVien";
+    var dsKhoa = (List<Khoa>)ViewBag.DsKhoa;
+    var chon = ViewBag.Chon as Khoa;
+}
+@if (chon is null)
+{
+<p class="ql-trong">Bạn chưa được gán khoá nào.</p>
+    return;
+}
+<form method="get" class="ql-bo-loc"><div class="ql-truong"><label for="khoa">Khoá</label>
+<select id="khoa" name="khoa" onchange="this.form.submit()">
+@foreach (var k in dsKhoa)
+{
+<option value="@k.Id" selected="@(k.Id == chon.Id)">@k.Ten</option>
+}
+</select></div></form>
+<section class="ql-khoi">
+<div class="ql-khoi-dau"><h2>Học viên ghi danh · @chon.Ten</h2><p>@ViewBag.HocVien.Count học viên</p></div>
+@if (ViewBag.HocVien.Count == 0)
+{
+<p class="ql-trong">Chưa có học viên ghi danh. Admin ghi danh ở mục Khoá học & ghi danh.</p>
+}
+else
+{
+<table class="ql-bang so">
+<thead><tr><th>Học viên</th><th>Tiến độ</th><th class="so">Bài nộp</th><th class="so">Tỉ lệ đúng</th><th>Lần cuối</th><th></th></tr></thead>
+<tbody>
+@foreach (var h in ViewBag.HocVien)
+{
+    int tong = ViewBag.TongBai;
+    var pt = tong == 0 ? 0 : (int)Math.Round(h.DaHoc * 100.0 / tong);
+    DateTime? lanCuoi = h.LanCuoi;
+<tr><td>@h.Ten<span class="ql-phu">@h.Email</span></td>
+<td><span class="ql-phu">@h.DaHoc/@tong bài</span><div class="ql-thanh"><span style="width: @(pt)%"></span></div></td>
+<td class="so">@h.SoBaiLam</td><td class="so">@(h.Cau == 0 ? "—" : $"{Math.Round(h.Dung * 100.0 / h.Cau)}%")</td>
+<td>@(lanCuoi is null ? "—" : lanCuoi.Value.ToLocalTime().ToString("dd/MM/yyyy"))</td>
+<td class="hanh-dong"><a href="/GiangVien/HocVien/ChiTiet/@h.NguoiDungId?khoa=@chon.Id" class="ql-nut phu nho">Xem chi tiết</a></td></tr>
+}
+</tbody>
+</table>
+}
+</section>

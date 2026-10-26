@@ -1,0 +1,61 @@
+@model GiaoBaiForm
+@{
+    ViewData["Title"] = "Giao bài tập";
+    ViewData["TieuDe"] = Model.Id == 0 ? "Giao bài tập" : "Chỉnh sửa bài tập được giao";
+    ViewData["Muc"] = "GiaoBai";
+    var khoa = (IEnumerable<dynamic>)ViewBag.DsBai;
+    var khoaRong = !khoa.Any();
+}
+@section Head { <link rel="stylesheet" href="~/css/giao-bai.css" asp-append-version="true"> }
+@section Actions { <a href="/GiangVien/CauHoi" class="ql-nut phu">Về bài tập</a> }
+@if (khoaRong)
+{
+<p class="ql-trong">Chưa có bài học được phân công. <a href="/GiangVien/NoiDung">Đến nội dung bài học</a> để tạo bài trước.</p>
+    return;
+}
+@if (ViewBag.DaCoBaiNop is true)
+{
+<p class="ql-thong-bao">Bài tập đã có bài nộp, nội dung được giữ nguyên. <a href="/GiangVien/GiaoBai/BaiNop/@Model.Id">Xem và chấm bài nộp →</a></p>
+}
+<div class="gb" id="giaoBai" data-locked="@(ViewBag.DaCoBaiNop is true ? "true" : "false")">
+<nav class="gb-steps" aria-label="Các bước giao bài tập">
+<button type="button" data-step="1"><span>1</span>Thông tin chung</button><i></i>
+<button type="button" data-step="2"><span>2</span>Soạn câu hỏi</button><i></i>
+<button type="button" data-step="3"><span>3</span>Xem lại &amp; xuất bản</button>
+</nav>
+<p id="gbLoi" class="ql-thong-bao loi" role="alert" hidden></p>
+<form id="gbForm" novalidate>
+@Html.AntiForgeryToken()
+<section class="gb-panel" data-panel="1">
+<h2>Thông tin bài tập</h2><p class="gb-muted">Chọn bài và buổi học cần giao bài tập cho học viên.</p>
+<div class="ql-truong"><label for="gbTen">Tên bài tập <span aria-hidden="true">*</span></label><input id="gbTen" type="text" maxlength="200" placeholder="Ví dụ: Bài tập củng cố buổi 2" required></div>
+<div class="ql-truong"><label for="gbBai">Thuộc bài học</label><select id="gbBai" required><option value="">— Chọn bài học —</option>
+@foreach (var b in khoa) { <option value="@b.Id">@b.Ten</option> }
+</select></div>
+<div class="ql-2cot">
+<div class="ql-truong"><label for="gbBuoi">Giao cho buổi học</label><select id="gbBuoi"><option value="">Bài tập của bài học (không gắn buổi)</option></select><small>Buổi học lấy từ Lịch dạy online của bài này.</small></div>
+<div class="ql-truong"><label for="gbHan">Hạn nộp</label><input id="gbHan" type="datetime-local"><small>Để trống nếu không giới hạn hạn nộp.</small></div>
+</div>
+<div class="ql-truong"><label for="gbHuongDan">Hướng dẫn cho học viên</label><textarea id="gbHuongDan" rows="3" maxlength="10000" placeholder="Nội dung cần ôn, yêu cầu làm bài…"></textarea></div>
+</section>
+<section class="gb-panel" data-panel="2" hidden>
+<div class="gb-structure"><div><h2>Cấu trúc bài tập</h2><div class="gb-types">
+<label><input type="checkbox" data-type="TN" checked><span>Trắc nghiệm<small>PHẦN I</small></span><b>✓</b></label>
+<label><input type="checkbox" data-type="DS" checked><span>Đúng / Sai<small>PHẦN II</small></span><b>✓</b></label>
+<label class="warm"><input type="checkbox" data-type="TL" checked><span>Tự luận<small>PHẦN III</small></span><b>✓</b></label>
+</div></div><div class="gb-total"><small>TỔNG ĐIỂM</small><strong id="gbTong">3.00đ</strong></div></div>
+<div id="gbCau"></div>
+</section>
+<section class="gb-panel" data-panel="3" hidden><h2>Xem lại bài tập</h2><div id="gbReview"></div></section>
+<footer class="gb-footer">
+<button type="button" class="ql-nut phu" id="gbTruoc">← Quay lại</button>
+<button type="button" class="ql-nut phu" id="gbNhap">Lưu nháp</button>
+<button type="button" class="ql-nut" id="gbTiep">Tiếp tục →</button>
+<button type="submit" class="ql-nut" id="gbGiao" hidden>Giao bài tập cho học viên</button>
+<span id="gbStatus" role="status"></span>
+</footer>
+</form>
+</div>
+<script id="gbData" type="application/json">@Html.Raw(NoiDungBaiTap.Viet(Model))</script>
+<script id="gbBuoiData" type="application/json">@Html.Raw(NoiDungBaiTap.Viet(ViewBag.DsBuoi))</script>
+@section Scripts { <script src="~/js/giao-bai.js" asp-append-version="true"></script> }

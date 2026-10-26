@@ -1,0 +1,29 @@
+@model List<SuDia.Web.Data.BaiNopGiao>
+@{
+    var bt = (SuDia.Web.Data.BaiTapGiao)ViewBag.BaiTap;
+    var cau = NoiDungBaiTap.Doc(bt.NoiDungJson);
+    var tuLuan = cau.Where(c => c.Kieu == "TL").ToList();
+    ViewData["TieuDe"] = "Bài nộp · " + bt.Ten;
+    ViewData["Muc"] = "CauHoi";
+}
+@section Head { <link rel="stylesheet" href="~/css/giao-bai.css" asp-append-version="true"> }
+@section Actions { <a class="ql-nut phu" href="/GiangVien/CauHoi?bai=@bt.BaiId">Về bài tập</a> }
+@if (Model.Count == 0) { <p class="ql-trong">Chưa có học viên nộp bài.</p> }
+<div class="gb gb-submissions">
+@foreach (var n in Model)
+{
+    var traLoi = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string,string>>(n.TraLoiJson) ?? new();
+<article class="gb-panel"><h2>@n.NguoiDung?.HoTen · @n.NguoiDung?.Email</h2><p class="gb-muted">Nộp lúc @DinhDang.GioNgay(n.NopLuc.ToLocalTime())</p>
+<p>Điểm tự động: <b>@n.DiemTuDong</b> · @(n.DiemTuLuan is null ? "Chờ chấm tự luận" : $"Tổng điểm: {n.DiemTuDong + n.DiemTuLuan}/{cau.Sum(c => c.TongDiem)}")</p>
+@foreach (var c in tuLuan)
+{
+<div class="gb-question"><b>@c.NoiDung · @c.Diem điểm</b><p class="gb-pre">@(string.IsNullOrWhiteSpace(traLoi.GetValueOrDefault(c.Id)) ? "Học viên bỏ trống" : traLoi.GetValueOrDefault(c.Id))</p>
+<details><summary>Hướng dẫn chấm</summary><p class="gb-pre">@c.LoiGiai</p></details></div>
+}
+@if (tuLuan.Count > 0)
+{
+<form method="post" asp-action="ChamTuLuan" class="ql-hang-nut"><input type="hidden" name="id" value="@n.Id"><label for="diem-@n.Id">Tổng điểm tự luận (tối đa @tuLuan.Sum(c => c.Diem))</label><input id="diem-@n.Id" name="diem" type="number" min="0" max="@tuLuan.Sum(c => c.Diem).ToString(System.Globalization.CultureInfo.InvariantCulture)" step="0.01" value="@n.DiemTuLuan?.ToString(System.Globalization.CultureInfo.InvariantCulture)" required class="gb-score"><button class="ql-nut">Lưu điểm</button></form>
+}
+</article>
+}
+</div>

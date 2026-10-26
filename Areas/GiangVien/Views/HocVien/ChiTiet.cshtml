@@ -1,0 +1,51 @@
+@{
+    var nd = (NguoiDung)ViewBag.NguoiDung;
+    var khoa = (Khoa)ViewBag.Khoa;
+    ViewData["Title"] = $"{nd.HoTen} – Học viên";
+    ViewData["TieuDe"] = nd.HoTen;
+    ViewData["Muc"] = "HocVien";
+    ViewData["Crumb"] = $"<a href=\"/GiangVien/HocVien?khoa={khoa.Id}\">Học viên · {khoa.Ten}</a> · {nd.Email}";
+}
+<div class="ql-luoi">
+<section class="ql-khoi">
+<div class="ql-khoi-dau"><h2>Bài đã nộp</h2></div>
+@if (ViewBag.BaiLam.Count == 0)
+{
+<p class="ql-trong">Chưa nộp bài nào.</p>
+}
+else
+{
+<table class="ql-bang so">
+<tbody>
+@foreach (var b in ViewBag.BaiLam)
+{
+<tr><td>@b.TenDe<span class="ql-phu">@(((DateTime)b.NopLuc).ToLocalTime().ToString("HH:mm dd/MM/yyyy"))</span>
+@if (b.CauSai.Count > 0)
+{
+<details style="margin-top: 6px"><summary class="ql-nut-chu" style="cursor: pointer">@b.CauSai.Count câu sai</summary>
+<ul style="margin: 6px 0 0; padding-left: 18px">
+@foreach (var s in b.CauSai)
+{
+<li>Câu @s.ThuTu: @s.NoiDung <span class="ql-phu">Chọn @(s.DaChon ?? "— (bỏ trống)") · đúng @s.DapAnDung</span></li>
+}
+</ul></details>
+}
+</td><td class="so"><span class="ql-chip @(b.SoDung >= b.SoCau * 0.8 ? "xanh" : "vang")">@b.SoDung/@b.SoCau</span></td></tr>
+}
+</tbody>
+</table>
+}
+</section>
+<section class="ql-khoi">
+<div class="ql-khoi-dau"><h2>Tiến độ từng bài</h2></div>
+<table class="ql-bang">
+<tbody>
+@foreach (var t in ViewBag.TienDo)
+{
+    TrangThaiHoc? tt = t.TrangThai;
+<tr><td>Bài @t.So. @t.Ten</td><td class="so">@if (tt == TrangThaiHoc.DaHoc) {<span class="ql-chip xanh">Đã học</span>} else if (tt == TrangThaiHoc.DangHoc) {<span class="ql-chip nhan">Đang học</span>} else {<span class="ql-chip">Chưa học</span>}</td></tr>
+}
+</tbody>
+</table>
+</section>
+</div>

@@ -18,14 +18,14 @@ public class TroLyController : Controller
     [EnableRateLimiting("tro-ly")]
     public async Task<IActionResult> Hoi([FromBody] HoiAiRequest req, CancellationToken ct)
     {
-        if (string.IsNullOrWhiteSpace(req.CauHoi) || req.CauHoi.Length > 500)
-            return BadRequest(new { loi = "Câu hỏi trống hoặc dài quá 500 ký tự." });
+        if (string.IsNullOrWhiteSpace(req.CauHoi) || req.CauHoi.Length > GioiHanHoiAi.CauHoi)
+            return BadRequest(new { loi = $"Câu hỏi trống hoặc dài quá {GioiHanHoiAi.CauHoi:N0} ký tự." });
 
         // Lịch sử do trình duyệt gửi: chỉ giữ 3 lượt cuối, cắt bớt nội dung quá dài
         var lichSu = (req.LichSu ?? [])
             .Where(l => !string.IsNullOrWhiteSpace(l.CauHoi) && l.TraLoi is not null)
             .TakeLast(3)
-            .Select(l => new LuotHoi(CatNgan(l.CauHoi, 500), CatNgan(l.TraLoi, 1500)))
+            .Select(l => new LuotHoi(CatNgan(l.CauHoi, GioiHanHoiAi.CauHoi), CatNgan(l.TraLoi, 1500)))
             .ToList();
 
         var res = await _ai.HoiAsync(req with { LichSu = lichSu }, ct);

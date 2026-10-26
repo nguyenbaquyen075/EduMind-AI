@@ -1,0 +1,27 @@
+@{
+    ViewData["Title"] = "Khoá học & ghi danh – Quản trị";
+    ViewData["TieuDe"] = "Khoá học";
+    ViewData["Muc"] = "KhoaHoc";
+    var dsGv = (List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>)ViewBag.DsGiangVien;
+}
+@section Actions { <a href="/Admin/GhiDanh" class="ql-nut phu">Quản lý ghi danh</a><a href="/Admin/KhoaHoc/Tao" class="ql-nut">+ Tạo khoá học</a> }
+<p class="ad-filter-note">Quản lý danh mục khoá, phân công giảng viên và mở nội dung học cho học viên.</p>
+<section class="ql-khoi">
+<table class="ql-bang so">
+<thead><tr><th>Khoá</th><th>Giảng viên phụ trách</th><th class="so">Bài</th><th class="so">Học viên</th><th></th></tr></thead>
+<tbody>
+@foreach (var k in ViewBag.Khoa)
+{
+<tr><td><b>@k.Ten</b><span class="ql-phu">@k.Id</span></td>
+<td><form method="post" asp-action="GanGiangVien"><input type="hidden" name="id" value="@k.Id"><span class="ql-truong" style="margin: 0; display: block; max-width: 300px"><select name="giangVienId" onchange="this.form.submit()" aria-label="Giảng viên khoá @k.Ten"><option value="">— Chưa gán —</option>
+@foreach (var g in dsGv)
+{
+<option value="@g.Value" selected="@(g.Value == k.GiangVienId)">@g.Text</option>
+}
+</select></span></form></td>
+<td class="so">@k.SoBai</td><td class="so">@k.SoHocVien</td>
+<td class="hanh-dong"><span class="ql-hang-nut" style="justify-content: flex-end"><a href="/Admin/NoiDung?khoa=@k.Id" class="ql-nut phu nho">Nội dung</a><a href="/Admin/KhoaHoc/GhiDanh/@k.Id" class="ql-nut nho">Ghi danh</a><a href="/Admin/KhoaHoc/Sua/@k.Id" class="ql-nut phu nho">Sửa khoá</a></span></td></tr>
+}
+</tbody>
+</table>
+</section>

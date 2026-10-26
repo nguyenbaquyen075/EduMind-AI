@@ -22,4 +22,7 @@ public interface IKhoaHocService
     /// <param name="id">Mã bài (bài tập theo bài) hoặc mã đề thi thử (1001+)</param>
     /// <param name="daChon">null = đang làm; có giá trị = đã nộp, chấm và hiện đáp án</param>
     LamDeViewModel LayDe(int? id, IReadOnlyDictionary<int, string>? daChon);
+
+    /// <summary>Lưu bài đã nộp (đã chấm) của người đang đăng nhập.</summary>
+    void LuuBaiLam(LamDeViewModel daNop);
 }

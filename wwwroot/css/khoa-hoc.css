@@ -248,3 +248,5 @@ a.kh-lesson:hover .kh-go{color:var(--accent);transform:translateX(2px)}
 .kh-more-menu a:hover,.kh-more-menu a:focus-visible{background:var(--surface-2);color:var(--text);outline:none}
 .kh-more-menu svg{flex:0 0 18px;color:var(--accent)}
 .kh-more-menu small{display:block;font-size:12px;font-weight:400;color:var(--text-3)}
+.kh-more-menu .tat{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;font-size:14px;font-weight:500;color:var(--text-3);cursor:not-allowed}
+.kh-more-menu .tat svg{flex:0 0 18px;color:var(--text-3)}
