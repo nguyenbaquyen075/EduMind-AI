@@ -1,0 +1,63 @@
+@model AdminDashboardViewModel
+@{
+    ViewData["Title"] = "Tổng quan – Quản trị";
+    ViewData["TieuDe"] = "Tổng quan hệ thống";
+    ViewData["Muc"] = "TongQuan";
+}
+@section Actions {
+<a href="/Admin/BaoCao" class="ql-nut phu">Xem báo cáo</a>
+<a href="/Admin/KhoaHoc/Tao" class="ql-nut">+ Tạo khoá học</a>
+}
+<section class="ad-welcome"><div><p class="ad-eyebrow">TRUNG TÂM QUẢN TRỊ</p><h2>Nắm bắt hoạt động, điều hành việc học.</h2><p>Theo dõi học viên, nội dung và các việc cần xử lý trên toàn hệ thống.</p></div><span class="ad-date">@SuDia.Web.Services.AdminThongKeService.HomNay.ToString("dd/MM/yyyy")</span></section>
+<div class="ad-stats">
+@foreach (var s in Model.SoLieu)
+{
+<article class="ad-stat"><p>@s.Nhan</p><strong class="so">@s.GiaTri</strong><small>@s.Phu</small></article>
+}
+</div>
+<div class="ad-grid">
+<section class="ql-khoi"><div class="ql-khoi-dau"><div><h2>Hoạt động học tập</h2><p>7 ngày gần nhất · theo giờ Việt Nam</p></div><span class="ql-chip nhan">@Model.TongHoatDong bài nộp</span></div><div class="ql-khoi-than"><partial name="_BieuDoAdmin" model="Model.Ngay" /><p class="ad-caption">@Model.TaiKhoanMoi tài khoản mới được tạo trong thời gian này.</p></div></section>
+<section class="ql-khoi"><div class="ql-khoi-dau"><h2>Cần xử lý</h2><span class="ql-chip">@Model.Viec.Count nhóm việc</span></div>
+@if (Model.Viec.Count == 0) { <div class="ad-empty"><b>Đã xử lý hết công việc</b><p>Chưa có cảnh báo cần chú ý.</p></div> }
+else {
+<div class="ad-tasks">
+@foreach (var v in Model.Viec) { <a href="@v.Link" class="ad-task"><span class="ad-dot @(v.CanChuY ? "warn" : "")"></span><span><b>@v.Ten</b><small>@v.ChiTiet</small></span><span aria-hidden="true">→</span></a> }
+</div>
+}
+</section>
+</div>
+<section class="ad-quick">
+<a href="/Admin/NguoiDung/Tao"><span>＋</span><b>Tạo tài khoản</b><small>Học viên, giảng viên hoặc quản trị</small></a>
+<a href="/Admin/GhiDanh"><span>↗</span><b>Ghi danh học viên</b><small>Mở khoá và quản lý hạn học</small></a>
+<a href="/Admin/NoiDung"><span>▤</span><b>Kiểm tra nội dung</b><small>Bài nháp, bài đã xuất bản, bài còn thiếu</small></a>
+<a href="/Admin/LichDay"><span>◷</span><b>Quản lý lịch dạy</b><small>Các buổi học trên mọi khoá</small></a>
+</section>
+<section class="ql-khoi"><div class="ql-khoi-dau"><div><h2>Tình hình các khoá học</h2><p>Nội dung và ghi danh hiện tại</p></div><a href="/Admin/KhoaHoc" class="ql-nut-chu">Quản lý khoá →</a></div>
+@if (Model.Khoa.Count == 0) { <p class="ql-trong">Chưa có khoá học. Tạo khoá đầu tiên để bắt đầu.</p> }
+else {
+<div class="ad-table-wrap"><table class="ql-bang"><thead><tr><th>Khoá học</th><th>Giảng viên</th><th>Nội dung xuất bản</th><th class="so">Ghi danh còn hạn</th><th></th></tr></thead><tbody>
+@foreach (var k in Model.Khoa)
+{
+<tr><td><b>@k.Ten</b><span class="ql-phu">@k.Id</span></td><td>@(k.GiangVien ?? "Chưa phân công")</td><td><span>@k.DaXuatBan / @k.SoBai bài</span><div class="ad-progress"><span style="width:@(k.SoBai == 0 ? 0 : k.DaXuatBan * 100 / k.SoBai)%"></span></div></td><td class="so">@k.DangHoc / @k.SoHocVien</td><td><a href="/Admin/KhoaHoc/GhiDanh/@k.Id">Chi tiết →</a></td></tr>
+}
+</tbody></table></div>
+}
+</section>
+<div class="ad-grid">
+<section class="ql-khoi"><div class="ql-khoi-dau"><h2>Bài nộp gần đây</h2><a href="/Admin/BaiTap" class="ql-nut-chu">Xem bài tập →</a></div>
+@if (Model.HoatDong.Count == 0) { <div class="ad-empty"><b>Chưa có hoạt động học tập</b><p>Bài nộp của học viên sẽ xuất hiện tại đây.</p></div> }
+else {
+<div class="ad-activity">
+@foreach (var h in Model.HoatDong) { <a href="@h.Link"><span class="ad-avatar">@h.HocVien[..Math.Min(h.HocVien.Length,1)]</span><span><b>@h.HocVien</b><small>@h.NoiDung · @h.Loai</small></span><time>@TimeZoneInfo.ConvertTimeFromUtc(DateTime.SpecifyKind(h.Luc,DateTimeKind.Utc),SuDia.Web.Services.AdminThongKeService.MuiGio).ToString("HH:mm · dd/MM")</time></a> }
+</div>
+}
+</section>
+<section class="ql-khoi"><div class="ql-khoi-dau"><h2>Buổi học sắp tới</h2><a href="/Admin/LichDay" class="ql-nut-chu">Xem lịch →</a></div>
+@if (Model.Buoi.Count == 0) { <div class="ad-empty"><b>Chưa có buổi học sắp tới</b><p>Thêm lịch dạy để giảng viên và học viên cùng theo dõi.</p><a href="/GiangVien/LichDay/Tao" class="ql-nut phu nho">+ Tạo buổi học</a></div> }
+else {
+<div class="ad-sessions">
+@foreach (var b in Model.Buoi) { <div><span class="ad-session-date">@TimeZoneInfo.ConvertTimeFromUtc(b.Luc!.Value,SuDia.Web.Services.AdminThongKeService.MuiGio).ToString("dd/MM")<small>@TimeZoneInfo.ConvertTimeFromUtc(b.Luc.Value,SuDia.Web.Services.AdminThongKeService.MuiGio).ToString("HH:mm")</small></span><span><b>@b.Bai</b><small>@b.Khoa · @(b.GiangVien ?? "Chưa phân công")</small></span><a href="/GiangVien/LichDay/Sua/@b.Id" class="ql-nut phu nho">Chi tiết</a></div> }
+</div>
+}
+</section>
+</div>

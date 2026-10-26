@@ -1,0 +1,82 @@
+@model Khoa?
+@{
+    ViewData["Title"] = "Bài tập – Giảng viên";
+    ViewData["TieuDe"] = "Bài tập";
+    ViewData["Muc"] = "CauHoi";
+    var dsKhoa = ViewBag.DsKhoa as List<Khoa> ?? [];
+    var soBaiTap = ViewBag.SoBaiTapGiao as Dictionary<int, int> ?? [];
+}
+@if (Model is null)
+{
+<p class="ql-trong">Bạn chưa được gán khoá nào. Admin gán khoá ở mục Khoá học.</p>
+    return;
+}
+@section Actions {
+@if (dsKhoa.Count > 1)
+{
+<form method="get" class="ql-hang-nut"><div class="ql-truong" style="margin: 0"><select name="khoa" onchange="this.form.submit()" aria-label="Chọn khoá">
+@foreach (var k in dsKhoa)
+{
+<option value="@k.Id" selected="@(k.Id == Model.Id)">@k.Ten</option>
+}
+</select></div></form>
+}
+<a href="/Home/LuyenDe/@Model.Id" class="ql-nut phu" target="_blank">Xem như học viên ↗</a>
+}
+
+<div class="ql-them mot" aria-label="Giao bài tập">
+<form method="get" action="/GiangVien/GiaoBai/Tao">
+<h2>+ Giao bài tập</h2>
+<div class="ql-hang-nut">
+<div class="ql-truong" style="flex: 1 1 320px"><select name="bai" aria-label="Giao bài tập cho bài" required>
+<option value="">— Chọn bài cần giao bài tập —</option>
+@foreach (var cd in Model.ChuDe.OrderBy(c => c.ThuTu))
+{
+<optgroup label="@cd.Ten">
+@foreach (var b in cd.Bai.OrderBy(x => x.ThuTu))
+{
+<option value="@b.Id">Bài @b.So. @b.Ten (@b.CauHoi.Count câu)</option>
+}
+</optgroup>
+}
+</select></div>
+<button class="ql-nut">Soạn bài tập →</button>
+</div>
+<p class="ql-phu" style="margin: 0">Giao một bài tập cho buổi học, gồm nhiều câu trắc nghiệm, đúng / sai và tự luận.</p>
+</form>
+</div>
+
+<section class="ql-khoi" aria-labelledby="cay">
+<div class="ql-khoi-dau"><h2 id="cay">@Model.Ten · bài tập theo chủ đề và bài</h2><p>Bấm vào bài tập để xem các câu đã giao; bấm ⋮ để thêm câu.</p></div>
+<ul class="ql-cay">
+@foreach (var cd in Model.ChuDe.OrderBy(c => c.ThuTu))
+{
+    var tong = cd.Bai.Sum(b => b.CauHoi.Count);
+<li>
+<div class="ql-chude">
+<span>@cd.Ten</span>
+<span class="ql-phu" style="margin: 0">@(tong == 0 ? "Chưa có câu nào" : $"{tong} câu cho cả chủ đề")</span>
+</div>
+    @foreach (var b in cd.Bai.OrderBy(x => x.ThuTu))
+    {
+<div class="ql-bai-dong bt-dong">
+<span class="ql-bai-so">Bài @b.So</span>
+<a href="/GiangVien/CauHoi?bai=@b.Id" class="bt-dong-ten">Bài tập · @b.Ten
+<span class="ql-phu">@b.CauHoi.Count câu luyện tập · @soBaiTap.GetValueOrDefault(b.Id) bài tập theo buổi
+@if (!b.DaXuatBan) {<span class="ql-chip vang">Nháp</span>}
+</span></a>
+<details class="ql-ba-cham">
+<summary aria-label="Thao tác với bài tập bài @b.So" title="Thao tác"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/></svg></summary>
+<ul>
+<li><a href="/GiangVien/CauHoi?bai=@b.Id">Xem bài tập</a></li>
+<li><a href="/GiangVien/GiaoBai/Tao?bai=@b.Id">Giao bài tập</a></li>
+<li><a href="/GiangVien/CauHoi/Tao?bai=@b.Id">Thêm câu hỏi</a></li>
+<li><a href="/Home/LamCauHoi/@b.Id" target="_blank">Xem như học viên ↗</a></li>
+</ul>
+</details>
+</div>
+    }
+</li>
+}
+</ul>
+</section>

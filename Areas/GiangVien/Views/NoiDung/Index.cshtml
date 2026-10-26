@@ -1,0 +1,75 @@
+@model Khoa?
+@{
+    ViewData["Title"] = "Nội dung bài học – Giảng viên";
+    ViewData["TieuDe"] = "Nội dung bài học";
+    ViewData["Muc"] = "NoiDung";
+    var dsKhoa = ViewBag.DsKhoa as List<Khoa> ?? [];
+}
+@if (Model is null)
+{
+<p class="ql-trong">Bạn chưa được gán khoá nào. Admin gán khoá ở mục Khoá học.</p>
+    return;
+}
+@section Actions {
+@if (dsKhoa.Count > 1)
+{
+<form method="get" class="ql-hang-nut"><div class="ql-truong" style="margin: 0"><select name="khoa" onchange="this.form.submit()" aria-label="Chọn khoá">
+@foreach (var k in dsKhoa)
+{
+<option value="@k.Id" selected="@(k.Id == Model.Id)">@k.Ten</option>
+}
+</select></div></form>
+}
+<a href="/Home/KhoaHoc/@Model.Id" class="ql-nut phu" target="_blank">Xem như học viên ↗</a>
+}
+
+<div class="ql-them" aria-label="Thêm mới">
+<form method="post" asp-action="ThemChuDe">
+<h2>+ Thêm chủ đề</h2>
+<input type="hidden" name="khoaId" value="@Model.Id">
+<div class="ql-truong"><input type="text" name="ten" placeholder="Tên chủ đề, ví dụ: Công cuộc Đổi mới từ năm 1986" aria-label="Tên chủ đề mới" required></div>
+<div><button class="ql-nut">Thêm chủ đề</button></div>
+</form>
+<form method="post" asp-action="ThemBai">
+<h2>+ Thêm bài học</h2>
+<div class="ql-hang-nut">
+<div class="ql-truong" style="flex: 0 1 240px"><select name="chuDeId" aria-label="Chủ đề của bài mới" required>
+@foreach (var cd in Model.ChuDe.OrderBy(c => c.ThuTu))
+{
+<option value="@cd.Id">@cd.Ten</option>
+}
+</select></div>
+<div class="ql-truong" style="flex: 1 1 220px"><input type="text" name="ten" placeholder="Tên bài mới" aria-label="Tên bài mới" required></div>
+</div>
+<div><button class="ql-nut">Thêm bài</button> <span class="ql-phu" style="display: inline">Bài mới ở dạng nháp, soạn xong mới xuất bản.</span></div>
+</form>
+</div>
+
+<section class="ql-khoi" aria-labelledby="cay">
+<div class="ql-khoi-dau"><h2 id="cay">@Model.Ten · chủ đề và bài</h2><p>Bấm "Soạn" để viết nội dung bài. Bài nháp chưa hiện cho học viên.</p></div>
+<ul class="ql-cay">
+@foreach (var cd in Model.ChuDe.OrderBy(c => c.ThuTu))
+{
+<li>
+<div class="ql-chude">
+<span>@cd.Ten</span>
+<details><summary class="ql-nut-chu" style="list-style: none; cursor: pointer">Đổi tên</summary>
+<form method="post" asp-action="SuaChuDe" class="ql-hang-nut" style="margin-top: 8px"><input type="hidden" name="id" value="@cd.Id"><div class="ql-truong" style="margin: 0"><input type="text" name="ten" value="@cd.Ten" aria-label="Tên chủ đề" required></div><button class="ql-nut nho">Lưu</button></form>
+</details>
+</div>
+    @foreach (var b in cd.Bai.OrderBy(x => x.ThuTu))
+    {
+<div class="ql-bai-dong">
+<span class="ql-bai-so">Bài @b.So</span>
+<span>@b.Ten
+<span class="ql-phu">@b.Muc.Count mục · @b.CauHoi.Count câu hỏi
+@if (!b.DaXuatBan) {<span class="ql-chip vang">Nháp</span>}
+@if (b.HocThu) {<span class="ql-chip nhan">Học thử</span>}
+</span></span>
+<span class="ql-hang-nut"><a href="/GiangVien/NoiDung/SoanBai/@b.Id" class="ql-nut nho">Soạn</a><a href="/GiangVien/CauHoi?bai=@b.Id" class="ql-nut phu nho">Bài tập</a></span>
+</div>
+    }
+</li>
+}
+</ul>
+</section>

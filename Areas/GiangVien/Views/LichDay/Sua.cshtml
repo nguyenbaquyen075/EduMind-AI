@@ -1,0 +1,17 @@
+@model BuoiHocForm
+@{
+    var moi = Model.Id == 0;
+    ViewData["Title"] = (moi ? "Lên lịch buổi học" : "Sửa buổi học") + " – Giảng viên";
+    ViewData["TieuDe"] = moi ? "Lên lịch buổi học" : "Sửa buổi học";
+    ViewData["Muc"] = "LichDay";
+    ViewData["Crumb"] = "<a href=\"/GiangVien/LichDay\">Lịch dạy online</a>";
+}
+<form method="post" asp-action="Luu" class="ql-form ql-khoi ql-khoi-than" style="max-width: 640px">
+<input type="hidden" asp-for="Id">
+<div asp-validation-summary="ModelOnly" class="ql-tong-loi"></div>
+<div class="ql-truong"><label asp-for="BaiId">Bài học</label>
+<select asp-for="BaiId" asp-items="(List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>)ViewBag.DsBai"><option value="0">— Chọn bài —</option></select><span asp-validation-for="BaiId" class="ql-loi"></span></div>
+<div class="ql-truong"><label asp-for="Link">Link Google Meet</label><input asp-for="Link" type="url" placeholder="https://meet.google.com/abc-defg-hij"><span asp-validation-for="Link" class="ql-loi"></span></div>
+<div class="ql-truong"><label asp-for="ThoiGian">Giờ học</label><input asp-for="ThoiGian" type="datetime-local"><small>Học viên thấy giờ này khi rê chuột vào "Học online".</small></div>
+<div class="ql-chan"><button class="ql-nut">Lưu buổi học</button><a href="/GiangVien/LichDay" class="ql-nut phu">Huỷ</a></div>
+</form>

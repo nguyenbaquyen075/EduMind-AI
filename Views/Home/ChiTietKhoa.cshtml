@@ -123,10 +123,19 @@ else
 <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.8"></circle><circle cx="12" cy="12" r="1.8"></circle><circle cx="12" cy="19" r="1.8"></circle></svg>
 </summary>
 <ul class="kh-more-menu">
+<li><a href="/BaiTap?bai=@b.Id"><span>Bài tập được giao theo buổi</span></a></li>
 <li><a asp-controller="Home" asp-action="BaiHoc" asp-route-id="@b.Id"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4h6a4 4 0 0 1 4 4v13a3 3 0 0 0-3-3H2z"></path><path d="M22 4h-6a4 4 0 0 0-4 4v13a3 3 0 0 1 3-3h7z"></path></svg><span>Học bài</span></a></li>
 <li><a asp-controller="Home" asp-action="LamCauHoi" asp-route-id="@b.Id"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg><span>Làm bài tập</span></a></li>
 <li><a asp-controller="Home" asp-action="LuyenDe" asp-route-id="@k.Id" asp-fragment="chu-de-@soChuDe"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"></rect><path d="M7 9h10M7 13h10M7 17h6"></path></svg><span>Luyện tập cả chủ đề</span></a></li>
 <li><a asp-controller="Home" asp-action="BaiHoc" asp-route-id="@b.Id" asp-fragment="tro-ly"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg><span>Hỏi AI về bài</span></a></li>
+            @if (Model.HocOnline.TryGetValue(b.Id, out var onl))
+            {
+<li><a href="@onl.Link" target="_blank" rel="noopener noreferrer" title="@(onl.ThoiGian is null ? "Mở Google Meet" : $"Buổi học: {DinhDang.GioNgay(onl.ThoiGian.Value)}")"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="14" height="12" rx="2"></rect><path d="M16 10l6-3v10l-6-3z"></path></svg><span>Học online</span></a></li>
+            }
+            else
+            {
+<li><span class="tat" aria-disabled="true" title="Chưa có link Meet cho buổi này"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="14" height="12" rx="2"></rect><path d="M16 10l6-3v10l-6-3z"></path></svg><span>Học online</span></span></li>
+            }
 </ul>
 </details>
         }

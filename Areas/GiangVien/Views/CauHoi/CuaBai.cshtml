@@ -1,0 +1,59 @@
+@{
+    var b = (Bai)ViewBag.Bai;
+    ViewData["Title"] = $"Bài tập Bài {b.So} – Giảng viên";
+    ViewData["TieuDe"] = $"Bài tập · Bài {b.So}. {b.Ten}";
+    ViewData["Muc"] = "CauHoi";
+    ViewData["Crumb"] = $"<a href=\"/GiangVien/CauHoi?khoa={b.ChuDe!.KhoaId}\">Bài tập · {System.Net.WebUtility.HtmlEncode(b.ChuDe.Khoa!.Ten)}</a> › {System.Net.WebUtility.HtmlEncode(b.ChuDe.Ten)}";
+    var ky = new[] { "A", "B", "C", "D" };
+}
+@section Actions {
+<a href="/GiangVien/GiaoBai/Tao?bai=@b.Id" class="ql-nut">Giao bài tập</a>
+<a href="/Home/LamCauHoi/@b.Id" class="ql-nut phu" target="_blank">Xem như học viên ↗</a>
+<a href="/GiangVien/CauHoi/Tao?bai=@b.Id" class="ql-nut">+ Thêm câu hỏi</a>
+}
+@{ var daGiao = ViewBag.BaiTapGiao as List<SuDia.Web.Data.BaiTapGiao> ?? []; }
+<section class="ql-khoi"><div class="ql-khoi-dau"><h2>Bài tập giao theo buổi</h2><span>@daGiao.Count bài tập</span></div>
+@if (daGiao.Count == 0) { <p class="ql-trong">Chưa có bài tập theo buổi. Bấm Giao bài tập để soạn một bài mới.</p> }
+@foreach (var bt in daGiao)
+{
+<div class="ql-khoi-than"><div class="ql-hang-nut"><strong>@bt.Ten</strong><span class="ql-chip @(bt.DaGiao ? "xanh" : "vang")">@(bt.DaGiao ? "Đã giao" : "Nháp")</span>
+<a href="/GiangVien/GiaoBai/Sua/@bt.Id">Chỉnh sửa</a><a href="/GiangVien/GiaoBai/BaiNop/@bt.Id">Bài nộp</a><a href="/BaiTap/Lam/@bt.Id" target="_blank">Xem trước ↗</a>
+<form method="post" asp-controller="GiaoBai" asp-action="Xoa" data-hoi="Xoá bài tập này? Chỉ có thể xoá khi chưa có bài nộp."><input type="hidden" name="id" value="@bt.Id"><button class="ql-nut-chu xoa">Xoá bài tập</button></form></div>
+<span class="ql-phu">@(bt.BuoiHoc?.ThoiGian is DateTime gio ? $"Buổi {DinhDang.GioNgay(gio.ToLocalTime())}" : "Bài tập của bài học") · @(bt.HanNop is DateTime han ? $"Hạn nộp {DinhDang.GioNgay(han.ToLocalTime())}" : "Không giới hạn hạn nộp")</span></div>
+}
+</section>
+<h2 style="font-size:16px">Câu hỏi luyện tập của bài học</h2>
+@if (ViewBag.Cau.Count > 0)
+{
+<p class="ql-phu" style="margin: 0 0 14px">@ViewBag.Cau.Count câu đã giao cho học viên · bấm ⋮ ở mỗi câu để sửa hoặc xoá</p>
+}
+<ol class="bt-ds">
+@{ var i = 0; }
+@foreach (var c in ViewBag.Cau)
+{
+    i++;
+<li class="ql-khoi bt-cau">
+<div class="bt-dau"><span class="bt-so">Câu @i</span><span class="ql-phu" style="margin: 0">@c.NguonHienThi</span>
+<span class="bt-ti-le">@(c.Lam == 0 ? "Chưa có lượt làm" : $"{Math.Round(c.Dung * 100.0 / c.Lam)}% làm đúng · {c.Lam} lượt")</span>
+<details class="ql-ba-cham">
+<summary aria-label="Thao tác với câu @i" title="Thao tác"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/></svg></summary>
+<ul>
+<li><a href="/GiangVien/CauHoi/Sua/@c.Id">Chỉnh sửa câu</a></li>
+<li><form method="post" asp-action="Xoa" data-hoi="Xoá câu @i? Câu này cũng bị gỡ khỏi các đề thi thử."><input type="hidden" name="id" value="@c.Id"><button class="xoa">Xoá câu</button></form></li>
+</ul>
+</details></div>
+<p class="bt-hoi">@c.NoiDung</p>
+<ul class="bt-pa">
+@for (var j = 0; j < c.PhuongAn.Count && j < 4; j++)
+{
+<li class="@(ky[j] == c.DapAnDung ? "dung" : "")"><span class="ky">@ky[j]</span><span>@c.PhuongAn[j]</span>@if (ky[j] == c.DapAnDung) {<span class="bt-nhan">Đáp án đúng</span>}</li>
+}
+</ul>
+@if (!string.IsNullOrWhiteSpace((string)c.GiaiThich))
+{
+<p class="bt-giai"><b>Lời giải:</b> @c.GiaiThich</p>
+}
+</li>
+}
+<li><a href="/GiangVien/CauHoi/Tao?bai=@b.Id" class="bt-them">+ Thêm câu hỏi@(ViewBag.Cau.Count == 0 ? " đầu tiên cho bài này" : "")</a></li>
+</ol>

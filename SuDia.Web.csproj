@@ -9,6 +9,9 @@
 
   <ItemGroup>
     <PackageReference Include="Anthropic" Version="13.3.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.11" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.11" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.11" />
   </ItemGroup>
 
   <!-- Tài liệu khoá, prompt và bộ kiểm thử được đọc lúc chạy -->

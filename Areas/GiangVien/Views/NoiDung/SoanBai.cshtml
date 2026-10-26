@@ -1,0 +1,50 @@
+@model Bai
+@{
+    ViewData["Title"] = $"Soạn Bài {Model.So} – Giảng viên";
+    ViewData["TieuDe"] = $"Bài {Model.So}. {Model.Ten}";
+    ViewData["Muc"] = "NoiDung";
+    ViewData["Crumb"] = $"<a href=\"/GiangVien/NoiDung?khoa={Model.ChuDe!.KhoaId}\">{Model.ChuDe.Khoa!.Ten}</a> › {Model.ChuDe.Ten}";
+}
+@section Actions {
+<a href="/GiangVien/CauHoi?bai=@Model.Id" class="ql-nut phu">Bài tập của bài (@ViewBag.SoCau câu)</a>
+<a href="/GiangVien/LichDay/Tao?bai=@Model.Id" class="ql-nut phu">+ Buổi dạy online</a>
+<a href="/Home/BaiHoc/@Model.Id" class="ql-nut phu" target="_blank">Xem như học viên ↗</a>
+}
+
+<section class="ql-khoi" aria-labelledby="muc">
+<div class="ql-khoi-dau"><h2 id="muc">Các mục của bài</h2><p>Mỗi mục là một phần trong trang đọc của học viên, hiện trong mục lục.</p></div>
+<form method="post" asp-action="ThemMuc" class="ql-khoi-than ql-hang-nut" style="border-bottom: 1px solid var(--vien-nhe); background: var(--nhan-nhat)">
+<input type="hidden" name="baiId" value="@Model.Id">
+<div class="ql-truong" style="margin: 0; flex: 1 1 320px"><input type="text" name="ten" placeholder="Tên mục mới, ví dụ: Bối cảnh" aria-label="Tên mục mới" required></div>
+<button class="ql-nut">+ Thêm mục</button>
+</form>
+@if (Model.Muc.Count == 0)
+{
+<p class="ql-trong">Bài chưa có mục nào. Thêm mục đầu tiên ở dưới.</p>
+}
+else
+{
+<table class="ql-bang">
+<tbody>
+@foreach (var m in Model.Muc.OrderBy(x => x.So))
+{
+<tr><td style="width: 70px"><b>Mục @m.So</b></td><td>@m.Ten<span class="ql-phu">@m.TieuDe · @m.Phan.Count phần</span></td>
+<td class="hanh-dong"><span class="ql-hang-nut" style="justify-content: flex-end"><a href="/GiangVien/NoiDung/SuaMuc/@m.Id" class="ql-nut nho">Soạn mục</a>
+<form method="post" asp-action="XoaMuc" data-hoi="Xoá mục @m.So và toàn bộ nội dung của mục?"><input type="hidden" name="id" value="@m.Id"><button class="ql-nut xoa nho">Xoá</button></form></span></td></tr>
+}
+</tbody>
+</table>
+}
+
+</section>
+
+<section class="ql-khoi" aria-labelledby="thong-tin">
+<div class="ql-khoi-dau"><h2 id="thong-tin">Thông tin bài</h2></div>
+<form method="post" asp-action="LuuBai" class="ql-khoi-than ql-form">
+<input type="hidden" name="id" value="@Model.Id">
+<div class="ql-truong"><label for="ten">Tên bài</label><input id="ten" type="text" name="ten" value="@Model.Ten" required></div>
+<label class="ql-check"><input type="checkbox" name="daXuatBan" value="true" checked="@Model.DaXuatBan"> Xuất bản — học viên thấy bài này</label>
+<label class="ql-check"><input type="checkbox" name="hocThu" value="true" checked="@Model.HocThu"> Cho học thử — học viên chưa ghi danh vẫn học được</label>
+<div class="ql-chan"><button class="ql-nut">Lưu thông tin bài</button></div>
+</form>
+</section>

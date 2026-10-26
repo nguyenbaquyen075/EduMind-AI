@@ -1,5 +1,7 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SuDia.Web.Services;
+using SuDia.Web.Models;
 
 namespace SuDia.Web.Controllers;
 
@@ -13,9 +15,25 @@ public class HomeController : Controller
     public IActionResult Index() => View(_svc.LayTrangChu());
 
     // Trang trong tài khoản. Khi có Identity: thêm [Authorize]
+    [Authorize]
     public IActionResult TongQuan() => View(_svc.LayTongQuan());
 
+    [Authorize]
+    public IActionResult HoiAi([FromServices] IAiService ai, string? khoa, string? hoi)
+    {
+        var danhMuc = _svc.LayKhoaHoc(null);
+        return View(new HoiAiViewModel
+        {
+            Menu = danhMuc.Menu with { MucDangMo = "HoiAi" },
+            Khoa = danhMuc.Khoa,
+            KhoaId = danhMuc.Khoa.Any(k => k.Id == khoa) ? khoa : null,
+            BanXemThu = ai is DemoAiService,
+            CauHoiBanDau = hoi is null ? "" : hoi[..Math.Min(hoi.Length, GioiHanHoiAi.CauHoi)],
+        });
+    }
+
     // Khoá của tôi: /Home/KhoaHoc chỉ hiện các khoá; /Home/KhoaHoc/lich-su-12 là trang chi tiết khoá với các bài
+    [Authorize]
     public IActionResult KhoaHoc(string? id)
     {
         var vm = _svc.LayKhoaHoc(id);
@@ -24,6 +42,7 @@ public class HomeController : Controller
     }
 
     // Luyện đề: /Home/LuyenDe chỉ hiện các khoá; /Home/LuyenDe/lich-su-12 là đề thi thử + bài tập theo chủ đề
+    [Authorize]
     public IActionResult LuyenDe(string? id)
     {
         var vm = _svc.LayLuyenDe(id);
@@ -32,14 +51,17 @@ public class HomeController : Controller
     }
 
     // Bài học + khung trợ lý. Khi có dữ liệu thật: kiểm tra học sinh đã mua khoá chứa bài này
+    [Authorize]
     public IActionResult BaiHoc(int? id) => View(_svc.LayBaiHoc(id));
 
     // Làm đề: hiện câu hỏi, chưa có đáp án
     [HttpGet]
+    [Authorize]
     public IActionResult LamCauHoi(int? id) => View(_svc.LayDe(id, null));
 
     // Nộp bài: chấm ở server rồi mới hiện đáp án + giải thích. Ô chọn tên "cau-1", "cau-2"…
     [HttpPost]
+    [Authorize]
     [ValidateAntiForgeryToken]
     public IActionResult LamCauHoi(int? id, IFormCollection form)
     {
@@ -47,7 +69,9 @@ public class HomeController : Controller
         foreach (var (key, value) in form)
             if (key.StartsWith("cau-") && int.TryParse(key[4..], out var so) && value.ToString() is "A" or "B" or "C" or "D")
                 daChon[so] = value.ToString();
-        return View(_svc.LayDe(id, daChon));
+        var daNop = _svc.LayDe(id, daChon);
+        _svc.LuuBaiLam(daNop);
+        return View(daNop);
     }
 
     public IActionResult Error() => View();

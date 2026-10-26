@@ -1,0 +1,41 @@
+@using SuDia.Web.Areas.Admin.Controllers
+@{
+    ViewData["Title"] = "Người dùng – Quản trị";
+    ViewData["TieuDe"] = "Người dùng";
+    ViewData["Muc"] = "NguoiDung";
+    string? loc = ViewBag.VaiTro;
+}
+@section Actions {
+<a href="/Admin/NguoiDung/Tao" class="ql-nut">+ Tạo tài khoản</a>
+}
+<form method="get" class="ql-bo-loc">
+<div class="ql-truong"><label for="q">Tìm</label><input id="q" type="text" name="q" value="@ViewBag.Q" placeholder="Tên hoặc email"></div>
+<div class="ql-truong"><label for="vaiTro">Vai trò</label><select id="vaiTro" name="vaiTro"><option value="">Tất cả</option>
+@foreach (var v in VaiTro.TatCa)
+{
+<option value="@v" selected="@(v == loc)">@AdminControllerBase.TenVaiTro(v)</option>
+}
+</select></div>
+<button class="ql-nut phu">Lọc</button>
+<label class="ql-check"><input type="checkbox" name="chuaGhiDanh" value="true" checked="@(ViewBag.ChuaGhiDanh is true)"> Chưa ghi danh khoá nào</label>
+</form>
+<section class="ql-khoi">
+<table class="ql-bang so">
+<thead><tr><th>Người dùng</th><th>Vai trò</th><th class="so">Khoá ghi danh</th><th>Ngày tạo</th><th>Trạng thái</th><th></th></tr></thead>
+<tbody>
+@foreach (var u in ViewBag.Ds)
+{
+<tr><td><a href="/Admin/NguoiDung/ChiTiet/@u.Id"><b>@u.HoTen</b></a><span class="ql-phu">@u.Email</span></td>
+<td><form method="post" asp-action="DoiVaiTro" class="ql-hang-nut"><input type="hidden" name="id" value="@u.Id"><span class="ql-truong" style="margin: 0"><select name="vaiTro" onchange="this.form.submit()" aria-label="Vai trò của @u.Email">
+@foreach (var v in VaiTro.TatCa)
+{
+<option value="@v" selected="@(v == u.VaiTro)">@AdminControllerBase.TenVaiTro(v)</option>
+}
+</select></span></form></td>
+<td class="so">@u.SoKhoa</td><td>@(((DateTime)u.NgayTao).ToLocalTime().ToString("dd/MM/yyyy"))</td>
+<td>@if (u.BiKhoa) {<span class="ql-chip do">Đã khoá</span>} else {<span class="ql-chip xanh">Hoạt động</span>}</td>
+<td class="hanh-dong"><form method="post" asp-action="KhoaTaiKhoan" data-hoi="@(u.BiKhoa ? "Mở khoá" : "Khoá") tài khoản @u.Email?"><input type="hidden" name="id" value="@u.Id"><input type="hidden" name="khoa" value="@(u.BiKhoa ? "false" : "true")"><button class="ql-nut @(u.BiKhoa ? "phu" : "xoa") nho">@(u.BiKhoa ? "Mở khoá" : "Khoá")</button></form></td></tr>
+}
+</tbody>
+</table>
+</section>

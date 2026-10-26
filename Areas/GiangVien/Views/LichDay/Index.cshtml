@@ -1,0 +1,33 @@
+@{
+    ViewData["Title"] = "Lịch dạy online – Giảng viên";
+    ViewData["TieuDe"] = "Lịch dạy online";
+    ViewData["Muc"] = "LichDay";
+    var bayGio = DateTime.UtcNow;
+}
+@section Actions {
+<a href="/GiangVien/LichDay/Tao" class="ql-nut">+ Lên lịch buổi học</a>
+}
+<section class="ql-khoi">
+<div class="ql-khoi-dau"><h2>Các buổi học</h2><p>Học viên mở link ở menu ⋮ → "Học online" của bài.</p></div>
+@if (ViewBag.Buoi.Count == 0)
+{
+<p class="ql-trong">Chưa có buổi nào. <a href="/GiangVien/LichDay/Tao">Lên lịch buổi đầu tiên</a>.</p>
+}
+else
+{
+<table class="ql-bang">
+<thead><tr><th>Bài</th><th>Giờ học</th><th>Link Meet</th><th></th></tr></thead>
+<tbody>
+@foreach (var b in ViewBag.Buoi)
+{
+    DateTime? gio = b.ThoiGian;
+<tr><td>@b.Bai<span class="ql-phu">@b.Khoa</span></td>
+<td>@(gio is null ? "Chưa đặt giờ" : DinhDang.GioNgay(gio.Value.ToLocalTime())) @if (gio is not null && gio < bayGio) {<span class="ql-chip">Đã qua</span>}</td>
+<td><a href="@b.Link" target="_blank" rel="noopener noreferrer">@b.Link</a></td>
+<td class="hanh-dong"><span class="ql-hang-nut" style="justify-content: flex-end"><a href="/GiangVien/LichDay/Sua/@b.Id" class="ql-nut phu nho">Sửa</a>
+<form method="post" asp-action="Xoa" data-hoi="Xoá buổi học này?"><input type="hidden" name="id" value="@b.Id"><button class="ql-nut xoa nho">Xoá</button></form></span></td></tr>
+}
+</tbody>
+</table>
+}
+</section>

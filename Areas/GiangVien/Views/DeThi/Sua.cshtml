@@ -1,0 +1,53 @@
+@model DeThiForm
+@{
+    var moi = Model.Id == 0;
+    ViewData["Title"] = (moi ? "Tạo đề" : "Sửa đề") + " – Giảng viên";
+    ViewData["TieuDe"] = moi ? $"Tạo đề · {ViewBag.TenKhoa}" : $"Sửa đề · {ViewBag.TenKhoa}";
+    ViewData["Muc"] = "DeThi";
+    ViewData["Crumb"] = "<a href=\"/GiangVien/DeThi\">Đề thi thử</a>";
+    int? baiTruoc = null;
+}
+<form method="post" asp-action="Luu" class="ql-form ql-khoi ql-khoi-than" style="max-width: 920px">
+<input type="hidden" asp-for="Id"><input type="hidden" asp-for="KhoaId">
+<div asp-validation-summary="ModelOnly" class="ql-tong-loi"></div>
+<div class="ql-2cot">
+<div class="ql-truong"><label asp-for="Ten">Tên đề</label><input asp-for="Ten" type="text"><span asp-validation-for="Ten" class="ql-loi"></span></div>
+<div class="ql-truong"><label asp-for="SoPhut">Thời gian (phút)</label><input asp-for="SoPhut" type="number" min="5" max="240"><span asp-validation-for="SoPhut" class="ql-loi"></span></div>
+</div>
+<label class="ql-check"><input asp-for="DangMo" type="checkbox"> Mở đề cho học viên làm</label>
+<div class="ql-truong"><span class="nhan">Chọn câu hỏi (<span id="demCau">@Model.CauHoiIds.Count</span> đã chọn)</span>
+<span asp-validation-for="CauHoiIds" class="ql-loi"></span>
+@if (ViewBag.CauHoi.Count == 0)
+{
+<p class="ql-trong">Khoá chưa có câu hỏi. <a href="/GiangVien/CauHoi/Tao">Thêm câu hỏi</a> trước.</p>
+}
+else
+{
+<ul class="ql-ds-cau">
+@foreach (var c in ViewBag.CauHoi)
+{
+    if (c.BaiSo != baiTruoc)
+    {
+<li class="nhom"><label class="ql-check"><input type="checkbox" data-chon-bai="@c.BaiSo"> Bài @c.BaiSo. @c.BaiTen</label></li>
+    }
+    baiTruoc = c.BaiSo;
+<li><label class="ql-check"><input type="checkbox" name="CauHoiIds" value="@c.Id" data-bai="@c.BaiSo" checked="@Model.CauHoiIds.Contains((int)c.Id)"> @c.NoiDung</label></li>
+}
+</ul>
+}
+</div>
+<div class="ql-chan"><button class="ql-nut">Lưu đề</button><a href="/GiangVien/DeThi" class="ql-nut phu">Huỷ</a></div>
+</form>
+@section Scripts {
+<script>
+// Chọn cả bài + đếm số câu đã chọn
+(() => {
+  const dem = () => document.getElementById('demCau').textContent = document.querySelectorAll('input[name=CauHoiIds]:checked').length;
+  document.querySelectorAll('[data-chon-bai]').forEach((cb) => cb.addEventListener('change', () => {
+    document.querySelectorAll(`input[data-bai="${cb.dataset.chonBai}"]`).forEach((x) => { x.checked = cb.checked; });
+    dem();
+  }));
+  document.querySelectorAll('input[name=CauHoiIds]').forEach((x) => x.addEventListener('change', dem));
+})();
+</script>
+}
