@@ -29,6 +29,7 @@ Cần .NET 8 SDK trở lên. Muốn dùng .NET 10 thì đổi `TargetFramework` 
 
 ## Luồng học của học sinh
 `/Home/KhoaHoc` (chỉ các ô khoá, có ảnh bìa) → bấm khoá → `/Home/KhoaHoc/lich-su-12` (trang chi tiết khoá: ảnh, thông tin, tiến độ, bài theo chủ đề) → **Chi tiết** → `/Home/BaiHoc/{mã bài}`.
+Làm đề: `/Home/LamCauHoi/{mã bài | mã đề}` hiện toàn bộ câu, chưa có đáp án; bấm **Nộp bài** → server chấm, mới hiện điểm, đáp án, lời giải và link về mục lý thuyết. Đề thi thử có đồng hồ, hết giờ tự nộp. Câu hỏi mẫu: `NganHangMau` trong `DuLieuMauService` (Bài 6, Bài 7).
 Luyện đề: `/Home/LuyenDe` (ô khoá) → `/Home/LuyenDe/lich-su-12` (đề thi thử + bài tập theo chủ đề, mỗi bài có nút Ôn lý thuyết → `/Home/BaiHoc/{mã bài}`) → `/Home/LamCauHoi/{mã bài | mã đề}`. Trang khoá có nút Luyện đề sang đúng khoá; trang làm câu hỏi quay về luyện đề của khoá.
 Ảnh bìa khoá: `wwwroot/images/khoa/{mã khoá}.jpg` (16:9, khuyên dùng 960×540) — thay ảnh thật cùng tên là xong.
 Mã bài không trùng giữa các khoá (mẫu: Lịch sử = số bài, Địa lí = 100 + số bài). Khoá chưa mua chỉ học thử bài đầu, các bài khác hiện khoá.
