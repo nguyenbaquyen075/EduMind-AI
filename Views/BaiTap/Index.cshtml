@@ -1,0 +1,13 @@
+@model List<SuDia.Web.Data.BaiTapGiao>
+@{ var bai = (SuDia.Web.Data.Bai)ViewBag.Bai; ViewData["Title"] = "Bài tập được giao"; }
+@section Head { <link rel="stylesheet" href="~/css/quan-ly.css" asp-append-version="true"><link rel="stylesheet" href="~/css/giao-bai.css" asp-append-version="true"> }
+<main class="gb" style="margin:32px auto;padding:0 20px">
+<a href="/Home/BaiHoc/@bai.Id">← Về bài học</a><h1>Bài tập được giao</h1><p>Bài @bai.So. @bai.Ten</p>
+@if (Model.Count == 0) { <p class="ql-trong">Chưa có bài tập được giao cho bài học này.</p> }
+@foreach (var bt in Model)
+{
+<article class="gb-panel" style="margin-bottom:16px"><h2><a href="/BaiTap/Lam/@bt.Id">@bt.Ten</a> @if (!bt.DaGiao) { <span class="ql-chip vang">Nháp · chỉ giảng viên thấy</span> }</h2>
+<p class="gb-muted">@(bt.BuoiHoc?.ThoiGian is DateTime gio ? $"Buổi học: {DinhDang.GioNgay(gio.ToLocalTime())}" : "Bài tập của bài học") · @(bt.HanNop is DateTime han ? $"Hạn nộp: {DinhDang.GioNgay(han.ToLocalTime())}" : "Không giới hạn hạn nộp")</p>
+<p class="gb-pre">@bt.HuongDan</p><a href="/BaiTap/Lam/@bt.Id" class="ql-nut">Mở bài tập →</a></article>
+}
+</main>

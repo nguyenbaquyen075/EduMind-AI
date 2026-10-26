@@ -1,0 +1,70 @@
+@model CauHoiForm
+@{
+    var moi = Model.Id == 0;
+    var baiId = Model.ViTri.Split(':')[0];
+    var veBai = string.IsNullOrEmpty(baiId) ? "/GiangVien/CauHoi" : $"/GiangVien/CauHoi?bai={baiId}";
+    ViewData["Title"] = (moi ? "Thêm câu hỏi" : "Sửa câu hỏi") + " – Giảng viên";
+    ViewData["TieuDe"] = moi ? "Thêm câu hỏi" : "Sửa câu hỏi";
+    ViewData["Muc"] = moi ? "ThemCau" : "CauHoi";
+    ViewData["Crumb"] = $"<a href=\"{veBai}\">Bài tập</a>";
+    var ky = new[] { "A", "B", "C", "D" };
+}
+@if (ViewBag.CoBai is false)
+{
+<div class="ql-trong"><p>Chưa có bài học để giao bài tập. Hãy tạo bài trong khoá được phân công trước.</p><a href="/GiangVien/NoiDung" class="ql-nut">Đến nội dung bài học</a></div>
+    return;
+}
+<form method="post" asp-action="Luu" class="ql-form bt-soan">
+<input type="hidden" asp-for="Id">
+<div asp-validation-summary="ModelOnly" class="ql-tong-loi"></div>
+<div class="ql-khoi bt-cau">
+<div class="bt-dau">
+<span class="bt-so">@(!moi ? "Sửa câu" : string.IsNullOrEmpty(baiId) ? "Câu mới" : $"Câu {(int)ViewBag.SoCau + 1}")</span>
+<div class="ql-truong bt-vi-tri"><label asp-for="ViTri" class="sr-only">Thuộc bài / mục</label>
+<select asp-for="ViTri" asp-items="(List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>)ViewBag.ViTri"><option value="">— Chọn bài / mục —</option></select>
+<span asp-validation-for="ViTri" class="ql-loi"></span></div>
+</div>
+
+<label asp-for="NoiDung" class="sr-only">Câu hỏi</label>
+<textarea asp-for="NoiDung" rows="2" class="bt-hoi-o" placeholder="Nhập câu hỏi, ví dụ: Chiến dịch Điện Biên Phủ diễn ra trong khoảng thời gian nào?" required></textarea>
+<span asp-validation-for="NoiDung" class="ql-loi"></span>
+
+<p class="bt-goi-y">Bấm vào chữ cái để chọn đáp án đúng</p>
+<div class="bt-pa bt-pa-soan" role="radiogroup" aria-label="Chọn đáp án đúng">
+@foreach (var k in ky)
+{
+<div>
+<div class="bt-lua-chon">
+<input type="radio" id="dap-an-@k" name="DapAn" value="@k" checked="@(Model.DapAn == k)" class="sr-only" aria-label="Đáp án đúng là @k" required>
+<label for="dap-an-@k" class="ky" title="Chọn @k là đáp án đúng">@k</label>
+@switch (k)
+{
+    case "A": <input asp-for="A" placeholder="Phương án A" aria-label="Phương án A" required> break;
+    case "B": <input asp-for="B" placeholder="Phương án B" aria-label="Phương án B" required> break;
+    case "C": <input asp-for="C" placeholder="Phương án C" aria-label="Phương án C" required> break;
+    case "D": <input asp-for="D" placeholder="Phương án D" aria-label="Phương án D" required> break;
+}
+<span class="bt-nhan">Đáp án đúng</span>
+</div>
+@Html.ValidationMessage(k, null, new { @class = "ql-loi" })
+</div>
+}
+</div>
+<span asp-validation-for="DapAn" class="ql-loi"></span>
+
+<div class="bt-giai bt-giai-soan">
+<label asp-for="GiaiThich"><b>Lời giải</b> · học viên thấy sau khi nộp bài</label>
+<textarea asp-for="GiaiThich" rows="3" placeholder="Giải thích vì sao đáp án đúng, dẫn lại ý trong bài học" required></textarea>
+<span asp-validation-for="GiaiThich" class="ql-loi"></span>
+</div>
+</div>
+
+<div class="ql-chan">
+<button class="ql-nut">@(moi ? "Lưu câu hỏi" : "Lưu thay đổi")</button>
+@if (moi)
+{
+<button class="ql-nut phu" name="tiep" value="1">Lưu và thêm câu tiếp</button>
+}
+<a href="@veBai" class="ql-nut phu">Huỷ</a>
+</div>
+</form>

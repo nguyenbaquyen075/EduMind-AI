@@ -100,11 +100,17 @@ public record KhoaHocChinh(
         ?? TatCaBai.FirstOrDefault(b => b.TrangThai == TrangThaiBai.ChuaHoc && !b.BiKhoa);
 }
 
+/// <summary>Buổi học online qua Google Meet của một bài.</summary>
+public record BuoiOnline(string Link, DateTime? ThoiGian);
+
 public class KhoaHocViewModel
 {
     public required MenuTaiKhoan Menu { get; init; }
     public IReadOnlyList<KhoaHocChinh> Khoa { get; init; } = [];
     public KhoaHocChinh? DangChon { get; init; }
+
+    /// <summary>Mã bài -> buổi học online. Bài không có trong đây là chưa có link Meet.</summary>
+    public IReadOnlyDictionary<int, BuoiOnline> HocOnline { get; init; } = new Dictionary<int, BuoiOnline>();
 }
 
 // ======================================================= Luyện đề (gắn với khoá học)
@@ -191,8 +197,9 @@ public record PhuongAn(string Ky, string NoiDung);
 
 /// <param name="BaiId">Bài chứa kiến thức của câu, để dẫn về lý thuyết</param>
 /// <param name="Muc">Mục trong bài (neo #muc-n); null nếu bài chưa có nội dung theo mục</param>
+/// <param name="Id">Mã câu trong database (0 với dữ liệu mẫu)</param>
 public record CauHoiDe(string NoiDung, IReadOnlyList<PhuongAn> PhuongAn, string DapAnDung, string GiaiThich,
-    int BaiId, int? Muc, string NguonHienThi);
+    int BaiId, int? Muc, string NguonHienThi, int Id = 0);
 
 public class LamDeViewModel
 {
@@ -226,6 +233,9 @@ public static class DinhDang
 
     /// <summary>Điểm thang 10 kiểu Việt Nam: 8,7</summary>
     public static string Diem(double? d) => d is null ? "—" : d.Value.ToString("0.0", Vi);
+
+    /// <summary>"19:30 · 28/10/2026"</summary>
+    public static string GioNgay(DateTime d) => d.ToString("HH:mm · dd/MM/yyyy", Vi);
 
     public static string Ngay(DateTime? d) => d is null ? "[ngày]" : d.Value.ToString("dd/MM/yyyy", Vi);
 

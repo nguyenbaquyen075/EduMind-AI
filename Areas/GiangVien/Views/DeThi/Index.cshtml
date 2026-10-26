@@ -1,0 +1,33 @@
+@{
+    ViewData["Title"] = "Đề thi thử – Giảng viên";
+    ViewData["TieuDe"] = "Đề thi thử";
+    ViewData["Muc"] = "DeThi";
+    var dsKhoa = (List<Khoa>)ViewBag.DsKhoa;
+}
+@section Actions {
+@foreach (var k in dsKhoa)
+{
+<a href="/GiangVien/DeThi/Tao?khoa=@k.Id" class="ql-nut">+ Đề @k.Ten</a>
+}
+}
+<section class="ql-khoi">
+@if (ViewBag.De.Count == 0)
+{
+<p class="ql-trong">Chưa có đề nào.</p>
+}
+else
+{
+<table class="ql-bang so">
+<thead><tr><th>Đề</th><th class="so">Số câu</th><th class="so">Thời gian</th><th>Trạng thái</th><th class="so">Lượt làm</th><th></th></tr></thead>
+<tbody>
+@foreach (var d in ViewBag.De)
+{
+<tr><td>@d.Ten<span class="ql-phu">@d.Khoa</span></td><td class="so">@d.SoCau</td><td class="so">@d.SoPhut phút</td>
+<td>@if (d.DangMo) {<span class="ql-chip xanh">Đang mở</span>} else {<span class="ql-chip">Đã đóng</span>}</td><td class="so">@d.LuotLam</td>
+<td class="hanh-dong"><span class="ql-hang-nut" style="justify-content: flex-end"><a href="/GiangVien/DeThi/Sua/@d.Id" class="ql-nut phu nho">Sửa</a>
+<form method="post" asp-action="Xoa" data-hoi="Xoá đề này?"><input type="hidden" name="id" value="@d.Id"><button class="ql-nut xoa nho">Xoá</button></form></span></td></tr>
+}
+</tbody>
+</table>
+}
+</section>

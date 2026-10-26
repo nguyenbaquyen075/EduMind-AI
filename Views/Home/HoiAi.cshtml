@@ -1,0 +1,43 @@
+@model HoiAiViewModel
+@{ ViewData["Title"] = "Hỏi AI · Sử Địa"; }
+@section Head {
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="~/css/hoi-ai.css" asp-append-version="true">
+}
+<div class="ai-shell">
+<partial name="_MenuTaiKhoan" model="Model.Menu" />
+<main class="ai-main" id="aiChat">
+<header class="ai-header">
+<div><h1>Hỏi AI</h1><p>Trợ lý học tập Sử · Địa</p></div>
+<div class="ai-actions"><label for="aiKhoa" class="ai-sr">Môn học</label><select id="aiKhoa"><option value="">Tất cả môn học</option>
+@foreach (var k in Model.Khoa) { <option value="@k.Id" selected="@(Model.KhoaId == k.Id)">@k.Ten</option> }
+</select><button type="button" id="aiMoi">＋ Đoạn chat mới</button></div>
+</header>
+@if (Model.BanXemThu)
+{
+<p class="ai-demo">Bản xem thử · Bạn có thể hỏi các câu gợi ý bên dưới. Trợ lý trả lời tự do sẽ khả dụng khi hệ thống được kết nối AI.</p>
+}
+<div class="ai-scroll" id="aiScroll">
+<section class="ai-welcome" id="aiWelcome">
+<span class="ai-symbol" aria-hidden="true">✦</span><h2>Hôm nay bạn muốn tìm hiểu gì?</h2>
+<p>Đặt câu hỏi về Lịch sử, Địa lí hoặc chọn một gợi ý để bắt đầu trò chuyện.</p>
+<div class="ai-suggestions" id="aiGoiY">
+<button type="button" data-mon="lich-su-12">Chiến dịch Điện Biên Phủ diễn ra khi nào?</button>
+<button type="button" data-mon="lich-su-12">Cách mạng tháng Tám thành công năm nào?</button>
+<button type="button" data-mon="dia-li-12">Vì sao Tây Nguyên trồng nhiều cà phê?</button>
+</div>
+</section>
+<div class="ai-messages" id="aiTinNhan" role="log" aria-label="Cuộc trò chuyện với trợ lý" aria-live="polite" aria-relevant="additions"></div>
+<p class="ai-typing" id="aiDangTraLoi" role="status" hidden><span aria-hidden="true">✦</span> Trợ lý đang trả lời…</p>
+</div>
+<div class="ai-bottom">
+<form id="aiForm" class="ai-composer">
+@Html.AntiForgeryToken()
+<label for="aiCauHoi" class="ai-sr">Câu hỏi cho trợ lý AI</label>
+<textarea id="aiCauHoi" name="cauHoi" rows="2" maxlength="@GioiHanHoiAi.CauHoi" placeholder="Nhập câu hỏi của bạn về Sử, Địa…" aria-describedby="aiHuongDan" required>@Model.CauHoiBanDau</textarea>
+<div class="ai-composer-footer"><span id="aiDem">0/@GioiHanHoiAi.CauHoi ký tự</span><button type="submit" id="aiGui" aria-label="Gửi câu hỏi" disabled>Gửi <span aria-hidden="true">↑</span></button></div>
+</form>
+<p id="aiHuongDan" class="ai-note">Enter để gửi · Shift + Enter để xuống dòng. Hãy đối chiếu câu trả lời với tài liệu học tập.</p>
+</div>
+</main></div>
+@section Scripts { <script src="~/js/hoi-ai.js" asp-append-version="true"></script> }

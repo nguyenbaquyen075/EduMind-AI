@@ -1,0 +1,52 @@
+@model LamBaiGiaoViewModel
+@{ var bt = Model.BaiTap; var nop = Model.BaiNop; var daNop = nop is not null; var hetHan = !Model.XemTruoc && bt.HanNop < DateTime.UtcNow; ViewData["Title"] = bt.Ten; }
+@section Head { <link rel="stylesheet" href="~/css/quan-ly.css" asp-append-version="true"><link rel="stylesheet" href="~/css/giao-bai.css" asp-append-version="true"> }
+<main class="gb" style="margin:32px auto;padding:0 20px">
+<a href="/BaiTap?bai=@bt.BaiId">← Bài tập được giao</a><h1>@bt.Ten</h1>
+<p>@Model.Cau.Count câu · Tổng @Model.TongDiem điểm · @(bt.HanNop is DateTime han ? $"Hạn nộp: {DinhDang.GioNgay(han.ToLocalTime())}" : "Không giới hạn hạn nộp")</p>
+<p class="gb-pre">@bt.HuongDan</p>
+@if (Model.XemTruoc) { <p class="ql-thong-bao">Chế độ xem trước của giảng viên · không lưu bài nộp.</p> }
+@if (TempData["LoiBaiTap"] is string loi) { <p class="ql-thong-bao loi" role="alert">@loi</p> }
+@if (daNop)
+{
+<div class="gb-panel"><h2>Đã nộp bài</h2><p>Điểm trắc nghiệm và đúng / sai: <b>@nop!.DiemTuDong</b></p>
+@if (nop.DiemTuLuan is null) { <p>Phần tự luận đang chờ giảng viên chấm. Đây chưa phải tổng điểm cuối cùng.</p> }
+else { <p>Tổng điểm: <b>@(nop.DiemTuDong + nop.DiemTuLuan) / @Model.TongDiem</b></p> }
+</div>
+}
+else if (hetHan) { <p class="ql-thong-bao loi">Đã hết hạn nộp bài tập này.</p> }
+<form method="post" asp-controller="BaiTap" asp-action="Lam" asp-route-id="@bt.Id">
+@{ var so = 0; }
+@foreach (var c in Model.Cau)
+{
+    so++;
+<fieldset class="gb-question" style="margin-top:20px" disabled="@(daNop || hetHan)"><legend>Câu @so · @c.TongDiem điểm</legend>
+<p class="gb-pre">@c.NoiDung</p>
+@if (c.Kieu == "TN")
+{
+<div class="gb-options">
+@for (var j = 0; j < 4; j++)
+{
+<label><input type="radio" name="@c.Id" value="@j" checked="@(Model.TraLoi.GetValueOrDefault(c.Id) == j.ToString())"> @("ABCD"[j]). @c.PhuongAn[j]</label>
+}
+</div>
+}
+else if (c.Kieu == "DS")
+{
+@for (var j = 0; j < c.Y.Count; j++)
+{
+    var key = $"{c.Id}-{j}";
+<div class="gb-question"><p>@("abcd"[j])) @c.Y[j].NoiDung</p><label><input type="radio" name="@key" value="true" checked="@(Model.TraLoi.GetValueOrDefault(key) == "true")"> Đúng</label> <label><input type="radio" name="@key" value="false" checked="@(Model.TraLoi.GetValueOrDefault(key) == "false")"> Sai</label>
+@if (daNop) { <p class="gb-correct">Đáp án: @(c.Y[j].Dung == true ? "Đúng" : "Sai")</p> }</div>
+}
+}
+else { <textarea name="@c.Id" rows="6" maxlength="20000" placeholder="Nhập câu trả lời tự luận…" aria-label="Câu trả lời tự luận câu @so">@Model.TraLoi.GetValueOrDefault(c.Id)</textarea> }
+@if (daNop)
+{
+    if (c.Kieu == "TN") { <p class="gb-correct">Đáp án đúng: @("ABCD"[c.DapAn!.Value])</p> }
+    if (!string.IsNullOrWhiteSpace(c.LoiGiai)) { <p class="gb-pre">@c.LoiGiai</p> }
+}
+</fieldset>
+}
+@if (!daNop && !hetHan) { <button type="submit" class="ql-nut">Nộp bài tập</button> }
+</form></main>

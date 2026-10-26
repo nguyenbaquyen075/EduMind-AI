@@ -1,0 +1,21 @@
+@using SuDia.Web.Areas.Admin.Controllers
+@model TaoNguoiDungForm
+@{
+    ViewData["Title"] = "Tạo tài khoản – Quản trị";
+    ViewData["TieuDe"] = "Tạo tài khoản";
+    ViewData["Muc"] = "NguoiDung";
+    ViewData["Crumb"] = "<a href=\"/Admin/NguoiDung\">Người dùng</a>";
+}
+<form method="post" class="ql-form ql-khoi ql-khoi-than" style="max-width: 560px">
+<div asp-validation-summary="ModelOnly" class="ql-tong-loi"></div>
+<div class="ql-truong"><label asp-for="HoTen">Họ và tên</label><input asp-for="HoTen" type="text"><span asp-validation-for="HoTen" class="ql-loi"></span></div>
+<div class="ql-truong"><label asp-for="Email">Email đăng nhập</label><input asp-for="Email" type="email"><span asp-validation-for="Email" class="ql-loi"></span></div>
+<div class="ql-truong"><label asp-for="MatKhau">Mật khẩu ban đầu</label><input asp-for="MatKhau" type="text" autocomplete="off"><small>Gửi cho người dùng, nhắc đổi sau khi đăng nhập.</small><span asp-validation-for="MatKhau" class="ql-loi"></span></div>
+<div class="ql-truong"><label asp-for="VaiTro">Vai trò</label><select asp-for="VaiTro">
+@foreach (var v in VaiTro.TatCa)
+{
+<option value="@v">@AdminControllerBase.TenVaiTro(v)</option>
+}
+</select></div>
+<div class="ql-chan"><button class="ql-nut">Tạo tài khoản</button><a href="/Admin/NguoiDung" class="ql-nut phu">Huỷ</a></div>
+</form>

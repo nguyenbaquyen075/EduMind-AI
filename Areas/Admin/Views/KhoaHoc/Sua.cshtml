@@ -1,0 +1,22 @@
+@model KhoaForm
+@{
+    var tao = ViewContext.RouteData.Values["action"]?.ToString() == "Tao";
+    ViewData["Title"] = (tao ? "Tạo khoá học" : "Sửa khoá") + " – Quản trị";
+    ViewData["TieuDe"] = tao ? "Tạo khoá học" : $"Sửa khoá · {Model.Ten}";
+    ViewData["Muc"] = "KhoaHoc";
+    ViewData["Crumb"] = "<a href=\"/Admin/KhoaHoc\">Khoá học & ghi danh</a>";
+}
+<form method="post" class="ql-form ql-khoi ql-khoi-than" style="max-width: 680px">
+@if (tao) {
+<div class="ql-truong"><label asp-for="Id">Mã khoá học</label><input asp-for="Id" type="text" maxlength="80" placeholder="vi-du: lich-su-11"><small>Dùng trên đường dẫn, không trùng mã khoá khác.</small><span asp-validation-for="Id" class="ql-loi"></span></div>
+} else { <input type="hidden" asp-for="Id"> }
+<div asp-validation-summary="ModelOnly" class="ql-tong-loi"></div>
+<div class="ql-2cot">
+<div class="ql-truong"><label asp-for="Ten">Tên khoá</label><input asp-for="Ten" type="text"><span asp-validation-for="Ten" class="ql-loi"></span></div>
+<div class="ql-truong"><label asp-for="KyHieu">Ký hiệu (1–3 chữ)</label><input asp-for="KyHieu" type="text" maxlength="3"><span asp-validation-for="KyHieu" class="ql-loi"></span></div>
+</div>
+<div class="ql-truong"><label asp-for="MoTa">Mô tả</label><textarea asp-for="MoTa" rows="3"></textarea></div>
+<div class="ql-truong"><label asp-for="Anh">Ảnh bìa</label><input asp-for="Anh" type="text"><small>Đường dẫn trong wwwroot, ví dụ /images/khoa/lich-su-12.jpg</small></div>
+<div class="ql-truong"><label asp-for="GiangVienId">Giảng viên phụ trách</label><select asp-for="GiangVienId" asp-items="(List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>)ViewBag.DsGiangVien"><option value="">— Chưa gán —</option></select><span asp-validation-for="GiangVienId" class="ql-loi"></span></div>
+<div class="ql-chan"><button class="ql-nut">Lưu</button><a href="/Admin/KhoaHoc" class="ql-nut phu">Huỷ</a></div>
+</form>

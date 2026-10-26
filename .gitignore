@@ -16,4 +16,5 @@ claude-sessions/
 
 # Bí mật cấu hình cục bộ (khoá API đặt bằng dotnet user-secrets hoặc biến môi trường)
 appsettings.*.local.json
+appsettings.Development.json
 *.env

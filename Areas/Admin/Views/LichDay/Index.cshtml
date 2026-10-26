@@ -1,0 +1,14 @@
+@model List<AdminBuoi>
+@{ ViewData["TieuDe"] = "Lịch dạy toàn hệ thống"; ViewData["Title"] = "Lịch dạy – Quản trị"; ViewData["Muc"] = "LichDay"; string? khoa = ViewBag.KhoaId; string? tt = ViewBag.TrangThai; }
+@section Actions { <a href="/GiangVien/LichDay/Tao" class="ql-nut">+ Tạo buổi học</a> }
+<div class="ql-so-lieu"><div class="ql-the"><p>Buổi sắp tới</p><b>@ViewBag.SapToi</b></div><div class="ql-the"><p>Buổi đã qua</p><b>@ViewBag.DaQua</b></div><div class="ql-the"><p>Chưa đặt giờ</p><b>@ViewBag.ChuaDat</b></div></div>
+<form method="get" class="ad-filters"><div class="ql-truong"><label for="khoa">Khoá học</label><select id="khoa" name="khoa"><option value="">Tất cả khoá</option>@foreach(Khoa k in ViewBag.DsKhoa) { <option value="@k.Id" selected="@(k.Id == khoa)">@k.Ten</option> }</select></div><div class="ql-truong"><label for="tt">Thời gian</label><select id="tt" name="trangThai"><option value="tat-ca" selected="@(tt == "tat-ca")">Tất cả</option><option value="sap-toi" selected="@(tt == "sap-toi")">Sắp tới</option><option value="da-qua" selected="@(tt == "da-qua")">Đã qua</option><option value="chua-dat" selected="@(tt == "chua-dat")">Chưa đặt giờ</option></select></div><button class="ql-nut phu">Lọc</button></form>
+<section class="ql-khoi"><div class="ql-khoi-dau"><h2>Các buổi học</h2><span>@ViewBag.Tong kết quả · giờ Việt Nam · tối đa 200 buổi</span></div>
+@if(Model.Count == 0) { <div class="ad-empty"><b>Chưa có buổi học phù hợp</b><p>Tạo buổi học mới hoặc chọn xem tất cả để kiểm tra lịch đã qua.</p></div> }
+else { <div class="ad-table-wrap"><table class="ql-bang"><thead><tr><th>Thời gian</th><th>Bài học</th><th>Giảng viên</th><th>Trạng thái</th><th></th></tr></thead><tbody>
+@foreach(var b in Model) {
+    var gio = b.Luc is DateTime luc ? TimeZoneInfo.ConvertTimeFromUtc(luc,SuDia.Web.Services.AdminThongKeService.MuiGio) : (DateTime?)null;
+<tr><td><b>@(gio?.ToString("HH:mm") ?? "Chưa đặt")</b><span class="ql-phu">@gio?.ToString("dd/MM/yyyy")</span></td><td>@b.Bai<span class="ql-phu">@b.Khoa</span></td><td>@(b.GiangVien ?? "Chưa phân công")</td><td><span class="ql-chip @(b.Luc is null ? "vang" : b.Luc < DateTime.UtcNow ? "" : "xanh")">@(b.Luc is null ? "Chưa đặt giờ" : b.Luc < DateTime.UtcNow ? "Đã qua" : "Sắp tới")</span></td><td><div class="ql-hang-nut">@if (Uri.TryCreate(b.Link, UriKind.Absolute, out var url) && url.Scheme == "https") { <a href="@b.Link" target="_blank" rel="noopener noreferrer" class="ql-nut phu nho">Vào lớp ↗</a> }<a href="/GiangVien/LichDay/Sua/@b.Id" class="ql-nut phu nho">Sửa buổi</a><a href="/GiangVien/GiaoBai/Tao?bai=@b.BaiId" class="ql-nut nho">Giao bài</a></div></td></tr>
+}
+</tbody></table></div> }
+</section>

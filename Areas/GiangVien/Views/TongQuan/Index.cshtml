@@ -1,0 +1,100 @@
+@model GiangVienTongQuanViewModel
+@{
+    ViewData["Title"] = "Bàn làm việc – Giảng viên";
+    ViewData["TieuDe"] = "Bàn làm việc";
+    ViewData["Muc"] = "TongQuan";
+}
+@section Actions {
+<a href="/GiangVien/LichDay/Tao" class="ql-nut phu">+ Lên lịch buổi học</a>
+<a href="/GiangVien/CauHoi/Tao" class="ql-nut">+ Thêm câu hỏi</a>
+}
+<div class="ql-nhanh">
+<a href="/GiangVien/NoiDung"><span class="ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"></path></svg></span><span>Soạn bài học<small>Thêm bài, mục, đoạn văn, mốc</small></span></a>
+<a href="/GiangVien/CauHoi/Tao"><span class="ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg></span><span>Ra bài tập<small>Câu hỏi 4 đáp án + lời giải</small></span></a>
+<a href="/GiangVien/DeThi"><span class="ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="13" r="8"></circle><path d="M12 9v4l2 2M9 2h6"></path></svg></span><span>Tạo đề thi thử<small>Chọn câu, đặt thời gian</small></span></a>
+<a href="/GiangVien/LichDay/Tao"><span class="ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 6h14v12H2zM16 10l6-3v10l-6-3z"></path></svg></span><span>Lên lịch dạy online<small>Link Google Meet + giờ học</small></span></a>
+</div>
+
+<div class="ql-so-lieu so">
+@foreach (var s in Model.SoLieu)
+{
+<div class="ql-the"><p>@s.Nhan</p><b>@s.GiaTri</b>@if (s.Phu is not null) {<small>@s.Phu</small>}</div>
+}
+</div>
+
+<div class="ql-luoi">
+<section class="ql-khoi" aria-labelledby="viec">
+<div class="ql-khoi-dau"><h2 id="viec">Việc cần làm</h2><p>Bài chưa có nội dung / chưa có câu hỏi</p></div>
+@if (Model.ViecCanLam.Count == 0)
+{
+<p class="ql-trong">Các bài đã có nội dung và câu hỏi.</p>
+}
+else
+{
+<ul class="ql-viec">
+@foreach (var v in Model.ViecCanLam)
+{
+<li><span>@v.NoiDung</span><a href="@v.Link" class="ql-nut phu nho">@v.NutChu</a></li>
+}
+</ul>
+}
+</section>
+
+<section class="ql-khoi" aria-labelledby="buoi">
+<div class="ql-khoi-dau"><h2 id="buoi">Buổi dạy sắp tới</h2><a href="/GiangVien/LichDay" class="ql-nut-chu">Xem lịch</a></div>
+@if (Model.BuoiSapToi.Count == 0)
+{
+<p class="ql-trong">Chưa có buổi nào. <a href="/GiangVien/LichDay/Tao">Lên lịch buổi học</a>.</p>
+}
+else
+{
+<table class="ql-bang">
+<tbody>
+@foreach (var b in Model.BuoiSapToi)
+{
+<tr><td>@b.TenBai<span class="ql-phu">@DinhDang.GioNgay(b.ThoiGian.ToLocalTime())</span></td><td class="hanh-dong"><a href="@b.Link" target="_blank" rel="noopener noreferrer" class="ql-nut nho">Vào Meet</a></td></tr>
+}
+</tbody>
+</table>
+}
+</section>
+
+<section class="ql-khoi" aria-labelledby="bai-lam">
+<div class="ql-khoi-dau"><h2 id="bai-lam">Bài học viên vừa nộp</h2><a href="/GiangVien/HocVien" class="ql-nut-chu">Tất cả học viên</a></div>
+@if (Model.BaiLam.Count == 0)
+{
+<p class="ql-trong">Chưa có bài nộp.</p>
+}
+else
+{
+<table class="ql-bang so">
+<thead><tr><th>Học viên</th><th>Bài / đề</th><th class="so">Điểm</th></tr></thead>
+<tbody>
+@foreach (var b in Model.BaiLam)
+{
+<tr><td>@b.HocVien<span class="ql-phu">@b.NopLuc.ToLocalTime().ToString("HH:mm dd/MM")</span></td><td>@b.TenDe</td><td class="so"><span class="ql-chip @(b.SoDung >= b.SoCau * 0.8 ? "xanh" : "vang")">@b.SoDung/@b.SoCau</span></td></tr>
+}
+</tbody>
+</table>
+}
+</section>
+
+<section class="ql-khoi" aria-labelledby="cau-sai">
+<div class="ql-khoi-dau"><h2 id="cau-sai">Câu học viên hay sai</h2><p>Nên giảng lại hoặc sửa câu</p></div>
+@if (Model.CauSai.Count == 0)
+{
+<p class="ql-trong">Chưa có câu nào bị làm sai.</p>
+}
+else
+{
+<table class="ql-bang so">
+<tbody>
+@foreach (var c in Model.CauSai)
+{
+<tr><td>@c.NoiDung<span class="ql-phu">@c.Nguon · sai @c.SoLanSai/@c.SoLanLam lượt</span></td><td class="hanh-dong"><a href="/GiangVien/CauHoi/Sua/@c.Id" class="ql-nut-chu">Sửa câu</a></td></tr>
+}
+</tbody>
+</table>
+}
+</section>
+</div>

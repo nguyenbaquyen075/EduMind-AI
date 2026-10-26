@@ -1,0 +1,32 @@
+@model DangNhapModel
+@inject IWebHostEnvironment Env
+@{
+    Layout = "_KhungTaiKhoan";
+    ViewData["Title"] = "Đăng nhập – Sử Địa";
+}
+<h1>Đăng nhập</h1>
+<p>Chào mừng bạn quay lại.</p>
+<form asp-action="DangNhap" method="post" novalidate>
+<input type="hidden" asp-for="ReturnUrl">
+<div asp-validation-summary="ModelOnly" class="tk-tong-loi" role="alert"></div>
+<div class="tk-truong">
+<label asp-for="Email">Email</label>
+<input asp-for="Email" type="email" autocomplete="username" autofocus>
+<span asp-validation-for="Email" class="tk-loi"></span>
+</div>
+<div class="tk-truong">
+<label asp-for="MatKhau">Mật khẩu</label>
+<input asp-for="MatKhau" type="password" autocomplete="current-password">
+<span asp-validation-for="MatKhau" class="tk-loi"></span>
+</div>
+<label class="tk-ghi-nho"><input asp-for="GhiNho" type="checkbox"> Ghi nhớ đăng nhập</label>
+<button type="submit" class="tk-nut">Đăng nhập</button>
+</form>
+<p class="tk-duoi">Chưa có tài khoản? <a asp-action="DangKy">Đăng ký học thử</a></p>
+@if (Env.IsDevelopment())
+{
+<div class="tk-mau">
+<p>Tài khoản dùng thử (chỉ khi chạy Development)</p>
+<code>admin@sudia.vn</code> · <code>giangvien@sudia.vn</code> · <code>hocvien@sudia.vn</code><br>Mật khẩu xem mục <code>TaiKhoanMau</code> trong appsettings.Development.json
+</div>
+}
