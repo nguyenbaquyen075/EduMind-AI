@@ -1,0 +1,19 @@
+# Build
+bin/
+obj/
+
+# IDE / OS
+.idea/
+.vs/
+.vscode/
+*.user
+*.suo
+.DS_Store
+
+# Nhật ký làm việc cá nhân, ảnh tham khảo — chỉ giữ trên máy
+claude-sessions/
+/image.png
+
+# Bí mật cấu hình cục bộ (khoá API đặt bằng dotnet user-secrets hoặc biến môi trường)
+appsettings.*.local.json
+*.env

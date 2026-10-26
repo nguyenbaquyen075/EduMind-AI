@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>SuDia.Web</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Anthropic" Version="13.3.0" />
+  </ItemGroup>
+
+  <!-- Tài liệu khoá, prompt và bộ kiểm thử được đọc lúc chạy -->
+  <ItemGroup>
+    <None Update="TaiLieu/**;Prompts/**;KiemThu/**" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>
