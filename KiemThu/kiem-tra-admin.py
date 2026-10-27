@@ -67,9 +67,9 @@ try:
     print('PASS: ghi danh, gia hạn và bộ lọc hết hạn/còn hạn')
     s,_,p=post(admin,'/GiangVien/NoiDung/ThemChuDe',{'khoaId':marker,'ten':marker},'/GiangVien/NoiDung?khoa='+marker);assert s==200
     topic=int(sql(f'SELECT "Id" FROM "ChuDe" WHERE "KhoaId"=\'{marker}\';'))
-    s,url,p=post(admin,'/GiangVien/NoiDung/ThemBai',{'chuDeId':topic,'ten':marker},'/GiangVien/NoiDung?khoa='+marker);assert s==200
+    s,url,p=post(admin,'/GiangVien/NoiDung/ThemBai',{'chuDeId':topic,'ten':marker,'soBai':1},'/GiangVien/NoiDung?khoa='+marker);assert s==200
     lesson=int(url.rstrip('/').split('/')[-1])
-    post(admin,'/GiangVien/NoiDung/LuuBai',{'id':lesson,'ten':marker,'hocThu':'false','daXuatBan':'true'},'/GiangVien/NoiDung/SoanBai/'+str(lesson))
+    post(admin,'/GiangVien/NoiDung/LuuBai',{'id':lesson,'ten':marker,'soBai':1,'hocThu':'false','daXuatBan':'true'},'/GiangVien/NoiDung/SoanBai/'+str(lesson))
     _,p=get(admin,'/Admin/NoiDung?khoa='+marker+'&trangThai=thieu-noi-dung');assert f'/SoanBai/{lesson}' in p
     _,p=get(admin,'/Admin/NoiDung?khoa='+marker+'&trangThai=thieu-noi-dung-xuat-ban');assert f'/SoanBai/{lesson}' in p
     s,_,p=post(admin,'/GiangVien/LichDay/Luu',{'BaiId':lesson,'Link':'https://meet.google.com/test-admin-demo','ThoiGian':'2030-01-01T19:30'},'/GiangVien/LichDay/Tao?bai='+str(lesson));assert s==200 and 'Đã lưu buổi học' in p
