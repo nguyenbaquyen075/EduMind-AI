@@ -12,6 +12,9 @@ public class TroLyOptions
     /// <summary>Model rẻ hơn: viết lại câu hỏi nối tiếp và AI chấm (Phần 4).</summary>
     public string ModelPhu { get; set; } = "claude-haiku-5-5";
 
+    /// <summary>Model phân tích và biên tập tài liệu giảng viên.</summary>
+    public string ModelSoanBai { get; set; } = "claude-sonnet-5-5";
+
     /// <summary>low | medium | high. Độ kỹ khi đọc tài liệu; cao hơn thì chậm và tốn hơn.</summary>
     public string MucSuyNghi { get; set; } = "medium";
 

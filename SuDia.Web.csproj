@@ -5,6 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>SuDia.Web</RootNamespace>
+    <UserSecretsId>SuDia.Web-local-ai</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
