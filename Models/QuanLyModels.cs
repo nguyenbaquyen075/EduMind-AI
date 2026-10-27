@@ -33,16 +33,8 @@ public class MucForm
     public int Id { get; set; }
     public int BaiId { get; set; }
     [Required(ErrorMessage = "Nhập tên mục (hiện trong mục lục)")] public string Ten { get; set; } = "";
-    public string? TieuDe { get; set; } = ""; // để trống: dùng tên mục
+    [Required(ErrorMessage = "Nhập tiêu đề mục")] public string TieuDe { get; set; } = "";
     public List<PhanForm> Phan { get; set; } = [];
-}
-
-/// <summary>Bản nháp AI chỉ tồn tại trên màn xem thử; chỉ ghi vào bài khi giảng viên bấm Chia sẻ.</summary>
-public class BanNhapNoiDungAiForm
-{
-    public int BaiId { get; set; }
-    public string PhamVi { get; set; } = "KhoaHoc";
-    public List<MucForm> Muc { get; set; } = [];
 }
 
 public class CauHoiForm

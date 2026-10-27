@@ -38,24 +38,10 @@ else
 
 </section>
 
-<section class="ql-khoi" aria-labelledby="ai-soan">
-<div class="ql-khoi-dau"><h2 id="ai-soan">Soạn nội dung bằng AI</h2><p>Dán ghi chú hoặc nội dung buổi học; AI sẽ chia thành mục và phần để giảng viên rà soát.</p></div>
-<form method="post" asp-action="TaoNoiDungBangAi" class="ql-khoi-than ql-form" data-soan-noi-dung>
-<input type="hidden" name="baiId" value="@Model.Id">
-<div class="ql-truong"><label for="noiDungAi">Nội dung buổi học</label><textarea id="noiDungAi" name="noiDung" rows="11" minlength="30" maxlength="30000" required placeholder="Dán nội dung, dàn ý hoặc ghi chú của buổi học vào đây...">@(ViewData.ModelState["noiDung"]?.AttemptedValue)</textarea><small>Có thể dùng AI hoặc tách theo ký hiệu đề mục có sẵn (#, ##, I., 1., 1.1., a). Cả hai cách đều cho xem và sửa trước khi chia sẻ.</small></div>
-<p class="ql-phu" data-soan-status role="status" aria-live="polite" hidden></p>
-<div class="ql-chan"><button class="ql-nut" type="submit">✦ Tạo bản nháp bằng AI</button><button class="ql-nut phu" type="submit" name="chiaTheoVanBan" value="true">Chia theo đề mục văn bản</button></div>
-</form>
-</section>
-@section Scripts {
-<script src="~/js/soan-noi-dung.js" asp-append-version="true"></script>
-}
-
 <section class="ql-khoi" aria-labelledby="thong-tin">
 <div class="ql-khoi-dau"><h2 id="thong-tin">Thông tin bài</h2></div>
 <form method="post" asp-action="LuuBai" class="ql-khoi-than ql-form">
 <input type="hidden" name="id" value="@Model.Id">
-<div class="ql-truong" style="max-width:160px"><label for="soBai">Số bài</label><input id="soBai" type="number" name="soBai" min="1" step="1" value="@Model.So" required></div>
 <div class="ql-truong"><label for="ten">Tên bài</label><input id="ten" type="text" name="ten" value="@Model.Ten" required></div>
 <label class="ql-check"><input type="checkbox" name="daXuatBan" value="true" checked="@Model.DaXuatBan"> Xuất bản — học viên thấy bài này</label>
 <label class="ql-check"><input type="checkbox" name="hocThu" value="true" checked="@Model.HocThu"> Cho học thử — học viên chưa ghi danh vẫn học được</label>
