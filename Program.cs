@@ -9,6 +9,8 @@ using SuDia.Web.Services.TroLy;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllersWithViews();
+builder.Services.AddMemoryCache();
+builder.Services.AddSingleton<KhoBanNhapNoiDung>();
 builder.Services.AddAntiforgery(o => o.HeaderName = "RequestVerificationToken");
 builder.Services.AddHttpContextAccessor();
 
@@ -53,6 +55,8 @@ else
 {
     builder.Services.AddSingleton<IAiService, DemoAiService>();
 }
+builder.Services.Configure<GeminiSoanBaiOptions>(builder.Configuration.GetSection("GeminiSoanBai"));
+builder.Services.AddHttpClient<ISoanNoiDungAiService, GeminiSoanNoiDungAiService>(http => http.Timeout = TimeSpan.FromSeconds(120));
 
 // Dữ liệu các trang học viên: đọc từ database theo người đăng nhập
 builder.Services.AddScoped<IKhoaHocService, EfKhoaHocService>();
@@ -69,6 +73,7 @@ builder.Services.AddRateLimiter(o =>
 });
 
 var app = builder.Build();
+app.Logger.LogInformation("AI soạn bài Gemini: {TrangThai}", string.IsNullOrWhiteSpace(builder.Configuration["GEMINI_API_KEY"]) ? "Chưa cấu hình kết nối" : "Đã cấu hình kết nối");
 
 if (!app.Environment.IsDevelopment())
 {

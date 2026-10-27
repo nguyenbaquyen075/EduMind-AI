@@ -99,6 +99,27 @@ khu giảng viên với quyền Admin trên mọi khoá. Báo cáo tính theo gi
 Kiểm tra với web Development cục bộ: `python3 KiemThu/kiem-tra-admin.py` (cần Python 3 và `psql`).
 
 
+## AI soạn bài cho giảng viên (Gemini)
+
+Nút **Chia theo đề mục văn bản** là lựa chọn ngoại tuyến, không gọi API: nhận diện các tiêu đề Markdown,
+số La Mã, số thứ tự, số phân cấp và chữ cái; giữ nguyên đoạn văn và mở bản xem thử có thể sửa.
+Không có ký hiệu tiêu đề thì giữ chung nội dung, không tự đoán cấu trúc theo ngữ nghĩa như AI.
+Nút có ở trang tạo chủ đề và trang soạn bài, dùng được khi Gemini hết hạn mức hoặc không phản hồi.
+
+**Nội dung bài học → Tạo chủ đề** dùng Gemini, độc lập với trợ lý hỏi đáp Claude.
+Lấy khóa từ https://aistudio.google.com/apikey và chọn dự án **Free tier chưa bật Billing** nếu muốn chỉ dùng hạn mức miễn phí.
+Chạy `zsh scripts/cau-hinh-ai.zsh` rồi khởi động lại web. Script lưu `GEMINI_API_KEY` bằng .NET user-secrets, không đưa khóa vào Git.
+Model cấu hình tại `GeminiSoanBai:Model` trong `appsettings.json`.
+`GeminiSoanBai:TimeoutSeconds` mặc định 30 giây: hết thời gian chờ thì giữ lại văn bản và báo để dùng nút chia theo đề mục.
+Trong khi chờ, form hiển thị số giây đã chờ, chặn bấm AI lặp lại và vẫn cho chuyển sang chia đề mục văn bản.
+Trang xem thử có URL GET riêng sau khi gửi form, nên tải lại/quay lại không cần gửi lại yêu cầu AI.
+Bản nháp tạm riêng theo tài khoản được giữ trong bộ nhớ máy chủ tối đa 2 giờ; hết hạn hoặc khởi động lại web sẽ đưa về trang nội dung kèm thông báo.
+Khi nhập sai hoặc AI lỗi, các ô đã nhập được giữ tạm và mở lại trên trang GET để tránh lưu trang POST trong lịch sử.
+Hết hạn mức trả thông báo chờ/thử lại, không tự chuyển sang Claude. Chi phí thực tế phụ thuộc dự án Google gắn với khóa;
+ứng dụng không kiểm tra hay thay đổi Billing của tài khoản Google. Hạn mức miễn phí có thể thay đổi.
+Ở gói miễn phí, Google có thể sử dụng nội dung đầu vào/đầu ra để cải thiện sản phẩm:
+https://ai.google.dev/gemini-api/docs/pricing.
+
 ## Trợ lý AI
 Menu học viên **Hỏi AI** mở trực tiếp `/Home/HoiAi`, không mở trang bài học.
 Ô **Hỏi nhanh AI** ở Tổng quan cũng chuyển sang chat và gửi câu hỏi đã nhập.

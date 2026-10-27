@@ -21,31 +21,10 @@
 </select></div></form>
 }
 <a href="/Home/KhoaHoc/@Model.Id" class="ql-nut phu" target="_blank">Xem như học viên ↗</a>
+<a href="/GiangVien/NoiDung/TaoChuDe?khoa=@Model.Id" class="ql-nut">+ Tạo chủ đề</a>
 }
 
-<div class="ql-them" aria-label="Thêm mới">
-<form method="post" asp-action="ThemChuDe">
-<h2>+ Thêm chủ đề</h2>
-<input type="hidden" name="khoaId" value="@Model.Id">
-<div class="ql-truong"><input type="text" name="ten" placeholder="Tên chủ đề, ví dụ: Công cuộc Đổi mới từ năm 1986" aria-label="Tên chủ đề mới" required></div>
-<div><button class="ql-nut">Thêm chủ đề</button></div>
-</form>
-<form method="post" asp-action="ThemBai">
-<h2>+ Thêm bài học</h2>
-<div class="ql-hang-nut">
-<div class="ql-truong" style="flex: 0 1 240px"><select name="chuDeId" aria-label="Chủ đề của bài mới" required>
-@foreach (var cd in Model.ChuDe.OrderBy(c => c.ThuTu))
-{
-<option value="@cd.Id">@cd.Ten</option>
-}
-</select></div>
-<div class="ql-truong" style="flex: 1 1 220px"><input type="text" name="ten" placeholder="Tên bài mới" aria-label="Tên bài mới" required></div>
-</div>
-<div><button class="ql-nut">Thêm bài</button> <span class="ql-phu" style="display: inline">Bài mới ở dạng nháp, soạn xong mới xuất bản.</span></div>
-</form>
-</div>
-
-<section class="ql-khoi" aria-labelledby="cay">
+<section class="ql-khoi ql-noi-dung-cay" aria-labelledby="cay">
 <div class="ql-khoi-dau"><h2 id="cay">@Model.Ten · chủ đề và bài</h2><p>Bấm "Soạn" để viết nội dung bài. Bài nháp chưa hiện cho học viên.</p></div>
 <ul class="ql-cay">
 @foreach (var cd in Model.ChuDe.OrderBy(c => c.ThuTu))
@@ -53,8 +32,13 @@
 <li>
 <div class="ql-chude">
 <span>@cd.Ten</span>
-<details><summary class="ql-nut-chu" style="list-style: none; cursor: pointer">Đổi tên</summary>
-<form method="post" asp-action="SuaChuDe" class="ql-hang-nut" style="margin-top: 8px"><input type="hidden" name="id" value="@cd.Id"><div class="ql-truong" style="margin: 0"><input type="text" name="ten" value="@cd.Ten" aria-label="Tên chủ đề" required></div><button class="ql-nut nho">Lưu</button></form>
+<details class="ql-ba-cham">
+<summary aria-label="Thao tác chủ đề @cd.Ten"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg></summary>
+<ul>
+<li><a href="/GiangVien/NoiDung/TaoBai?chuDeId=@cd.Id">Thêm bài học</a></li>
+<li><button type="button" data-topic-action="edit" data-id="@cd.Id" data-ten="@cd.Ten">Chỉnh sửa</button></li>
+<li><form method="post" asp-action="XoaChuDe" data-hoi="Xoá chủ đề này cùng toàn bộ bài học, mục và nội dung bên trong?"><input type="hidden" name="id" value="@cd.Id"><button class="xoa" type="submit">Xoá</button></form></li>
+</ul>
 </details>
 </div>
     @foreach (var b in cd.Bai.OrderBy(x => x.ThuTu))
@@ -73,3 +57,15 @@
 }
 </ul>
 </section>
+
+<dialog id="chuDeDialog" class="ql-topic-dialog" aria-labelledby="chuDeDialogTitle">
+<form method="post" asp-action="SuaChuDe" class="ql-form" id="chuDeDialogForm">
+<h2 id="chuDeDialogTitle">Chỉnh sửa chủ đề</h2>
+<input type="hidden" name="id" id="chuDeDialogId">
+<div class="ql-truong"><label for="chuDeDialogTen">Tên chủ đề</label><input type="text" name="ten" id="chuDeDialogTen" required></div>
+<div class="ql-chan"><button class="ql-nut">Lưu thay đổi</button><button type="button" class="ql-nut phu" id="chuDeDialogCancel">Huỷ</button></div>
+</form>
+</dialog>
+@section Scripts {
+<script src="~/js/chu-de.js" asp-append-version="true"></script>
+}
