@@ -34,9 +34,9 @@
     string? nhomTruoc = null;
 }
 @section Head {
-<link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+@* Hiện ngay bằng font hệ thống; không chờ mạng Google Fonts khi chuyển menu. *@
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" media="print" onload="this.media='all'">
 <link rel="stylesheet" href="~/css/quan-ly.css" asp-append-version="true">
 @if (khu == "Admin") { <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true"> }
 @await RenderSectionAsync("Head", required: false)

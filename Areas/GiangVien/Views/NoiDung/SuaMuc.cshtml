@@ -2,48 +2,52 @@
 @{
     var bai = (Bai)ViewBag.Bai;
     ViewData["Title"] = $"Soạn mục – Bài {bai.So}";
-    ViewData["TieuDe"] = $"Mục: {Model.Ten}";
+    ViewData["TieuDe"] = "Chỉnh sửa nội dung";
     ViewData["Muc"] = "NoiDung";
     ViewData["Crumb"] = $"<a href=\"/GiangVien/NoiDung?khoa={bai.ChuDe!.KhoaId}\">{bai.ChuDe.Khoa!.Ten}</a> › <a href=\"/GiangVien/NoiDung/SoanBai/{bai.Id}\">Bài {bai.So}. {bai.Ten}</a>";
 }
 @section Actions {
-<a href="/Home/BaiHoc/@bai.Id" class="ql-nut phu" target="_blank">Xem như học viên ↗</a>
-<button type="submit" form="formMuc" class="ql-nut">Lưu mục</button>
+<a href="/GiangVien/NoiDung/SoanBai/@bai.Id" class="ql-nut phu">← Về bài</a>
+<a href="/Home/BaiHoc/@bai.Id" class="ql-nut phu" target="_blank">Xem thử ↗</a>
+<button type="submit" form="formMuc" class="ql-nut">Lưu thay đổi</button>
 }
 <form method="post" asp-action="SuaMuc" id="formMuc" class="ql-form" style="max-width: 920px">
 <input type="hidden" asp-for="Id"><input type="hidden" asp-for="BaiId">
 <div asp-validation-summary="ModelOnly" class="ql-tong-loi"></div>
-<div class="ql-2cot">
-<div class="ql-truong"><label asp-for="Ten">Tên mục (trong mục lục)</label><input asp-for="Ten" type="text"><span asp-validation-for="Ten" class="ql-loi"></span></div>
-<div class="ql-truong"><label asp-for="TieuDe">Tiêu đề hiển thị</label><input asp-for="TieuDe" type="text"><span asp-validation-for="TieuDe" class="ql-loi"></span></div>
-</div>
+<section class="ql-khoi"><div class="ql-khoi-than ql-form" style="max-width:none">
+<div class="ql-truong"><label asp-for="Ten">Tiêu đề</label><textarea asp-for="Ten" rows="2"></textarea><span asp-validation-for="Ten" class="ql-loi"></span></div>
+<details><summary class="ql-nut-chu">Tiêu đề hiển thị khác (tuỳ chọn)</summary><div class="ql-truong" style="margin-top:8px"><label asp-for="TieuDe">Tiêu đề trên trang đọc</label><textarea asp-for="TieuDe" rows="2" placeholder="Để trống để dùng tiêu đề bên trên"></textarea><span asp-validation-for="TieuDe" class="ql-loi"></span></div></details>
+</div></section>
 
-<div class="ql-khoi-dau" style="padding: 8px 0 0; border: 0"><h2>Các phần của mục</h2><button type="button" class="ql-nut phu nho" id="themPhan">+ Thêm phần</button></div>
 <div id="dsPhan" class="ql-form" style="max-width: none">
 @for (var i = 0; i < Model.Phan.Count; i++)
 {
 <div class="ql-the-phan" data-phan>
-<div class="ql-the-phan-dau"><span>Phần <b data-so>@(i + 1)</b></span><button type="button" class="ql-nut-chu xoa" data-xoa-phan>Xoá phần</button></div>
+<div class="ql-the-phan-dau" data-phan-dau hidden="@(Model.Phan.Count == 1)"><span>Phần <b data-so>@(i + 1)</b></span><button type="button" class="ql-nut-chu xoa" data-xoa-phan>Xoá phần</button></div>
 <div class="ql-form" style="max-width: none">
+<div class="ql-truong"><label>Nội dung</label><textarea name="Phan[@i].DoanVan" rows="5">@Model.Phan[i].DoanVan</textarea></div>
+<details><summary class="ql-nut-chu">Tuỳ chọn: tiêu đề phần, mốc thời gian, ghi nhớ</summary><div class="ql-form" style="max-width:none;margin-top:12px">
 <div class="ql-truong"><label>Tiêu đề phần</label><input type="text" name="Phan[@i].TieuDe" value="@Model.Phan[i].TieuDe" placeholder="Ví dụ: Diễn biến"></div>
-<div class="ql-truong"><label>Đoạn văn</label><textarea name="Phan[@i].DoanVan" rows="5">@Model.Phan[i].DoanVan</textarea><small>Mỗi đoạn cách nhau một dòng trống.</small></div>
 <div class="ql-truong"><label>Mốc thời gian (không bắt buộc)</label><textarea name="Phan[@i].Moc" rows="3" placeholder="ĐỢT 1 | 13–17/3 | Tiêu diệt Him Lam và phân khu Bắc.">@Model.Phan[i].Moc</textarea><small>Mỗi dòng một mốc: Tên | Thời gian | Nội dung</small></div>
-<label class="ql-check"><input type="checkbox" name="Phan[@i].LaGhiNho" value="true" checked="@Model.Phan[i].LaGhiNho"> Đây là phần "Ghi nhớ nhanh" (hiện có vạch màu)</label>
+<label class="ql-check"><input type="checkbox" name="Phan[@i].LaGhiNho" value="true" checked="@Model.Phan[i].LaGhiNho"> Ghi nhớ nhanh</label>
+</div></details>
 </div>
 </div>
 }
 </div>
-<div class="ql-chan"><button class="ql-nut">Lưu mục</button><a href="/GiangVien/NoiDung/SoanBai/@bai.Id" class="ql-nut phu">Về bài</a></div>
+<div class="ql-chan"><button type="button" class="ql-nut phu" id="themPhan">+ Thêm phần nội dung</button></div>
 </form>
 
 <template id="mauPhan">
 <div class="ql-the-phan" data-phan>
-<div class="ql-the-phan-dau"><span>Phần <b data-so></b></span><button type="button" class="ql-nut-chu xoa" data-xoa-phan>Xoá phần</button></div>
+<div class="ql-the-phan-dau" data-phan-dau><span>Phần <b data-so></b></span><button type="button" class="ql-nut-chu xoa" data-xoa-phan>Xoá phần</button></div>
 <div class="ql-form" style="max-width: none">
+<div class="ql-truong"><label>Nội dung</label><textarea data-ten="DoanVan" rows="5"></textarea></div>
+<details><summary class="ql-nut-chu">Tuỳ chọn: tiêu đề phần, mốc thời gian, ghi nhớ</summary><div class="ql-form" style="max-width:none;margin-top:12px">
 <div class="ql-truong"><label>Tiêu đề phần</label><input type="text" data-ten="TieuDe" placeholder="Ví dụ: Diễn biến"></div>
-<div class="ql-truong"><label>Đoạn văn</label><textarea data-ten="DoanVan" rows="5"></textarea><small>Mỗi đoạn cách nhau một dòng trống.</small></div>
 <div class="ql-truong"><label>Mốc thời gian (không bắt buộc)</label><textarea data-ten="Moc" rows="3" placeholder="ĐỢT 1 | 13–17/3 | Tiêu diệt Him Lam và phân khu Bắc."></textarea><small>Mỗi dòng một mốc: Tên | Thời gian | Nội dung</small></div>
-<label class="ql-check"><input type="checkbox" data-ten="LaGhiNho" value="true"> Đây là phần "Ghi nhớ nhanh" (hiện có vạch màu)</label>
+<label class="ql-check"><input type="checkbox" data-ten="LaGhiNho" value="true"> Ghi nhớ nhanh</label>
+</div></details>
 </div>
 </div>
 </template>
@@ -54,6 +58,7 @@
 (() => {
   const ds = document.getElementById('dsPhan');
   const danhSo = () => ds.querySelectorAll('[data-phan]').forEach((p, i) => {
+    p.querySelector('[data-phan-dau]').hidden = ds.children.length === 1;
     p.querySelector('[data-so]').textContent = i + 1;
     p.querySelectorAll('[name^="Phan["], [data-ten]').forEach((el) => {
       const ten = el.dataset.ten || el.name.replace(/^Phan\[\d+\]\./, '');
@@ -63,7 +68,7 @@
   document.getElementById('themPhan').addEventListener('click', () => {
     ds.appendChild(document.getElementById('mauPhan').content.cloneNode(true));
     danhSo();
-    ds.lastElementChild.querySelector('input[type=text]').focus();
+    ds.lastElementChild.querySelector('textarea').focus();
   });
   ds.addEventListener('click', (e) => {
     if (!e.target.matches('[data-xoa-phan]')) return;
@@ -73,4 +78,5 @@
   if (!ds.children.length) document.getElementById('themPhan').click();
 })();
 </script>
+<script src="~/js/ban-nhap-ai.js" asp-append-version="true"></script>
 }
