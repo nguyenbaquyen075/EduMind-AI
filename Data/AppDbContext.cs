@@ -21,6 +21,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
     public DbSet<BuoiHoc> BuoiHoc => Set<BuoiHoc>();
     public DbSet<BaiTapGiao> BaiTapGiao => Set<BaiTapGiao>();
     public DbSet<BaiNopGiao> BaiNopGiao => Set<BaiNopGiao>();
+    public DbSet<LuotLamKiemTra> LuotLamKiemTra => Set<LuotLamKiemTra>();
 
     protected override void OnModelCreating(ModelBuilder b)
     {
@@ -30,6 +31,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
         // Mã bài, mã đề giữ theo dữ liệu sẵn có (đường dẫn /Home/BaiHoc/7 không đổi)
         b.Entity<Bai>().Property(x => x.Id).ValueGeneratedNever();
         b.Entity<DeThi>().Property(x => x.Id).ValueGeneratedNever();
+        b.Entity<DeThi>().HasOne(x => x.BaiTapGiao).WithOne(x => x.DeThi)
+            .HasForeignKey<DeThi>(x => x.BaiTapGiaoId).OnDelete(DeleteBehavior.Restrict);
         b.Entity<DeThiCau>().HasKey(x => new { x.DeThiId, x.ThuTu });
         b.Entity<GhiDanh>().HasKey(x => new { x.NguoiDungId, x.KhoaId });
         b.Entity<TienDoBai>().HasKey(x => new { x.NguoiDungId, x.BaiId });
@@ -37,5 +40,6 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
         b.Entity<BuoiHoc>().HasIndex(x => x.BaiId);
         b.Entity<BaiTapGiao>().HasOne(x => x.BuoiHoc).WithMany().HasForeignKey(x => x.BuoiHocId).OnDelete(DeleteBehavior.SetNull);
         b.Entity<BaiNopGiao>().HasIndex(x => new { x.BaiTapGiaoId, x.NguoiDungId }).IsUnique();
+        b.Entity<LuotLamKiemTra>().HasKey(x => new { x.BaiTapGiaoId, x.NguoiDungId });
     }
 }

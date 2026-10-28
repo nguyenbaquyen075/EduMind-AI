@@ -1,0 +1,31 @@
+@model Khoa
+@{ var dsKhoa = ViewBag.DsKhoa as List<Khoa> ?? []; var chuDe = ViewBag.ChuDe as ChuDe; ViewData["Title"] = chuDe is null ? "Tạo chủ đề" : "Thêm bài học"; ViewData["TieuDe"] = chuDe is null ? "Tạo chủ đề" : "Thêm bài học"; ViewData["Muc"] = "NoiDung"; ViewData["Crumb"] = "<a href=\"/GiangVien/NoiDung\">Nội dung bài học</a> › " + (chuDe is null ? "Tạo chủ đề" : "Thêm bài học"); }
+@section Actions { <a href="/GiangVien/NoiDung?khoa=@Model.Id" class="ql-nut phu">← Về nội dung bài học</a> }
+<section class="ql-khoi" style="max-width:920px;margin:0 auto" aria-labelledby="tao">
+<div class="ql-khoi-dau"><div><h2 id="tao">Từ ý tưởng đến bài học có cấu trúc</h2><p>Nhập nội dung; AI sẽ soạn thành các mục và phần để anh xem, sửa trước khi chia sẻ.</p></div></div>
+<form method="post" asp-action="TaoChuDeBangAi" class="ql-khoi-than ql-form" data-soan-noi-dung>
+<partial name="_NhapTaiLieu" />
+@if (chuDe is null)
+{
+<div class="ql-truong"><label for="khoaId">Khoá học</label><select id="khoaId" name="khoaId">@foreach (var k in dsKhoa) { <option value="@k.Id" selected="@(k.Id == Model.Id)">@k.Ten</option> }</select></div>
+<div class="ql-truong"><label for="tenChuDe">Tên chủ đề</label><input id="tenChuDe" type="text" name="tenChuDe" value="@(ViewData.ModelState["tenChuDe"]?.AttemptedValue)" placeholder="Ví dụ: Việt Nam từ năm 1986" required></div>
+}
+else
+{
+<input type="hidden" name="chuDeId" value="@chuDe.Id"><input type="hidden" name="khoaId" value="@Model.Id">
+<p class="ql-phu">@Model.Ten · @chuDe.Ten</p>
+}
+<div class="ql-hang-nut" style="align-items:flex-end">
+<div class="ql-truong" style="flex:0 0 130px"><label for="soBai">Số bài</label><input id="soBai" type="number" name="soBai" min="1" step="1" value="@(ViewData.ModelState["soBai"]?.AttemptedValue)" placeholder="Ví dụ: 5" required></div>
+<div class="ql-truong" style="flex:1 1 260px"><label for="tenBai">Tên bài học</label><input id="tenBai" type="text" name="tenBai" value="@(ViewData.ModelState["tenBai"]?.AttemptedValue)" placeholder="Ví dụ: Công cuộc Đổi mới" required></div>
+</div>
+<div class="ql-truong"><label for="noiDung">Nội dung hoặc dàn ý buổi học</label><textarea id="noiDung" name="noiDung" rows="13" minlength="30" maxlength="30000" placeholder="Dán nội dung hoặc dàn ý ở đây. AI sẽ phân tích và chủ động chia thành các mục, phần nội dung phù hợp." required>@ViewData.ModelState["noiDung"]?.AttemptedValue</textarea><small>Chủ đề và bài học được lưu ở dạng nháp. Anh sẽ xem và sửa bản AI tạo trước khi chia sẻ.</small></div>
+<p class="ql-phu">Khi AI bận, chọn “Chia theo đề mục văn bản” để tách ngay trên máy chủ, không cần mạng hay khóa API. Nhận diện tiêu đề dạng #, ##, I., 1., 1.1., a). Nếu không có ký hiệu rõ, nội dung được giữ chung để anh sửa.</p>
+<p class="ql-phu" data-soan-status role="status" aria-live="polite" hidden></p>
+<div class="ql-chan"><button class="ql-nut" type="submit">✦ AI tạo các mục nội dung</button><button class="ql-nut phu" type="submit" name="chiaTheoVanBan" value="true">Chia theo đề mục văn bản</button><a class="ql-nut phu" href="/GiangVien/NoiDung?khoa=@Model.Id">Huỷ</a></div>
+</form>
+</section>
+@section Scripts {
+<script src="~/js/soan-noi-dung.js" asp-append-version="true"></script>
+<script src="~/js/nhap-tai-lieu.js" asp-append-version="true"></script>
+}

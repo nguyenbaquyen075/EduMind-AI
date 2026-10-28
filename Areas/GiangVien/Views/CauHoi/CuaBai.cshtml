@@ -9,7 +9,6 @@
 @section Actions {
 <a href="/GiangVien/GiaoBai/Tao?bai=@b.Id" class="ql-nut">Giao bài tập</a>
 <a href="/Home/LamCauHoi/@b.Id" class="ql-nut phu" target="_blank">Xem như học viên ↗</a>
-<a href="/GiangVien/CauHoi/Tao?bai=@b.Id" class="ql-nut">+ Thêm câu hỏi</a>
 }
 @{ var daGiao = ViewBag.BaiTapGiao as List<SuDia.Web.Data.BaiTapGiao> ?? []; }
 <section class="ql-khoi"><div class="ql-khoi-dau"><h2>Bài tập giao theo buổi</h2><span>@daGiao.Count bài tập</span></div>
@@ -55,5 +54,5 @@
 }
 </li>
 }
-<li><a href="/GiangVien/CauHoi/Tao?bai=@b.Id" class="bt-them">+ Thêm câu hỏi@(ViewBag.Cau.Count == 0 ? " đầu tiên cho bài này" : "")</a></li>
+<li><a href="/GiangVien/GiaoBai/Tao?bai=@b.Id" class="bt-them">+ Soạn bài tập</a></li>
 </ol>

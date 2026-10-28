@@ -123,7 +123,7 @@ public record BaiLuyen(int BaiId, int So, string Ten, int SoCau, int? Dung, bool
 
 public record ChuongLuyen(string Ten, IReadOnlyList<BaiLuyen> Bai);
 
-public record DeThiThu(int Id, string Ten, int SoCau, int SoPhut, int? Dung, bool BiKhoa)
+public record DeThiThu(int Id, string Ten, int SoCau, int SoPhut, int? Dung, bool BiKhoa, string? KetQua = null)
 {
     public bool Tot => Dung is not null && Dung >= SoCau * 0.8;
 }

@@ -1,4 +1,4 @@
-import html, http.cookiejar, json, os, re, subprocess, urllib.error, urllib.parse, urllib.request, uuid
+import html, http.cookiejar, json, os, re, ssl, subprocess, urllib.error, urllib.parse, urllib.request, uuid
 # Chỉ chạy trên database Development. Script xoá đúng bài tập và bài nộp thử do nó tạo.
 BASE = os.environ.get('SUDIA_TEST_URL', 'http://localhost:5280').rstrip('/')
 PASSWORD = os.environ.get('SUDIA_TEST_PASSWORD', 'SuDia@2026')
@@ -7,7 +7,7 @@ if urllib.parse.urlparse(BASE).hostname not in ('localhost', '127.0.0.1', '::1')
     raise SystemExit('Kiểm tra này chỉ được chạy trên web cục bộ.')
 marker = 'sudia-assignment-' + uuid.uuid4().hex
 created = []
-def client(): return urllib.request.build_opener(urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()))
+def client(): return urllib.request.build_opener(urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()), urllib.request.HTTPSHandler(context=ssl._create_unverified_context()))
 def req(c, path, data=None, isjson=False, tok=None):
     headers = {}
     if data is not None:
@@ -26,7 +26,13 @@ def login(email):
     assert status==200 and '/DangNhap' not in url
     return c
 teacher=login('giangvien@sudia.vn'); student=login('hocvien@sudia.vn')
-_,_,page=req(teacher,'/GiangVien/GiaoBai/Tao?bai=6'); tok=token(page)
+fixture_sql = f'''INSERT INTO "Bai" ("Id","ChuDeId","So","Ten","SoMuc","SoPhut","ThuTu","HocThu","DaXuatBan")
+SELECT (SELECT coalesce(max("Id"),0)+1 FROM "Bai"),c."Id",999,'{marker}',0,0,999,false,true
+FROM "ChuDe" c JOIN "Khoa" k ON k."Id"=c."KhoaId" JOIN "AspNetUsers" t ON t."Id"=k."GiangVienId"
+JOIN "GhiDanh" g ON g."KhoaId"=k."Id" JOIN "AspNetUsers" s ON s."Id"=g."NguoiDungId"
+WHERE t."Email"='giangvien@sudia.vn' AND s."Email"='hocvien@sudia.vn' LIMIT 1 RETURNING "Id";'''
+bai=int(subprocess.check_output(['psql','-d',DATABASE,'-At','-v','ON_ERROR_STOP=1','-c',fixture_sql],text=True).splitlines()[0])
+_,_,page=req(teacher,f'/GiangVien/GiaoBai/Tao?bai={bai}'); tok=token(page)
 def save(data, expected=200):
     status,_,body=req(teacher,'/GiangVien/GiaoBai/Luu',data,True,tok)
     assert status==expected,(status,body[:1000])
@@ -34,10 +40,10 @@ def save(data, expected=200):
 questions=[{'id':'tn-test','kieu':'TN','noiDung':'Câu TN '+marker,'diem':1,'phuongAn':['Một','Hai','Ba','Bốn'],'dapAn':1,'y':[],'loiGiai':'LOI-GIAI-'+marker},
  {'id':'ds-test','kieu':'DS','noiDung':'Câu DS '+marker,'diem':1,'phuongAn':[], 'y':[{'noiDung':'Ý '+str(i),'dung':i%2==0,'diem':.25} for i in range(4)],'loiGiai':'LOI-GIAI-'+marker},
  {'id':'tl-test','kieu':'TL','noiDung':'Câu TL '+marker,'diem':1,'phuongAn':[],'y':[],'loiGiai':'LOI-GIAI-'+marker}]
-data={'id':0,'baiId':6,'buoiHocId':None,'ten':marker,'huongDan':'Hướng dẫn thử','hanNop':None,'daGiao':False,'cau':questions}
+data={'id':0,'baiId':bai,'buoiHocId':None,'ten':marker,'huongDan':'Hướng dẫn thử','hanNop':None,'daGiao':False,'cau':questions}
 try:
-    status,_,body=req(teacher,'/GiangVien/CauHoi')
-    assert status==200 and '/GiangVien/GiaoBai/Tao?bai=6' in body and 'Thêm câu hỏi' in body
+    status,_,body=req(teacher,f'/GiangVien/CauHoi?bai={bai}')
+    assert status==200 and f'/GiangVien/GiaoBai/Tao?bai={bai}' in body and 'href="/GiangVien/CauHoi/Tao' not in body
     draft=save(data); created.append(draft['id']); data['id']=draft['id']
     assert req(student,f'/BaiTap/Lam/{data["id"]}')[0]==404
     assert req(teacher,f'/GiangVien/GiaoBai/Sua/{data["id"]}')[0]==200
@@ -53,7 +59,7 @@ try:
     assert req(teacher,'/GiangVien/GiaoBai/Luu',data,True)[0]==400
     print('PASS: chặn thiếu đáp án, sai buổi/bài, điểm âm, thiếu CSRF')
     data['daGiao']=True;save(data)
-    status,_,body=req(student,'/BaiTap?bai=6'); assert status==200 and marker in body,(status,body[:500])
+    status,_,body=req(student,f'/BaiTap?bai={bai}'); assert status==200 and marker in body,(status,body[:500])
     status,_,body=req(student,f'/BaiTap/Lam/{data["id"]}')
     assert status==200 and 'Câu TN' in body and 'Câu DS' in body and 'Câu TL' in body,(status,body[:500])
     assert 'LOI-GIAI-'+marker not in body
@@ -73,11 +79,12 @@ try:
     assert 'chờ giảng viên chấm' not in body and re.search(r'Tổng điểm: <b>3(?:[.,]0+)? / 3',body),body[:1000]
     blocked=save(data,400);assert 'đã có học viên nộp' in blocked['loi']
     print('PASS: giảng viên chấm tự luận, học viên thấy tổng 3/3; khoá sửa bài đã nộp')
-    assert '/KhongCoQuyen' in req(student,'/GiangVien/GiaoBai/Tao?bai=6')[1]
+    assert '/KhongCoQuyen' in req(student,f'/GiangVien/GiaoBai/Tao?bai={bai}')[1]
     assert req(client(),f'/BaiTap/Lam/{data["id"]}')[1].find('/DangNhap')>=0
     print('PASS: phân quyền giảng viên/học viên và yêu cầu đăng nhập')
 finally:
     for i in created:
         sql=f'DELETE FROM "BaiTapGiao" WHERE "Id" = {int(i)} AND "Ten" = \'{marker}\';'
         subprocess.run(['psql','-d',DATABASE,'-v','ON_ERROR_STOP=1','-c',sql],check=True,capture_output=True)
-    print('CLEANUP: đã xoá bài tập và bài nộp thử theo mã riêng')
+    subprocess.run(['psql','-d',DATABASE,'-v','ON_ERROR_STOP=1','-c',f'''DELETE FROM "Bai" WHERE "Id"={bai} AND "Ten"='{marker}';'''],check=True,capture_output=True)
+    print('CLEANUP: đã xoá bài học, bài tập và bài nộp thử theo mã riêng')
