@@ -194,14 +194,23 @@ public class EfKhoaHocService : IKhoaHocService
         var ganNhat = _db.BaiLam.AsNoTracking().Where(b => b.NguoiDungId == _userId).OrderByDescending(b => b.NopLuc).ToList()
             .GroupBy(b => (b.MaDe, b.LaDeThi)).ToDictionary(g => g.Key, g => g.First());
         var deThi = _db.DeThi.AsNoTracking().Where(d => d.DangMo).OrderBy(d => d.Id)
-            .Select(d => new { d.Id, d.KhoaId, d.Ten, d.SoPhut, SoCau = d.Cau.Count }).ToList();
+            .Select(d => new { d.Id, d.KhoaId, d.Ten, d.SoPhut, SoCau = d.Cau.Count, d.BaiTapGiaoId,
+                NoiDung = d.BaiTapGiao == null ? null : d.BaiTapGiao.NoiDungJson }).ToList();
+        var baiNop = _db.BaiNopGiao.AsNoTracking().Where(n => n.NguoiDungId == _userId)
+            .ToDictionary(n => n.BaiTapGiaoId);
 
         var tatCa = danhMuc.Select(k => new KhoaLuyen(k,
             k.Chuong.Select(c => new ChuongLuyen(c.Ten, c.Bai.Select(b => new BaiLuyen(
                 b.Id, b.So, b.Ten, soCau.GetValueOrDefault(b.Id),
                 ganNhat.TryGetValue((b.Id, false), out var bl) ? bl.SoDung : null, b.BiKhoa)).ToList())).ToList(),
-            deThi.Where(d => d.KhoaId == k.Id).Select(d => new DeThiThu(d.Id, d.Ten, d.SoCau, d.SoPhut,
-                ganNhat.TryGetValue((d.Id, true), out var bl) ? bl.SoDung : null, !k.DaMo)).ToList())).ToList();
+            deThi.Where(d => d.KhoaId == k.Id).Select(d => {
+                var cau = d.NoiDung is null ? null : NoiDungBaiTap.Doc(d.NoiDung);
+                var nop = d.BaiTapGiaoId is int bt ? baiNop.GetValueOrDefault(bt) : null;
+                var ketQua = nop is null ? null : nop.DiemTuLuan is null ? "Chờ chấm tự luận"
+                    : $"{nop.DiemTuDong + nop.DiemTuLuan}/{cau!.Sum(c => c.TongDiem)} điểm";
+                return new DeThiThu(d.Id, d.Ten, cau?.Count ?? d.SoCau, d.SoPhut,
+                    ganNhat.TryGetValue((d.Id, true), out var bl) ? bl.SoDung : null, !k.DaMo, ketQua);
+            }).ToList())).ToList();
 
         return new LuyenDeViewModel { Menu = Menu("LuyenDe"), Khoa = tatCa, DangChon = tatCa.FirstOrDefault(k => k.Khoa.Id == khoaId) };
     }

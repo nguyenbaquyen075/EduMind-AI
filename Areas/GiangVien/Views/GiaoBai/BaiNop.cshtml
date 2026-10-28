@@ -4,10 +4,10 @@
     var cau = NoiDungBaiTap.Doc(bt.NoiDungJson);
     var tuLuan = cau.Where(c => c.Kieu == "TL").ToList();
     ViewData["TieuDe"] = "Bài nộp · " + bt.Ten;
-    ViewData["Muc"] = "CauHoi";
+    ViewData["Muc"] = bt.DeThi is null ? "CauHoi" : "DeThi";
 }
 @section Head { <link rel="stylesheet" href="~/css/giao-bai.css" asp-append-version="true"> }
-@section Actions { <a class="ql-nut phu" href="/GiangVien/CauHoi?bai=@bt.BaiId">Về bài tập</a> }
+@section Actions { <a class="ql-nut phu" href="@(bt.DeThi is null ? $"/GiangVien/CauHoi?bai={bt.BaiId}" : "/GiangVien/DeThi")">← Về danh sách</a> }
 @if (Model.Count == 0) { <p class="ql-trong">Chưa có học viên nộp bài.</p> }
 <div class="gb gb-submissions">
 @foreach (var n in Model)

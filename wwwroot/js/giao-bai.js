@@ -2,6 +2,7 @@
   const root = document.getElementById('giaoBai');
   if (!root) return;
   const data = JSON.parse(document.getElementById('gbData').textContent);
+  const tenLoai = data.laKiemTra ? 'bài kiểm tra' : 'bài tập';
   const buoi = JSON.parse(document.getElementById('gbBuoiData').textContent);
   const $ = (id) => document.getElementById(id);
   const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -16,6 +17,7 @@
   $('gbTen').value = data.ten;
   $('gbBai').value = data.baiId || '';
   $('gbHuongDan').value = data.huongDan;
+  if ($('gbPhut')) $('gbPhut').value = data.soPhut || 45;
   if (data.hanNop) {
     const d = new Date(data.hanNop);
     $('gbHan').value = new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
@@ -65,10 +67,12 @@
     data.ten = $('gbTen').value.trim(); data.baiId = Number($('gbBai').value);
     data.buoiHocId = Number($('gbBuoi').value) || null; data.huongDan = $('gbHuongDan').value.trim();
     data.hanNop = $('gbHan').value ? new Date($('gbHan').value).toISOString() : null;
+    if (data.laKiemTra) { data.soPhut = Number($('gbPhut').value); data.buoiHocId = null; }
     return data.ten && data.baiId;
   }
   function validate() {
-    if (!info()) return 'Nhập tên bài tập và chọn bài học ở bước Thông tin chung.';
+    if (!info()) return `Nhập tên ${tenLoai} và chọn bài học ở bước Thông tin chung.`;
+    if (data.laKiemTra && (!Number.isInteger(data.soPhut) || data.soPhut < 5 || data.soPhut > 240)) return 'Thời gian làm bài từ 5 đến 240 phút.';
     if (!data.cau.length) return 'Thêm ít nhất một câu hỏi.';
     for (const [i,c] of data.cau.entries()) {
       if (!c.noiDung.trim()) return `Câu ${i+1}: chưa nhập nội dung.`;
@@ -79,7 +83,7 @@
     return total() > 1000 ? 'Tổng điểm không quá 1.000.' : null;
   }
   function review() {
-    $('gbReview').innerHTML = `<h3>${esc(data.ten)}</h3><p class="gb-muted">${esc($('gbBai').selectedOptions[0]?.textContent)} · ${esc($('gbBuoi').selectedOptions[0]?.textContent)}</p>
+    $('gbReview').innerHTML = `<h3>${esc(data.ten)}</h3><p class="gb-muted">${esc($('gbBai').selectedOptions[0]?.textContent)} · ${data.laKiemTra ? `${data.soPhut} phút` : esc($('gbBuoi').selectedOptions[0]?.textContent)}</p>
     <p>${data.cau.length} câu · <b>${total().toFixed(2)} điểm</b> · ${data.hanNop ? 'Hạn nộp: '+esc(new Date(data.hanNop).toLocaleString('vi-VN')) : 'Không giới hạn hạn nộp'}</p><p class="gb-pre">${esc(data.huongDan)}</p>` +
     data.cau.map((c,i) => `<article class="gb-question"><b>Câu ${i+1} · ${names[c.kieu]} · ${totalCau(c).toFixed(2)}đ</b><p class="gb-pre">${esc(c.noiDung)}</p>
     ${c.kieu === 'TN' ? c.phuongAn.map((p,j) => `<p class="${c.dapAn === j ? 'gb-correct' : ''}">${'ABCD'[j]}. ${esc(p)} ${c.dapAn === j ? '✓' : ''}</p>`).join('') : ''}
@@ -88,7 +92,7 @@
   }
   function go(n) {
     error('');
-    if (n > 1 && !info()) { error('Nhập tên bài tập và chọn bài học trước.'); return; }
+    if (n > 1 && !info()) { error(`Nhập tên ${tenLoai} và chọn bài học trước.`); return; }
     if (n === 3) { const e = validate(); if (e) { error(e); return; } review(); }
     step = n;
     root.querySelectorAll('[data-panel]').forEach(e => e.hidden = Number(e.dataset.panel) !== n);
@@ -140,7 +144,7 @@
   });
   async function save(publish) {
     if (saving || locked) return;
-    if (!info()) { go(1); error('Nhập tên bài tập và chọn bài học trước khi lưu.'); return; }
+    if (!info()) { go(1); error(`Nhập tên ${tenLoai} và chọn bài học trước khi lưu.`); return; }
     if (publish) { const e = validate(); if (e) { error(e); return; } }
     saving = true; error(''); $('gbStatus').textContent = 'Đang lưu…';
     root.querySelectorAll('#gbNhap,#gbGiao').forEach(b => b.disabled = true);

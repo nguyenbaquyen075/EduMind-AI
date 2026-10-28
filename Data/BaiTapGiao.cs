@@ -14,6 +14,16 @@ public class BaiTapGiao
     public bool DaGiao { get; set; }
     public string NoiDungJson { get; set; } = "[]";
     public DateTime NgayTao { get; set; } = DateTime.UtcNow;
+    public DeThi? DeThi { get; set; }
+}
+
+public class LuotLamKiemTra
+{
+    public int BaiTapGiaoId { get; set; }
+    public BaiTapGiao? BaiTapGiao { get; set; }
+    public string NguoiDungId { get; set; } = "";
+    public NguoiDung? NguoiDung { get; set; }
+    public DateTime BatDauLuc { get; set; } = DateTime.UtcNow;
 }
 
 public class BaiNopGiao

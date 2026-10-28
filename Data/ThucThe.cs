@@ -115,6 +115,8 @@ public class DeThi
     public string Ten { get; set; } = "";
     public int SoPhut { get; set; }
     public bool DangMo { get; set; } = true;
+    public int? BaiTapGiaoId { get; set; } // đề mới dùng chung bộ soạn TN/ĐS/TL với bài tập
+    public BaiTapGiao? BaiTapGiao { get; set; }
     public List<DeThiCau> Cau { get; set; } = [];
 }
 

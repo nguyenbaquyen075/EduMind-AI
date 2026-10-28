@@ -5,7 +5,7 @@
     var veBai = string.IsNullOrEmpty(baiId) ? "/GiangVien/CauHoi" : $"/GiangVien/CauHoi?bai={baiId}";
     ViewData["Title"] = (moi ? "Thêm câu hỏi" : "Sửa câu hỏi") + " – Giảng viên";
     ViewData["TieuDe"] = moi ? "Thêm câu hỏi" : "Sửa câu hỏi";
-    ViewData["Muc"] = moi ? "ThemCau" : "CauHoi";
+    ViewData["Muc"] = "CauHoi";
     ViewData["Crumb"] = $"<a href=\"{veBai}\">Bài tập</a>";
     var ky = new[] { "A", "B", "C", "D" };
 }

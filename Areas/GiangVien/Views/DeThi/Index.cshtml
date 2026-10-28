@@ -25,6 +25,7 @@ else
 <tr><td>@d.Ten<span class="ql-phu">@d.Khoa</span></td><td class="so">@d.SoCau</td><td class="so">@d.SoPhut phút</td>
 <td>@if (d.DangMo) {<span class="ql-chip xanh">Đang mở</span>} else {<span class="ql-chip">Đã đóng</span>}</td><td class="so">@d.LuotLam</td>
 <td class="hanh-dong"><span class="ql-hang-nut" style="justify-content: flex-end"><a href="/GiangVien/DeThi/Sua/@d.Id" class="ql-nut phu nho">Sửa</a>
+@if (d.BaiTapGiaoId is int bt) { <a href="/GiangVien/GiaoBai/BaiNop/@bt" class="ql-nut phu nho">Bài nộp &amp; chấm điểm</a> }
 <form method="post" asp-action="Xoa" data-hoi="Xoá đề này?"><input type="hidden" name="id" value="@d.Id"><button class="ql-nut xoa nho">Xoá</button></form></span></td></tr>
 }
 </tbody>

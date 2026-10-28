@@ -442,6 +442,9 @@ namespace SuDia.Web.Data.Migrations
                     b.Property<int>("Id")
                         .HasColumnType("integer");
 
+                    b.Property<int?>("BaiTapGiaoId")
+                        .HasColumnType("integer");
+
                     b.Property<bool>("DangMo")
                         .HasColumnType("boolean");
 
@@ -457,6 +460,9 @@ namespace SuDia.Web.Data.Migrations
                         .HasColumnType("text");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("BaiTapGiaoId")
+                        .IsUnique();
 
                     b.HasIndex("KhoaId");
 
@@ -534,6 +540,24 @@ namespace SuDia.Web.Data.Migrations
                     b.HasIndex("GiangVienId");
 
                     b.ToTable("Khoa");
+                });
+
+            modelBuilder.Entity("SuDia.Web.Data.LuotLamKiemTra", b =>
+                {
+                    b.Property<int>("BaiTapGiaoId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("NguoiDungId")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("BatDauLuc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("BaiTapGiaoId", "NguoiDungId");
+
+                    b.HasIndex("NguoiDungId");
+
+                    b.ToTable("LuotLamKiemTra");
                 });
 
             modelBuilder.Entity("SuDia.Web.Data.MocThoiGian", b =>
@@ -881,11 +905,18 @@ namespace SuDia.Web.Data.Migrations
 
             modelBuilder.Entity("SuDia.Web.Data.DeThi", b =>
                 {
+                    b.HasOne("SuDia.Web.Data.BaiTapGiao", "BaiTapGiao")
+                        .WithOne("DeThi")
+                        .HasForeignKey("SuDia.Web.Data.DeThi", "BaiTapGiaoId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("SuDia.Web.Data.Khoa", "Khoa")
                         .WithMany()
                         .HasForeignKey("KhoaId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("BaiTapGiao");
 
                     b.Navigation("Khoa");
                 });
@@ -936,6 +967,25 @@ namespace SuDia.Web.Data.Migrations
                     b.Navigation("GiangVien");
                 });
 
+            modelBuilder.Entity("SuDia.Web.Data.LuotLamKiemTra", b =>
+                {
+                    b.HasOne("SuDia.Web.Data.BaiTapGiao", "BaiTapGiao")
+                        .WithMany()
+                        .HasForeignKey("BaiTapGiaoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SuDia.Web.Data.NguoiDung", "NguoiDung")
+                        .WithMany()
+                        .HasForeignKey("NguoiDungId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("BaiTapGiao");
+
+                    b.Navigation("NguoiDung");
+                });
+
             modelBuilder.Entity("SuDia.Web.Data.MocThoiGian", b =>
                 {
                     b.HasOne("SuDia.Web.Data.Phan", null)
@@ -977,6 +1027,11 @@ namespace SuDia.Web.Data.Migrations
             modelBuilder.Entity("SuDia.Web.Data.BaiLam", b =>
                 {
                     b.Navigation("TraLoi");
+                });
+
+            modelBuilder.Entity("SuDia.Web.Data.BaiTapGiao", b =>
+                {
+                    b.Navigation("DeThi");
                 });
 
             modelBuilder.Entity("SuDia.Web.Data.ChuDe", b =>

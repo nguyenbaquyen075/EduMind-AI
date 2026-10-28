@@ -1,5 +1,5 @@
 (() => {
-  document.querySelectorAll('#banNhapAi, #formMuc').forEach((form) => {
+  document.querySelectorAll('#banNhapAi, #formMuc, #giaoBai').forEach((form) => {
 
   const initialized = new WeakSet();
   const fit = (field) => {
@@ -27,7 +27,7 @@
     frame = requestAnimationFrame(resizeAll);
   };
   resizeAll();
-  new MutationObserver(schedule).observe(form, { childList: true, subtree: true });
+  new MutationObserver(schedule).observe(form, { childList: true, subtree: true, attributes: true, attributeFilter: ['hidden'] });
   form.addEventListener('toggle', schedule, true);
 
   // Recalculate wrapping when the page width or loaded fonts change.

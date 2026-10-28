@@ -17,7 +17,7 @@ public class CauHoiController(AppDbContext db) : GiangVienControllerBase(db)
             var b = await BaiCuaToi().AsNoTracking().Include(x => x.ChuDe!).ThenInclude(x => x.Khoa).FirstOrDefaultAsync(x => x.Id == bai);
             if (b is null) return NotFound();
             ViewBag.Bai = b;
-            ViewBag.BaiTapGiao = await Db.BaiTapGiao.AsNoTracking().Include(x => x.BuoiHoc).Where(x => x.BaiId == b.Id).OrderByDescending(x => x.NgayTao).ToListAsync();
+            ViewBag.BaiTapGiao = await Db.BaiTapGiao.AsNoTracking().Include(x => x.BuoiHoc).Where(x => x.BaiId == b.Id && x.DeThi == null).OrderByDescending(x => x.NgayTao).ToListAsync();
             var cau = await Db.CauHoi.AsNoTracking().Where(c => c.BaiId == b.Id).OrderBy(c => c.ThuTu).ThenBy(c => c.Id)
                 .Select(c => new { c.Id, c.NoiDung, c.PhuongAn, c.DapAnDung, c.GiaiThich, c.NguonHienThi,
                     Lam = Db.CauTraLoi.Count(t => t.CauHoiId == c.Id), Dung = Db.CauTraLoi.Count(t => t.CauHoiId == c.Id && t.Dung) })
@@ -30,7 +30,7 @@ public class CauHoiController(AppDbContext db) : GiangVienControllerBase(db)
         if (dsKhoa.Count == 0) return View(model: null);
         var chon = dsKhoa.FirstOrDefault(k => k.Id == khoa) ?? dsKhoa[0];
         ViewBag.DsKhoa = dsKhoa;
-        ViewBag.SoBaiTapGiao = await Db.BaiTapGiao.AsNoTracking().Where(x => x.Bai!.ChuDe!.KhoaId == chon.Id)
+        ViewBag.SoBaiTapGiao = await Db.BaiTapGiao.AsNoTracking().Where(x => x.Bai!.ChuDe!.KhoaId == chon.Id && x.DeThi == null)
             .GroupBy(x => x.BaiId).Select(g => new { BaiId = g.Key, So = g.Count() }).ToDictionaryAsync(x => x.BaiId, x => x.So);
         var kh = await Db.Khoa.AsNoTracking().Where(x => x.Id == chon.Id)
             .Include(x => x.ChuDe.OrderBy(c => c.ThuTu)).ThenInclude(c => c.Bai.OrderBy(b => b.ThuTu)).ThenInclude(b => b.CauHoi)
@@ -43,11 +43,8 @@ public class CauHoiController(AppDbContext db) : GiangVienControllerBase(db)
         var ds = await DanhSachViTri();
         var chon = viTri ?? bai?.ToString() ?? "";
         if (chon.Length > 0 && !ds.Any(x => x.Value == chon)) return NotFound();
-        ViewBag.ViTri = ds;
         var baiId = int.TryParse(chon.Split(':')[0], out var id) ? id : 0;
-        ViewBag.SoCau = await Db.CauHoi.CountAsync(x => x.BaiId == baiId);
-        ViewBag.CoBai = ds.Count > 0;
-        return View("Sua", new CauHoiForm { ViTri = chon });
+        return RedirectToAction("Tao", "GiaoBai", new { bai = baiId == 0 ? (int?)null : baiId });
     }
 
     public async Task<IActionResult> Sua(int id)

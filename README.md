@@ -73,8 +73,14 @@ giao bài xong học viên mở ở menu ⋮ của bài học → **Bài tập �
 Trắc nghiệm và đúng / sai chấm tự động; tự luận chấm tại **Bài nộp** của giảng viên.
 Bài đã có học viên nộp được giữ nguyên nội dung. Học viên chỉ thấy đáp án và lời giải sau khi nộp.
 
-**Thêm câu hỏi** là chức năng riêng: thêm từng câu luyện tập vào bài học, vẫn có ở menu trái
-và menu ⋮. **Lưu và thêm câu tiếp** giữ nguyên bài / mục đã chọn.
+**Bài tập và kiểm tra dùng chung form 3 bước**: Thông tin chung → Soạn câu hỏi → Xem lại & xuất bản.
+Cả hai đều có Trắc nghiệm, Đúng/Sai và Tự luận; có thể thêm, xoá và sắp xếp câu trong form.
+Đã bỏ menu riêng **Thêm câu hỏi**; các đường dẫn thêm câu cũ chuyển về form soạn bài tập.
+Kiểm tra có thời gian 5–240 phút, chỉ bắt đầu khi học viên bấm **Bắt đầu làm bài**; thời gian bắt đầu lưu ở server,
+tải lại không đặt lại đồng hồ. Hết giờ trang tự nộp; server không nhận đáp án gửi quá thời gian kèm 10 giây truyền bài.
+Trắc nghiệm/Đúng-Sai chấm tự động, Tự luận chấm tại **Bài nộp & chấm điểm**.
+Đề cũ đã có bài làm và đề mới đã có lượt bắt đầu được giữ nguyên nội dung. Đề cũ chưa có bài làm mở bằng form chung;
+khi lưu sẽ tạo bộ câu riêng, không sửa câu ngân hàng đang dùng ở nơi khác.
 
 Kiểm tra luồng giao bài (web Development đang chạy, PostgreSQL có dữ liệu mẫu, Python 3 và `psql`):
 `python3 KiemThu/kiem-tra-giao-bai-theo-buoi.py`. Mặc định dùng `http://localhost:5280`,
