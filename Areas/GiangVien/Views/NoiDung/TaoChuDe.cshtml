@@ -4,6 +4,7 @@
 <section class="ql-khoi" style="max-width:920px;margin:0 auto" aria-labelledby="tao">
 <div class="ql-khoi-dau"><div><h2 id="tao">Từ ý tưởng đến bài học có cấu trúc</h2><p>Nhập nội dung; AI sẽ soạn thành các mục và phần để anh xem, sửa trước khi chia sẻ.</p></div></div>
 <form method="post" asp-action="TaoChuDeBangAi" class="ql-khoi-than ql-form" data-soan-noi-dung>
+<partial name="_NhapTaiLieu" />
 @if (chuDe is null)
 {
 <div class="ql-truong"><label for="khoaId">Khoá học</label><select id="khoaId" name="khoaId">@foreach (var k in dsKhoa) { <option value="@k.Id" selected="@(k.Id == Model.Id)">@k.Ten</option> }</select></div>
@@ -26,4 +27,5 @@ else
 </section>
 @section Scripts {
 <script src="~/js/soan-noi-dung.js" asp-append-version="true"></script>
+<script src="~/js/nhap-tai-lieu.js" asp-append-version="true"></script>
 }

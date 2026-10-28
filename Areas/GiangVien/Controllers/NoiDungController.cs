@@ -9,6 +9,27 @@ namespace SuDia.Web.Areas.GiangVien.Controllers;
 // Soạn nội dung: Khoá → Chủ đề → Bài → Mục → Phần (đoạn văn, mốc thời gian, ghi nhớ)
 public class NoiDungController(AppDbContext db, ISoanNoiDungAiService ai, KhoBanNhapNoiDung banNhap) : GiangVienControllerBase(db)
 {
+    [HttpPost, ValidateAntiForgeryToken, RequestSizeLimit(22 * 1024 * 1024)]
+    public async Task<IActionResult> NhapTaiLieu(IFormFile? taiLieu, CancellationToken ct)
+    {
+        if (taiLieu is null || taiLieu.Length == 0 || taiLieu.Length > DocTaiLieuOffice.ToiDaByte)
+            return BadRequest(new { loi = "Anh chọn tài liệu Word hoặc PowerPoint, tối đa 20 MB." });
+        var extension = Path.GetExtension(taiLieu.FileName).ToLowerInvariant();
+        if (extension is not ".docx" and not ".pptx")
+            return BadRequest(new { loi = "Chỉ nhận .docx và .pptx. Với file .doc hoặc .ppt cũ, anh lưu lại sang định dạng mới nhé." });
+        try
+        {
+            using var buffer = new MemoryStream();
+            await taiLieu.CopyToAsync(buffer, ct);
+            buffer.Position = 0;
+            return Json(DocTaiLieuOffice.Doc(buffer, extension, taiLieu.FileName));
+        }
+        catch (Exception ex) when (ex is InvalidDataException or System.Xml.XmlException or ArgumentException or UriFormatException)
+        {
+            return BadRequest(new { loi = ex is InvalidDataException ? ex.Message : "Không đọc được tài liệu. Anh kiểm tra file có bị hỏng hoặc có mật khẩu không nhé." });
+        }
+    }
+
     private void PhucHoiNhap(string? nhap)
     {
         var values = banNhap.Doc<Dictionary<string, string>>(Uid, nhap);
