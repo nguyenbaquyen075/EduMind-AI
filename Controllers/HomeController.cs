@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SuDia.Web.Services;
 using SuDia.Web.Models;
+using Microsoft.EntityFrameworkCore;
+using SuDia.Web.Data;
 
 namespace SuDia.Web.Controllers;
 
@@ -57,14 +59,20 @@ public class HomeController : Controller
     // Làm đề: hiện câu hỏi, chưa có đáp án
     [HttpGet]
     [Authorize]
-    public IActionResult LamCauHoi(int? id) => View(_svc.LayDe(id, null));
+    public async Task<IActionResult> LamCauHoi(int? id, [FromServices] AppDbContext db)
+    {
+        var baiTap = await db.DeThi.Where(d => d.Id == id).Select(d => d.BaiTapGiaoId).FirstOrDefaultAsync();
+        return baiTap is int bt ? RedirectToAction("Lam", "BaiTap", new { id = bt }) : View(_svc.LayDe(id, null));
+    }
 
     // Nộp bài: chấm ở server rồi mới hiện đáp án + giải thích. Ô chọn tên "cau-1", "cau-2"…
     [HttpPost]
     [Authorize]
     [ValidateAntiForgeryToken]
-    public IActionResult LamCauHoi(int? id, IFormCollection form)
+    public async Task<IActionResult> LamCauHoi(int? id, IFormCollection form, [FromServices] AppDbContext db)
     {
+        var baiTap = await db.DeThi.Where(d => d.Id == id).Select(d => d.BaiTapGiaoId).FirstOrDefaultAsync();
+        if (baiTap is int bt) return RedirectToAction("Lam", "BaiTap", new { id = bt });
         var daChon = new Dictionary<int, string>();
         foreach (var (key, value) in form)
             if (key.StartsWith("cau-") && int.TryParse(key[4..], out var so) && value.ToString() is "A" or "B" or "C" or "D")

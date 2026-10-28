@@ -31,6 +31,10 @@ public class GiaoBaiForm
     public string HuongDan { get; set; } = "";
     public DateTimeOffset? HanNop { get; set; }
     public bool DaGiao { get; set; }
+    public bool LaKiemTra { get; set; }
+    public int? DeThiId { get; set; }
+    [System.ComponentModel.DataAnnotations.Range(5, 240)]
+    public int SoPhut { get; set; } = 45;
     public List<CauBaiTap> Cau { get; set; } = [];
 }
 
@@ -41,6 +45,8 @@ public class LamBaiGiaoViewModel
     public SuDia.Web.Data.BaiNopGiao? BaiNop { get; init; }
     public Dictionary<string, string> TraLoi { get; init; } = [];
     public bool XemTruoc { get; init; }
+    public DateTime? HetGio { get; init; }
+    public bool CanBatDau => BaiTap.DeThi is not null && !XemTruoc && BaiNop is null && HetGio is null;
     public decimal TongDiem => Cau.Sum(c => c.TongDiem);
 }
 

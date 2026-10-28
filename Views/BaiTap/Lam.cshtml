@@ -2,11 +2,21 @@
 @{ var bt = Model.BaiTap; var nop = Model.BaiNop; var daNop = nop is not null; var hetHan = !Model.XemTruoc && bt.HanNop < DateTime.UtcNow; ViewData["Title"] = bt.Ten; }
 @section Head { <link rel="stylesheet" href="~/css/quan-ly.css" asp-append-version="true"><link rel="stylesheet" href="~/css/giao-bai.css" asp-append-version="true"> }
 <main class="gb" style="margin:32px auto;padding:0 20px">
-<a href="/BaiTap?bai=@bt.BaiId">← Bài tập được giao</a><h1>@bt.Ten</h1>
+<a href="@(bt.DeThi is null ? $"/BaiTap?bai={bt.BaiId}" : $"/Home/LuyenDe/{bt.DeThi.KhoaId}")">← @(bt.DeThi is null ? "Bài tập được giao" : "Danh sách kiểm tra")</a><h1>@bt.Ten</h1>
 <p>@Model.Cau.Count câu · Tổng @Model.TongDiem điểm · @(bt.HanNop is DateTime han ? $"Hạn nộp: {DinhDang.GioNgay(han.ToLocalTime())}" : "Không giới hạn hạn nộp")</p>
 <p class="gb-pre">@bt.HuongDan</p>
 @if (Model.XemTruoc) { <p class="ql-thong-bao">Chế độ xem trước của giảng viên · không lưu bài nộp.</p> }
 @if (TempData["LoiBaiTap"] is string loi) { <p class="ql-thong-bao loi" role="alert">@loi</p> }
+@if (Model.CanBatDau)
+{
+<div class="gb-panel"><h2>Bài kiểm tra · @bt.DeThi!.SoPhut phút</h2><p>Đồng hồ bắt đầu sau khi bấm nút bên dưới. Tải lại trang không đặt lại thời gian.</p>
+@if (!hetHan) { <form method="post" asp-action="BatDau" asp-route-id="@bt.Id"><button type="submit" class="ql-nut">Bắt đầu làm bài</button></form> }
+else { <p class="ql-thong-bao loi">Đã hết hạn làm bài kiểm tra.</p> }
+</div>
+}
+else
+{
+@if (Model.HetGio is not null && !daNop) { <p class="ql-thong-bao" role="status">Thời gian còn lại: <b id="ktConLai">Đang tính…</b> · Hết giờ sẽ tự nộp.</p> }
 @if (daNop)
 {
 <div class="gb-panel"><h2>Đã nộp bài</h2><p>Điểm trắc nghiệm và đúng / sai: <b>@nop!.DiemTuDong</b></p>
@@ -15,7 +25,7 @@ else { <p>Tổng điểm: <b>@(nop.DiemTuDong + nop.DiemTuLuan) / @Model.TongDie
 </div>
 }
 else if (hetHan) { <p class="ql-thong-bao loi">Đã hết hạn nộp bài tập này.</p> }
-<form method="post" asp-controller="BaiTap" asp-action="Lam" asp-route-id="@bt.Id">
+<form method="post" asp-controller="BaiTap" asp-action="Lam" asp-route-id="@bt.Id" id="kiemTraForm" data-het-gio="@Model.HetGio?.ToString("o")">
 @{ var so = 0; }
 @foreach (var c in Model.Cau)
 {
@@ -48,5 +58,8 @@ else { <textarea name="@c.Id" rows="6" maxlength="20000" placeholder="Nhập câ
 }
 </fieldset>
 }
-@if (!daNop && !hetHan) { <button type="submit" class="ql-nut">Nộp bài tập</button> }
-</form></main>
+@if (!daNop && !hetHan) { <button type="submit" class="ql-nut">@(bt.DeThi is null ? "Nộp bài tập" : "Nộp bài kiểm tra")</button> }
+</form>
+}
+</main>
+@section Scripts { @if (Model.HetGio is not null && !daNop && !hetHan) { <script src="~/js/kiem-tra.js" asp-append-version="true"></script> } }

@@ -47,7 +47,7 @@
 </div>
 
 <section class="ql-khoi" aria-labelledby="cay">
-<div class="ql-khoi-dau"><h2 id="cay">@Model.Ten · bài tập theo chủ đề và bài</h2><p>Bấm vào bài tập để xem các câu đã giao; bấm ⋮ để thêm câu.</p></div>
+<div class="ql-khoi-dau"><h2 id="cay">@Model.Ten · bài tập theo chủ đề và bài</h2><p>Bấm vào bài để xem hoặc soạn bài tập.</p></div>
 <ul class="ql-cay">
 @foreach (var cd in Model.ChuDe.OrderBy(c => c.ThuTu))
 {
@@ -70,7 +70,6 @@
 <ul>
 <li><a href="/GiangVien/CauHoi?bai=@b.Id">Xem bài tập</a></li>
 <li><a href="/GiangVien/GiaoBai/Tao?bai=@b.Id">Giao bài tập</a></li>
-<li><a href="/GiangVien/CauHoi/Tao?bai=@b.Id">Thêm câu hỏi</a></li>
 <li><a href="/Home/LamCauHoi/@b.Id" target="_blank">Xem như học viên ↗</a></li>
 </ul>
 </details>
