@@ -42,6 +42,7 @@ else
 <div class="ql-khoi-dau"><h2 id="ai-soan">Soạn nội dung bằng AI</h2><p>Dán ghi chú hoặc nội dung buổi học; AI sẽ chia thành mục và phần để giảng viên rà soát.</p></div>
 <form method="post" asp-action="TaoNoiDungBangAi" class="ql-khoi-than ql-form" data-soan-noi-dung>
 <input type="hidden" name="baiId" value="@Model.Id">
+<partial name="_NhapTaiLieu" />
 <div class="ql-truong"><label for="noiDungAi">Nội dung buổi học</label><textarea id="noiDungAi" name="noiDung" rows="11" minlength="30" maxlength="30000" required placeholder="Dán nội dung, dàn ý hoặc ghi chú của buổi học vào đây...">@(ViewData.ModelState["noiDung"]?.AttemptedValue)</textarea><small>Có thể dùng AI hoặc tách theo ký hiệu đề mục có sẵn (#, ##, I., 1., 1.1., a). Cả hai cách đều cho xem và sửa trước khi chia sẻ.</small></div>
 <p class="ql-phu" data-soan-status role="status" aria-live="polite" hidden></p>
 <div class="ql-chan"><button class="ql-nut" type="submit">✦ Tạo bản nháp bằng AI</button><button class="ql-nut phu" type="submit" name="chiaTheoVanBan" value="true">Chia theo đề mục văn bản</button></div>
@@ -49,6 +50,7 @@ else
 </section>
 @section Scripts {
 <script src="~/js/soan-noi-dung.js" asp-append-version="true"></script>
+<script src="~/js/nhap-tai-lieu.js" asp-append-version="true"></script>
 }
 
 <section class="ql-khoi" aria-labelledby="thong-tin">
