@@ -13,4 +13,13 @@
     ten.focus();
   });
   document.getElementById('chuDeDialogCancel').addEventListener('click', () => dialog.close());
+
+  // Nút "+ Tạo chủ đề" ở đầu trang mở hộp thoại nhập tên
+  const tao = document.getElementById('taoChuDeDialog');
+  document.querySelector('[data-topic-action="create"]')?.addEventListener('click', () => {
+    tao.querySelector('form').reset();
+    tao.showModal();
+    tao.querySelector('#tenChuDeMoi').focus();
+  });
+  tao?.querySelector('[data-dong-dialog]').addEventListener('click', () => tao.close());
 })();

@@ -1,0 +1,32 @@
+@model DonHang
+@{
+    ViewData["Title"] = "Kết quả thanh toán";
+    var dsKhoa = (List<Khoa>)ViewBag.Khoa;
+}
+@section Head { <link rel="stylesheet" href="~/css/quan-ly.css" asp-append-version="true"><link rel="stylesheet" href="~/css/giao-bai.css" asp-append-version="true"> }
+<main class="gb" style="margin:32px auto;padding:0 20px;max-width:720px">
+@if (TempData["LoiThanhToan"] is string loi) { <p class="ql-thong-bao loi" role="alert" style="margin:0 0 16px">@loi</p> }
+<section class="gb-panel" role="status">
+@if (Model.TrangThai == TrangThaiDon.DaThanhToan)
+{
+<h1 style="margin:0 0 8px">Thanh toán thành công</h1>
+<p>Gói <b>@Model.TenGoi</b> đã được kích hoạt. Các khoá đã mở:</p>
+<ul style="padding-left:20px">@foreach (var k in dsKhoa) { <li style="margin:6px 0"><a asp-controller="Home" asp-action="KhoaHoc" asp-route-id="@k.Id">@k.Ten</a></li> }</ul>
+<p style="margin-top:20px"><a asp-controller="Home" asp-action="KhoaHoc" asp-route-id="" class="ql-nut">Vào học ngay →</a></p>
+}
+else if (Model.TrangThai == TrangThaiDon.DaHuy)
+{
+<h1 style="margin:0 0 8px">Chưa thanh toán</h1>
+<p>Đơn mua gói <b>@Model.TenGoi</b> đã huỷ hoặc hết hạn, bạn chưa bị trừ tiền.</p>
+<p style="margin-top:20px">@if (Model.GoiBanId is int goiId) { <a href="/ThanhToan/Mua/@goiId" class="ql-nut">Thanh toán lại</a> } <a href="/#goi" class="ql-nut phu">Xem các gói</a></p>
+}
+else
+{
+<h1 style="margin:0 0 8px">Đang chờ xác nhận thanh toán</h1>
+<p>Nếu bạn đã chuyển khoản, hệ thống sẽ mở khoá trong ít phút. Tải lại trang này để cập nhật.</p>
+<p style="margin-top:20px">@if (Model.LinkThanhToan is string link) { <a href="@link" class="ql-nut">Mở lại trang thanh toán</a> } <a href="/ThanhToan/KetQua?ma=@Model.MaThanhToan" class="ql-nut phu">Tải lại</a></p>
+}
+<p class="gb-muted" style="margin-top:20px">Mã đơn @Model.MaThanhToan · @DinhDang.Gia(Model.SoTien) · @Model.SoThang tháng</p>
+</section>
+<p style="margin-top:16px"><a href="/ThanhToan">Xem lịch sử thanh toán</a></p>
+</main>

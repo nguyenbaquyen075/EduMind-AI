@@ -1,0 +1,30 @@
+@model XemTruocBaiModel
+@{
+    // Mở trong khung nổi của trang soạn: dùng layout trơn và CSS trang bài học của học viên
+    Layout = "_Layout";
+    ViewData["Title"] = "Xem trước · " + Model.TieuDe;
+}
+@section Head {
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap">
+<link rel="stylesheet" href="~/css/bai-hoc.css" asp-append-version="true">
+}
+<div style="min-height: 100vh; background: #FAF8F3; color: #0F1B2D; font-family: 'Be Vietnam Pro', system-ui, sans-serif; font-size: 16px; line-height: 1.6">
+<main class="bai-viet" style="margin: 0 auto; padding: 28px 20px 48px">
+@if (Model.GhiChu is string ghiChu)
+{
+<p style="margin: 0 0 20px; padding: 10px 14px; border-radius: 10px; background: #FFF7EB; border: 1px solid #F0CF9A; color: #5C3A06; font-size: 14px">@ghiChu</p>
+}
+<header class="muc-bai dau-bai">
+<p style="margin: 0 0 6px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #0E7C66">@Model.Nhan</p>
+<h1 style="margin: 0; font-size: 32px; font-weight: 800; letter-spacing: -0.5px; line-height: 1.25">@Model.TieuDe</h1>
+</header>
+@if (Model.Muc.Count == 0 || Model.Muc.All(m => m.Phan.Count == 0))
+{
+<p style="margin: 0; padding: 20px; border-radius: 12px; border: 1px dashed #C5CED6; color: #52606D">Chưa có nội dung. Thêm mục và đoạn văn để học viên có bài đọc.</p>
+}
+else
+{
+<partial name="_NoiDungBai" model="Model.Muc" />
+}
+</main>
+</div>

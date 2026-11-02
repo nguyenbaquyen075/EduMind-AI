@@ -27,7 +27,7 @@ public class NguoiDungController(AppDbContext db, UserManager<NguoiDung> users) 
         return View();
     }
 
-    public IActionResult Tao() => View(new TaoNguoiDungForm());
+    public IActionResult Tao(string? vaiTro) => View(new TaoNguoiDungForm { VaiTro = VaiTro.TatCa.Contains(vaiTro) ? vaiTro! : VaiTro.HocVien });
 
     public async Task<IActionResult> ChiTiet(string id)
     {

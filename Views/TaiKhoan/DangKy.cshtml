@@ -3,8 +3,8 @@
     Layout = "_KhungTaiKhoan";
     ViewData["Title"] = "Đăng ký – Sử Địa";
 }
-<h1>Đăng ký học thử</h1>
-<p>Tạo tài khoản để học thử bài đầu của mỗi môn.</p>
+<h1>Đăng ký</h1>
+<p>Tạo tài khoản để bắt đầu học.</p>
 <form asp-action="DangKy" method="post" novalidate>
 <div asp-validation-summary="ModelOnly" class="tk-tong-loi" role="alert"></div>
 <div class="tk-truong">
@@ -14,17 +14,17 @@
 </div>
 <div class="tk-truong">
 <label asp-for="Email">Email</label>
-<input asp-for="Email" type="email" autocomplete="email">
+<input asp-for="Email" type="email" autocomplete="email" placeholder="ban@email.com">
 <span asp-validation-for="Email" class="tk-loi"></span>
 </div>
 <div class="tk-truong">
 <label asp-for="MatKhau">Mật khẩu</label>
-<input asp-for="MatKhau" type="password" autocomplete="new-password">
+<div class="tk-mk"><input asp-for="MatKhau" type="password" autocomplete="new-password"><button type="button" class="tk-mat" data-hien-mk="MatKhau" aria-label="Hiện mật khẩu" aria-pressed="false"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"></path><circle cx="12" cy="12" r="3"></circle></svg></button></div>
 <span asp-validation-for="MatKhau" class="tk-loi"></span>
 </div>
 <div class="tk-truong">
 <label asp-for="NhapLai">Nhập lại mật khẩu</label>
-<input asp-for="NhapLai" type="password" autocomplete="new-password">
+<div class="tk-mk"><input asp-for="NhapLai" type="password" autocomplete="new-password"><button type="button" class="tk-mat" data-hien-mk="NhapLai" aria-label="Hiện mật khẩu" aria-pressed="false"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"></path><circle cx="12" cy="12" r="3"></circle></svg></button></div>
 <span asp-validation-for="NhapLai" class="tk-loi"></span>
 </div>
 <button type="submit" class="tk-nut">Tạo tài khoản</button>

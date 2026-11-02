@@ -2,7 +2,8 @@
 @{ var bt = Model.BaiTap; var nop = Model.BaiNop; var daNop = nop is not null; var hetHan = !Model.XemTruoc && bt.HanNop < DateTime.UtcNow; ViewData["Title"] = bt.Ten; }
 @section Head { <link rel="stylesheet" href="~/css/quan-ly.css" asp-append-version="true"><link rel="stylesheet" href="~/css/giao-bai.css" asp-append-version="true"> }
 <main class="gb" style="margin:32px auto;padding:0 20px">
-<a href="@(bt.DeThi is null ? $"/BaiTap?bai={bt.BaiId}" : $"/Home/LuyenDe/{bt.DeThi.KhoaId}")">← @(bt.DeThi is null ? "Bài tập được giao" : "Danh sách kiểm tra")</a><h1>@bt.Ten</h1>
+@* Id = 0: bản xem trước trong khung soạn của giảng viên, không có trang để quay lại hay nộp *@
+@if (bt.Id != 0) { <a href="@(bt.DeThi is null ? $"/BaiTap?bai={bt.BaiId}" : $"/Home/LuyenDe/{bt.DeThi.KhoaId}")">← @(bt.DeThi is null ? "Bài tập được giao" : "Danh sách kiểm tra")</a> }<h1>@bt.Ten</h1>
 <p>@Model.Cau.Count câu · Tổng @Model.TongDiem điểm · @(bt.HanNop is DateTime han ? $"Hạn nộp: {DinhDang.GioNgay(han.ToLocalTime())}" : "Không giới hạn hạn nộp")</p>
 <p class="gb-pre">@bt.HuongDan</p>
 @if (Model.XemTruoc) { <p class="ql-thong-bao">Chế độ xem trước của giảng viên · không lưu bài nộp.</p> }
@@ -10,6 +11,8 @@
 @if (Model.CanBatDau)
 {
 <div class="gb-panel"><h2>Bài kiểm tra · @bt.DeThi!.SoPhut phút</h2><p>Đồng hồ bắt đầu sau khi bấm nút bên dưới. Tải lại trang không đặt lại thời gian.</p>
+@if (!hetHan && bt.HanNop is DateTime hanKt && hanKt < DateTime.UtcNow.AddMinutes(bt.DeThi.SoPhut))
+{ <p class="ql-thong-bao" role="note">Hạn nộp đến trước khi hết @bt.DeThi.SoPhut phút: bài sẽ tự nộp lúc @DinhDang.GioNgay(hanKt.ToLocalTime()).</p> }
 @if (!hetHan) { <form method="post" asp-action="BatDau" asp-route-id="@bt.Id"><button type="submit" class="ql-nut">Bắt đầu làm bài</button></form> }
 else { <p class="ql-thong-bao loi">Đã hết hạn làm bài kiểm tra.</p> }
 </div>
@@ -58,7 +61,7 @@ else { <textarea name="@c.Id" rows="6" maxlength="20000" placeholder="Nhập câ
 }
 </fieldset>
 }
-@if (!daNop && !hetHan) { <button type="submit" class="ql-nut">@(bt.DeThi is null ? "Nộp bài tập" : "Nộp bài kiểm tra")</button> }
+@if (!daNop && !hetHan && bt.Id != 0) { <button type="submit" class="ql-nut">@(bt.DeThi is null ? "Nộp bài tập" : "Nộp bài kiểm tra")</button> }
 </form>
 }
 </main>

@@ -1,0 +1,36 @@
+@model GoiBanForm
+@{
+    var tao = Model.Id == 0;
+    ViewData["Title"] = (tao ? "Tạo gói học" : "Sửa gói học") + " – Quản trị";
+    ViewData["TieuDe"] = tao ? "Tạo gói học" : $"Sửa gói · {Model.Ten}";
+    ViewData["Muc"] = "GoiHoc";
+    ViewData["Crumb"] = "<a href=\"/Admin/GoiHoc\">Gói học & giá</a>";
+    var dsKhoa = (List<Khoa>)ViewBag.DsKhoa;
+}
+<form method="post" asp-action="Luu" class="ql-form ql-khoi ql-khoi-than" style="max-width: 680px">
+<input type="hidden" asp-for="Id">
+<div asp-validation-summary="ModelOnly" class="ql-tong-loi"></div>
+<div class="ql-2cot">
+<div class="ql-truong"><label asp-for="Ten">Tên gói</label><input asp-for="Ten" type="text" maxlength="100" placeholder="Ví dụ: Sử & Địa 12"><span asp-validation-for="Ten" class="ql-loi"></span></div>
+<div class="ql-truong"><label asp-for="Nhan">Nhãn nhỏ phía trên</label><input asp-for="Nhan" type="text" maxlength="40" placeholder="Ví dụ: Trọn bộ"></div>
+</div>
+<div class="ql-2cot">
+<div class="ql-truong"><label asp-for="Gia">Giá (đồng)</label><input asp-for="Gia" type="number" min="1000" step="1000" placeholder="Để trống nếu chưa mở bán"><small>Số tiền học viên trả qua PayOS.</small><span asp-validation-for="Gia" class="ql-loi"></span></div>
+<div class="ql-truong"><label asp-for="SoThang">Thời hạn học (tháng)</label><input asp-for="SoThang" type="number" min="1" max="60"><small>Cộng nối tiếp nếu học viên còn hạn.</small><span asp-validation-for="SoThang" class="ql-loi"></span></div>
+</div>
+<fieldset class="ql-truong" style="border:0;padding:0;margin:0"><legend style="font-weight:600;margin-bottom:6px">Khoá được mở khi mua</legend>
+@foreach (var k in dsKhoa)
+{
+<label class="ql-check"><input type="checkbox" name="KhoaIds" value="@k.Id" checked="@Model.KhoaIds.Contains(k.Id)"> @k.Ten</label>
+}
+<span asp-validation-for="KhoaIds" class="ql-loi"></span></fieldset>
+<div class="ql-truong"><label asp-for="QuyenLoi">Quyền lợi</label><textarea asp-for="QuyenLoi" rows="5" placeholder="Mỗi dòng một quyền lợi"></textarea><small>Hiện thành danh sách trên thẻ gói ở trang chủ.</small></div>
+<div class="ql-2cot">
+<div class="ql-truong"><label asp-for="MauNhan">Màu nhãn</label><input asp-for="MauNhan" type="color"><span asp-validation-for="MauNhan" class="ql-loi"></span></div>
+<div>
+<label class="ql-check"><input asp-for="NoiBat"> Nổi bật (viền vàng, "Được chọn nhiều nhất")</label>
+<label class="ql-check"><input asp-for="DangBan"> Đang bán — hiện ở trang chủ</label>
+</div>
+</div>
+<div class="ql-chan"><button class="ql-nut">Lưu gói</button><a href="/Admin/GoiHoc" class="ql-nut phu">Huỷ</a></div>
+</form>

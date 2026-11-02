@@ -98,6 +98,24 @@ public class GiaoBaiController(AppDbContext db) : GiangVienControllerBase(db)
         return Json(new { url = f.LaKiemTra ? Url.Action("Index", "DeThi") : Url.Action("Index", "CauHoi", new { bai = f.BaiId }), id = bt.Id });
     }
 
+    // Xem trước bài tập / kiểm tra như học viên, theo dữ liệu đang soạn trên form (chưa cần lưu)
+    [HttpPost, ValidateAntiForgeryToken, RequestSizeLimit(2_000_000)]
+    public IActionResult XemTruoc(string? duLieu)
+    {
+        GiaoBaiForm? f;
+        try { f = System.Text.Json.JsonSerializer.Deserialize<GiaoBaiForm>(duLieu ?? "", new System.Text.Json.JsonSerializerOptions(System.Text.Json.JsonSerializerDefaults.Web)); }
+        catch (System.Text.Json.JsonException) { f = null; }
+        if (f is null) return BadRequest();
+        foreach (var c in f.Cau)
+        {
+            while (c.PhuongAn.Count < 4) c.PhuongAn.Add("");
+            if (c.Kieu == "DS") while (c.Y.Count < 4) c.Y.Add(new YDungSai());
+        }
+        var bt = new BaiTapGiao { Ten = string.IsNullOrWhiteSpace(f.Ten) ? "(Chưa đặt tên)" : f.Ten.Trim(), HuongDan = f.HuongDan ?? "",
+            HanNop = f.HanNop?.UtcDateTime, DeThi = f.LaKiemTra ? new DeThi { SoPhut = f.SoPhut } : null };
+        return View("~/Views/BaiTap/Lam.cshtml", new LamBaiGiaoViewModel { BaiTap = bt, Cau = f.Cau, XemTruoc = true });
+    }
+
     public async Task<IActionResult> BaiNop(int id)
     {
         var bt = await CuaToi().AsNoTracking().FirstOrDefaultAsync(b => b.Id == id);

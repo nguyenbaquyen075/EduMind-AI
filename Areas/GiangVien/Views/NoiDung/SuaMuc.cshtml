@@ -8,7 +8,7 @@
 }
 @section Actions {
 <a href="/GiangVien/NoiDung/SoanBai/@bai.Id" class="ql-nut phu">← Về bài</a>
-<a href="/Home/BaiHoc/@bai.Id" class="ql-nut phu" target="_blank">Xem thử ↗</a>
+<button type="submit" form="formMuc" formaction="/GiangVien/NoiDung/XemTruocMuc" formtarget="khungXemTruoc" formnovalidate class="ql-nut phu" data-xem-truoc>Xem trước</button>
 <button type="submit" form="formMuc" class="ql-nut">Lưu thay đổi</button>
 }
 <form method="post" asp-action="SuaMuc" id="formMuc" class="ql-form" style="max-width: 920px">
@@ -80,3 +80,4 @@
 </script>
 <script src="~/js/ban-nhap-ai.js" asp-append-version="true"></script>
 }
+<partial name="_KhungXemTruoc" />

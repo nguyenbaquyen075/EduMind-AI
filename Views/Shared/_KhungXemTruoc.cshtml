@@ -1,0 +1,24 @@
+@* Khung xem trước nổi trên trang soạn: hiện phần vừa soạn như học viên thấy, không chuyển sang trang học viên.
+   Nút mở: [data-xem-truoc] (có data-src thì nạp link đó; nút gửi form thì đặt formtarget="khungXemTruoc"). *@
+<dialog id="xemTruoc" class="ql-xem-truoc" aria-labelledby="xemTruocTieuDe">
+<div class="ql-xem-truoc-dau">
+<div><b id="xemTruocTieuDe">Xem trước</b><span>Học viên sẽ thấy như bên dưới · chỉ để xem, không lưu</span></div>
+<button type="button" class="ql-nut phu nho" data-dong-xem-truoc>Đóng</button>
+</div>
+<iframe name="khungXemTruoc" title="Xem trước như học viên"></iframe>
+</dialog>
+<script>
+(() => {
+  const hop = document.getElementById('xemTruoc');
+  const khung = hop.querySelector('iframe');
+  document.addEventListener('click', (e) => {
+    const nut = e.target.closest('[data-xem-truoc]');
+    if (!nut) return;
+    if (nut.dataset.src) khung.src = nut.dataset.src;
+    hop.showModal();
+  });
+  hop.querySelector('[data-dong-xem-truoc]').addEventListener('click', () => hop.close());
+  hop.addEventListener('click', (e) => { if (e.target === hop) hop.close(); }); // bấm ra ngoài khung
+  hop.addEventListener('close', () => { khung.src = 'about:blank'; });
+})();
+</script>

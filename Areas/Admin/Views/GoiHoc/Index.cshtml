@@ -1,0 +1,31 @@
+@{
+    ViewData["Title"] = "Gói học & giá – Quản trị";
+    ViewData["TieuDe"] = "Gói học & giá";
+    ViewData["Muc"] = "GoiHoc";
+    var dsGoi = (List<GoiBan>)ViewBag.Goi;
+    var tenKhoa = (Dictionary<string, string>)ViewBag.TenKhoa;
+}
+@section Actions { <a href="/Admin/GoiHoc/Tao" class="ql-nut">+ Tạo gói</a> }
+<p class="ad-filter-note">Giá và quyền lợi hiển thị ở mục Gói học trang chủ. Đơn hàng và doanh thu xem ở <a href="/Admin/DoanhThu">Doanh thu & đơn hàng</a>.</p>
+@if (ViewBag.DaCauHinh is not true)
+{
+<p class="ql-thong-bao loi" style="margin:0 0 16px">Chưa cấu hình khoá PayOS: học viên chưa thanh toán được. Chạy <code>zsh scripts/cau-hinh-payos.zsh</code> trên máy chủ rồi khởi động lại web.</p>
+}
+<section class="ql-khoi">
+<table class="ql-bang">
+<thead><tr><th>Gói</th><th>Khoá được mở</th><th class="so">Giá</th><th class="so">Thời hạn</th><th>Trạng thái</th><th></th></tr></thead>
+<tbody>
+@foreach (var g in dsGoi)
+{
+<tr><td><b>@g.Ten</b>@if (g.NoiBat) { <span class="ql-chip vang">Nổi bật</span> }<span class="ql-phu">@g.Nhan</span></td>
+<td>@(g.KhoaIds.Count == 0 ? "—" : string.Join(", ", g.KhoaIds.Select(id => tenKhoa.GetValueOrDefault(id, id))))</td>
+<td class="so">@(g.Gia is null ? "Chưa đặt" : DinhDang.Gia(g.Gia))</td><td class="so">@g.SoThang tháng</td>
+<td>@if (!g.DangBan) { <span class="ql-chip">Ngừng bán</span> } else if (g.Gia is null) { <span class="ql-chip vang">Chưa có giá</span> } else { <span class="ql-chip xanh">Đang bán</span> }</td>
+<td class="hanh-dong"><span class="ql-hang-nut" style="justify-content: flex-end"><a href="/Admin/GoiHoc/Sua/@g.Id" class="ql-nut phu nho">Sửa</a>
+<form method="post" asp-action="Xoa" data-hoi="Xoá gói @g.Ten?"><input type="hidden" name="id" value="@g.Id"><button class="ql-nut xoa nho">Xoá</button></form></span></td></tr>
+}
+@if (dsGoi.Count == 0) { <tr><td colspan="6" class="ql-trong">Chưa có gói học nào.</td></tr> }
+</tbody>
+</table>
+</section>
+

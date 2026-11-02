@@ -14,7 +14,7 @@
 <div class="ql-truong"><label asp-for="VaiTro">Vai trò</label><select asp-for="VaiTro">
 @foreach (var v in VaiTro.TatCa)
 {
-<option value="@v">@AdminControllerBase.TenVaiTro(v)</option>
+<option value="@v" selected="@(v == Model.VaiTro)">@AdminControllerBase.TenVaiTro(v)</option>
 }
 </select></div>
 <div class="ql-chan"><button class="ql-nut">Tạo tài khoản</button><a href="/Admin/NguoiDung" class="ql-nut phu">Huỷ</a></div>

@@ -1,0 +1,23 @@
+@{
+    // Đầu trang Bài tập / Lịch dạy khi đã chọn: quay về danh sách khoá, khoá đang xem, giảng viên phụ trách.
+    // Mở từ trang Giảng viên (chỉ có ?gv=) thì hiện các khoá của người đó để chọn.
+    string gv = ViewBag.Gv; string? khoa = ViewBag.KhoaId; var muc = ViewData["Muc"] as string ?? "";
+    var dsKhoa = (List<Khoa>)ViewBag.DsKhoa;
+    var dangXem = dsKhoa.FirstOrDefault(k => k.Id == khoa) ?? (dsKhoa.Count == 1 ? dsKhoa[0] : null);
+    var khong = gv == SuDia.Web.Areas.Admin.Controllers.AdminControllerBase.KhongPhanCong;
+}
+<div class="dgv">
+<a href="/Admin/@muc" class="dgv-ve">← Các khoá</a>
+@if (dangXem is not null)
+{
+<div class="dgv-khoa-ten"><b>@dangXem.Ten</b><small>@(khong ? "Chưa có giảng viên" : "GV " + ViewBag.TenGv)</small></div>
+}
+else
+{
+<div class="dgv-khoa-ten"><b>@ViewBag.TenGv</b><small>@dsKhoa.Count khoá</small></div>
+<nav class="dgv-khoa" aria-label="Khoá của giảng viên">
+<a href="/Admin/@muc?gv=@gv" aria-current="page">Tất cả</a>
+@foreach (var k in dsKhoa) { <a href="/Admin/@muc?gv=@gv&khoa=@k.Id">@k.Ten</a> }
+</nav>
+}
+</div>

@@ -247,8 +247,8 @@
 <p style="margin: 0 0 6px; font-size: 11px; letter-spacing: 2.5px; text-transform: uppercase; color: @g.MauNhan">@g.Nhan</p>
     }
 <h3 style="margin: 0 0 28px; font-family: 'Playfair Display', Georgia, serif; font-size: 30px; font-weight: 600; color: #F4EEE2">@g.Ten</h3>
-<p style="margin: 0 0 4px; font-family: 'Playfair Display', Georgia, serif; font-size: 40px; font-weight: 600; color: #F4EEE2">@(DinhDang.Gia(g.Gia))</p>
-<p style="margin: 0 0 28px; font-size: 14px; color: #A39B8E">cho một năm học</p>
+<p style="margin: 0 0 4px; font-family: 'Playfair Display', Georgia, serif; font-size: 40px; font-weight: 600; color: #F4EEE2">@(g.Gia is null ? "Sắp mở bán" : DinhDang.Gia(g.Gia))</p>
+<p style="margin: 0 0 28px; font-size: 14px; color: #A39B8E">cho @(g.SoThang == 12 ? "một năm học" : $"{g.SoThang} tháng học")</p>
 <ul style="margin: 0 0 36px; padding: 0; list-style: none; flex-grow: 1; border-top: 1px solid #2E2A24">
     @foreach (var ql in g.QuyenLoi)
     {
@@ -257,11 +257,11 @@
 </ul>
     @if (g.NoiBat)
     {
-<a asp-controller="Home" asp-action="TongQuan" style="display: flex; align-items: center; justify-content: center; min-height: 52px; background: #C8A15A; color: #14120F; text-decoration: none; font-weight: 600">Chọn gói</a>
+<a asp-controller="ThanhToan" asp-action="Mua" asp-route-id="@g.Id" style="display: flex; align-items: center; justify-content: center; min-height: 52px; background: #C8A15A; color: #14120F; text-decoration: none; font-weight: 600">Chọn gói</a>
     }
     else
     {
-<a asp-controller="Home" asp-action="TongQuan" style="display: flex; align-items: center; justify-content: center; min-height: 52px; border: 1px solid #F4EEE2; color: #F4EEE2; text-decoration: none; font-weight: 500">Chọn gói</a>
+<a asp-controller="ThanhToan" asp-action="Mua" asp-route-id="@g.Id" style="display: flex; align-items: center; justify-content: center; min-height: 52px; border: 1px solid #F4EEE2; color: #F4EEE2; text-decoration: none; font-weight: 500">Chọn gói</a>
     }
 </div>
 }

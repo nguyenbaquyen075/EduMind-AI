@@ -252,7 +252,7 @@ public class DuLieuMauService : IKhoaHocService
         ],
     };
 
-    public BaiHocViewModel LayBaiHoc(int? id)
+    public BaiHocViewModel? LayBaiHoc(int? id)
     {
         var khoa = DanhMuc.FirstOrDefault(k => k.TatCaBai.Any(b => b.Id == id)) ?? DanhMuc[0];
         var bai = khoa.TatCaBai.FirstOrDefault(b => b.Id == id) ?? khoa.BaiHocTiep ?? khoa.TatCaBai.First();

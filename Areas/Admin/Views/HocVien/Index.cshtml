@@ -1,0 +1,42 @@
+@model List<AdminHocVienRow>
+@{
+    ViewData["TieuDe"] = "Học viên"; ViewData["Title"] = "Học viên – Quản trị"; ViewData["Muc"] = "HocVien";
+    string? khoa = ViewBag.KhoaId; string? sx = ViewBag.SapXep; int trang = ViewBag.Trang, soTrang = ViewBag.SoTrang;
+    var now = DateTime.UtcNow;
+    string Luc(DateTime? t) => t is null ? "Chưa học" : (now - t.Value).TotalDays < 1 ? "Hôm nay" : (now - t.Value).TotalDays < 2 ? "Hôm qua" : $"{(int)(now - t.Value).TotalDays} ngày trước";
+}
+@section Actions { <a href="/Admin/GhiDanh" class="ql-nut phu">Ghi danh</a><a href="/Admin/NguoiDung/Tao?vaiTro=HocVien" class="ql-nut">+ Thêm học viên</a> }
+<div class="ad-stats ad-stats--3">
+<article class="ad-stat"><p>Học viên</p><strong class="so">@ViewBag.Tong</strong><small>Tài khoản học viên</small></article>
+<article class="ad-stat"><p>Đang học</p><strong class="so">@ViewBag.DangHoc</strong><small>Có khoá còn hạn</small></article>
+<article class="ad-stat"><p>Hoạt động 7 ngày</p><strong class="so">@ViewBag.HoatDong7</strong><small>Học bài, luyện tập hoặc nộp bài</small></article>
+</div>
+<form method="get" class="ad-filters">
+<div class="ql-truong"><label for="q">Tìm học viên</label><input id="q" type="text" name="q" value="@ViewBag.Q" placeholder="Họ tên hoặc email"></div>
+<div class="ql-truong"><label for="khoa">Khoá học</label><select id="khoa" name="khoa"><option value="">Tất cả khoá</option>@foreach (Khoa k in ViewBag.DsKhoa) { <option value="@k.Id" selected="@(k.Id == khoa)">@k.Ten</option> }</select></div>
+<div class="ql-truong"><label for="sx">Sắp xếp</label><select id="sx" name="sapXep"><option value="">Mới tạo trước</option><option value="tien-do" selected="@(sx == "tien-do")">Tiến độ thấp trước</option><option value="hoat-dong" selected="@(sx == "hoat-dong")">Lâu chưa học trước</option><option value="het-han" selected="@(sx == "het-han")">Sắp hết hạn trước</option></select></div>
+<button class="ql-nut phu">Lọc</button><a href="/Admin/HocVien" class="ql-nut-chu">Bỏ lọc</a>
+</form>
+<section class="ql-khoi">
+<div class="ql-khoi-dau"><h2>Tiến độ học viên</h2><span>Bài đã học / bài xuất bản của các khoá còn hạn</span></div>
+@if (Model.Count == 0) { <p class="ql-trong">Không có học viên phù hợp.</p> }
+else {
+<div class="ad-table-wrap"><table class="ql-bang">
+<thead><tr><th>Học viên</th><th>Khoá đang học</th><th>Tiến độ bài học</th><th class="so">Luyện tập</th><th class="so">Bài nộp</th><th>Học gần nhất</th><th>Hạn học</th></tr></thead>
+<tbody>
+@foreach (var h in Model)
+{
+<tr><td><a href="/Admin/NguoiDung/ChiTiet/@h.Id"><b>@h.HoTen</b></a><span class="ql-phu">@h.Email</span></td>
+<td>@if (h.Khoa.Count == 0) { <span class="ql-chip">Chưa ghi danh</span> } else { @string.Join(", ", h.Khoa) }</td>
+<td>@if (h.TienDo is int td) { <div class="gv-tl"><span class="bd-ht-ray"><span class="bd-ht-thanh" style="width:@(Math.Max(td, 1))%"></span></span><b>@td%</b></div><span class="ql-phu">@h.BaiDaHoc / @h.BaiTong bài</span> } else { <span class="ql-phu">—</span> }</td>
+<td class="so">@h.LuyenTap</td><td class="so">@h.BaiNop</td>
+<td><span class="@(h.HoatDongCuoi is null || (now - h.HoatDongCuoi.Value).TotalDays > 14 ? "hv-cham" : null)">@Luc(h.HoatDongCuoi)</span></td>
+<td>@if (h.Khoa.Count == 0) { <span class="ql-phu">—</span> } else if (h.HanGanNhat is DateTime han) { <span class="ql-chip @(han <= now.AddDays(14) ? "vang" : "")">@han.ToLocalTime().ToString("dd/MM/yyyy")</span> } else { <span class="ql-phu">Không giới hạn</span> }</td></tr>
+}
+</tbody></table></div>
+}
+</section>
+@if (soTrang > 1)
+{
+<div class="ad-pagination"><span>Trang @trang / @soTrang</span><span class="ql-hang-nut">@if (trang > 1) { <a asp-route-q="@ViewBag.Q" asp-route-khoa="@khoa" asp-route-sapXep="@sx" asp-route-trang="@(trang - 1)" class="ql-nut phu nho">← Trước</a> }@if (trang < soTrang) { <a asp-route-q="@ViewBag.Q" asp-route-khoa="@khoa" asp-route-sapXep="@sx" asp-route-trang="@(trang + 1)" class="ql-nut phu nho">Sau →</a> }</span></div>
+}

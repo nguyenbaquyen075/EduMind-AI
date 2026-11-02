@@ -126,6 +126,23 @@ Hết hạn mức trả thông báo chờ/thử lại, không tự chuyển sang
 Ở gói miễn phí, Google có thể sử dụng nội dung đầu vào/đầu ra để cải thiện sản phẩm:
 https://ai.google.dev/gemini-api/docs/pricing.
 
+## Gói học & thanh toán (PayOS)
+
+Gói học ở trang chủ lấy từ database. Admin sửa tên, giá, thời hạn (tháng), khoá được mở, quyền lợi và ẩn/hiện tại
+**Admin → Gói học & thanh toán**. Gói chưa có giá hiện "Sắp mở bán" và chưa mua được.
+
+Luồng mua: **Chọn gói** → `/ThanhToan/Mua/{id}` (cần đăng nhập, chỉ tài khoản học viên) → trang PayOS quét VietQR
+→ PayOS chuyển về `/ThanhToan/KetQua`. Trang kết quả **hỏi lại PayOS** trạng thái đơn, không tin tham số trên URL.
+Đã trả thì ghi danh vào các khoá của gói; còn hạn thì cộng nối tiếp, ghi danh không giới hạn giữ nguyên.
+Webhook `POST /api/payos/webhook` xác minh chữ ký HMAC-SHA256; webhook và trang kết quả đến cùng lúc chỉ cộng hạn một lần.
+Đơn giữ lại giá, thời hạn và khoá lúc mua, nên sửa gói sau đó không ảnh hưởng đơn cũ. Gói đã có đơn thì chỉ ngừng bán, không xoá.
+
+Cấu hình: chạy `zsh scripts/cau-hinh-payos.zsh` (Client ID, API Key, Checksum Key lấy tại my.payos.vn → Kênh thanh toán),
+rồi khởi động lại web. Môi trường thật đặt biến `PayOS__ClientId`, `PayOS__ApiKey`, `PayOS__ChecksumKey`.
+Khai báo webhook trên PayOS: `https://<tên-miền>/api/payos/webhook` (localhost không nhận được webhook; trang kết quả
+và nút **Kiểm tra PayOS** ở trang admin vẫn xác nhận được đơn). Chưa có khoá thì máy **Development** hiện nút
+giả lập thanh toán để thử luồng mở khoá; môi trường khác báo chưa cấu hình.
+
 ## Trợ lý AI
 Menu học viên **Hỏi AI** mở trực tiếp `/Home/HoiAi`, không mở trang bài học.
 Ô **Hỏi nhanh AI** ở Tổng quan cũng chuyển sang chat và gửi câu hỏi đã nhập.

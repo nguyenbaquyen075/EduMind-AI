@@ -487,6 +487,69 @@ namespace SuDia.Web.Data.Migrations
                     b.ToTable("DeThiCau");
                 });
 
+            modelBuilder.Entity("SuDia.Web.Data.DonHang", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("GoiBanId")
+                        .HasColumnType("integer");
+
+                    b.Property<List<string>>("KhoaIds")
+                        .IsRequired()
+                        .HasColumnType("text[]");
+
+                    b.Property<string>("LinkThanhToan")
+                        .HasColumnType("text");
+
+                    b.Property<string>("MaGiaoDich")
+                        .HasColumnType("text");
+
+                    b.Property<string>("MaLinkThanhToan")
+                        .HasColumnType("text");
+
+                    b.Property<long>("MaThanhToan")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime>("NgayTao")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("NgayThanhToan")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("NguoiDungId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("SoThang")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("SoTien")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("TenGoi")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("TrangThai")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GoiBanId");
+
+                    b.HasIndex("MaThanhToan")
+                        .IsUnique();
+
+                    b.HasIndex("NguoiDungId", "NgayTao");
+
+                    b.ToTable("DonHang");
+                });
+
             modelBuilder.Entity("SuDia.Web.Data.GhiDanh", b =>
                 {
                     b.Property<string>("NguoiDungId")
@@ -508,6 +571,54 @@ namespace SuDia.Web.Data.Migrations
                     b.ToTable("GhiDanh");
                 });
 
+            modelBuilder.Entity("SuDia.Web.Data.GoiBan", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("DangBan")
+                        .HasColumnType("boolean");
+
+                    b.Property<int?>("Gia")
+                        .HasColumnType("integer");
+
+                    b.Property<List<string>>("KhoaIds")
+                        .IsRequired()
+                        .HasColumnType("text[]");
+
+                    b.Property<string>("MauNhan")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Nhan")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool>("NoiBat")
+                        .HasColumnType("boolean");
+
+                    b.Property<List<string>>("QuyenLoi")
+                        .IsRequired()
+                        .HasColumnType("text[]");
+
+                    b.Property<int>("SoThang")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Ten")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("ThuTu")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("GoiBan");
+                });
+
             modelBuilder.Entity("SuDia.Web.Data.Khoa", b =>
                 {
                     b.Property<string>("Id")
@@ -517,14 +628,29 @@ namespace SuDia.Web.Data.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("DoiTuong")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<string>("GiangVienId")
                         .HasColumnType("text");
+
+                    b.Property<bool>("HienThi")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("KyHieu")
                         .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("MoTa")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Mon")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("MucTieu")
                         .IsRequired()
                         .HasColumnType("text");
 
@@ -936,6 +1062,24 @@ namespace SuDia.Web.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("CauHoi");
+                });
+
+            modelBuilder.Entity("SuDia.Web.Data.DonHang", b =>
+                {
+                    b.HasOne("SuDia.Web.Data.GoiBan", "GoiBan")
+                        .WithMany()
+                        .HasForeignKey("GoiBanId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("SuDia.Web.Data.NguoiDung", "NguoiDung")
+                        .WithMany()
+                        .HasForeignKey("NguoiDungId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("GoiBan");
+
+                    b.Navigation("NguoiDung");
                 });
 
             modelBuilder.Entity("SuDia.Web.Data.GhiDanh", b =>

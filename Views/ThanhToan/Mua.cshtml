@@ -1,0 +1,65 @@
+@model GoiBan
+@{
+    ViewData["Title"] = $"Mua gói {Model.Ten}";
+    var dsKhoa = (List<Khoa>)ViewBag.Khoa;
+    var hanHienTai = (Dictionary<string, DateTime?>)ViewBag.HanHienTai;
+    var coGia = Model.Gia is > 0;
+}
+@section Head { <link rel="stylesheet" href="~/css/quan-ly.css" asp-append-version="true"><link rel="stylesheet" href="~/css/giao-bai.css" asp-append-version="true"> }
+<main class="gb" style="margin:32px auto;padding:0 20px;max-width:720px">
+<a href="/#goi">← Các gói học</a>
+<h1>@Model.Ten</h1>
+<p class="gb-muted">@Model.Nhan · thời hạn @Model.SoThang tháng kể từ khi thanh toán</p>
+@if (TempData["LoiThanhToan"] is string loi) { <p class="ql-thong-bao loi" role="alert" style="margin:16px 0">@loi</p> }
+
+<section class="gb-panel" style="margin-top:20px">
+<h2>Các khoá được mở</h2>
+<ul style="margin:12px 0 0;padding-left:20px">
+@foreach (var k in dsKhoa)
+{
+    var conHan = hanHienTai.TryGetValue(k.Id, out var han);
+<li style="margin:6px 0"><b>@k.Ten</b>
+@if (conHan && han is null) { <span class="gb-muted"> · đang học không giới hạn</span> }
+else if (conHan && han > DateTime.UtcNow) { <span class="gb-muted"> · đang còn hạn đến @DinhDang.GioNgay(han.Value.ToLocalTime()), mua thêm sẽ cộng nối tiếp</span> }
+</li>
+}
+</ul>
+@if (Model.QuyenLoi.Count > 0)
+{
+<h2 style="margin-top:20px">Quyền lợi</h2>
+<ul style="margin:12px 0 0;padding-left:20px">@foreach (var q in Model.QuyenLoi) { <li style="margin:6px 0">@q</li> }</ul>
+}
+</section>
+
+<section class="gb-panel" style="margin-top:20px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px">
+<div><span class="gb-muted">Tổng thanh toán</span><div style="font-size:28px;font-weight:700">@(coGia ? DinhDang.Gia(Model.Gia) : "Chưa có giá")</div></div>
+@if (ViewBag.LaHocVien is not true)
+{
+<p class="gb-muted" style="margin:0">Chỉ tài khoản học viên mua được gói học.</p>
+}
+else if (!coGia || dsKhoa.Count == 0)
+{
+<p class="gb-muted" style="margin:0">Gói đang chờ cập nhật, chưa mở bán.</p>
+}
+else if (ViewBag.CoTheThanhToan is not true)
+{
+<p class="gb-muted" style="margin:0">Thanh toán online chưa được cấu hình. Vui lòng liên hệ trung tâm.</p>
+}
+else
+{
+<form method="post" asp-action="Mua" asp-route-id="@Model.Id">
+<button type="submit" class="ql-nut" style="min-height:48px;padding:0 24px">@(ViewBag.GiaLap is true ? "Giả lập thanh toán thành công" : "Thanh toán qua PayOS →")</button>
+</form>
+}
+</section>
+@if (ViewBag.LaHocVien is not true || !coGia || dsKhoa.Count == 0 || ViewBag.CoTheThanhToan is not true) { }
+else if (ViewBag.GiaLap is true)
+{
+<p class="gb-muted" style="margin-top:12px">Máy dev chưa có khoá PayOS: nút trên đánh dấu đơn đã trả để thử luồng mở khoá. Môi trường thật không có nút này.</p>
+}
+else
+{
+<p class="gb-muted" style="margin-top:12px">Bạn sẽ được chuyển sang trang PayOS để quét mã VietQR bằng ứng dụng ngân hàng. Khoá học mở ngay khi thanh toán xong.</p>
+}
+<p style="margin-top:16px"><a href="/ThanhToan">Xem lịch sử thanh toán</a></p>
+</main>

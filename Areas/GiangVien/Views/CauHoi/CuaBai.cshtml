@@ -8,7 +8,6 @@
 }
 @section Actions {
 <a href="/GiangVien/GiaoBai/Tao?bai=@b.Id" class="ql-nut">Giao bài tập</a>
-<a href="/Home/LamCauHoi/@b.Id" class="ql-nut phu" target="_blank">Xem như học viên ↗</a>
 }
 @{ var daGiao = ViewBag.BaiTapGiao as List<SuDia.Web.Data.BaiTapGiao> ?? []; }
 <section class="ql-khoi"><div class="ql-khoi-dau"><h2>Bài tập giao theo buổi</h2><span>@daGiao.Count bài tập</span></div>
@@ -16,7 +15,7 @@
 @foreach (var bt in daGiao)
 {
 <div class="ql-khoi-than"><div class="ql-hang-nut"><strong>@bt.Ten</strong><span class="ql-chip @(bt.DaGiao ? "xanh" : "vang")">@(bt.DaGiao ? "Đã giao" : "Nháp")</span>
-<a href="/GiangVien/GiaoBai/Sua/@bt.Id">Chỉnh sửa</a><a href="/GiangVien/GiaoBai/BaiNop/@bt.Id">Bài nộp</a><a href="/BaiTap/Lam/@bt.Id" target="_blank">Xem trước ↗</a>
+<a href="/GiangVien/GiaoBai/Sua/@bt.Id">Chỉnh sửa</a><a href="/GiangVien/GiaoBai/BaiNop/@bt.Id">Bài nộp</a>
 <form method="post" asp-controller="GiaoBai" asp-action="Xoa" data-hoi="Xoá bài tập này? Chỉ có thể xoá khi chưa có bài nộp."><input type="hidden" name="id" value="@bt.Id"><button class="ql-nut-chu xoa">Xoá bài tập</button></form></div>
 <span class="ql-phu">@(bt.BuoiHoc?.ThoiGian is DateTime gio ? $"Buổi {DinhDang.GioNgay(gio.ToLocalTime())}" : "Bài tập của bài học") · @(bt.HanNop is DateTime han ? $"Hạn nộp {DinhDang.GioNgay(han.ToLocalTime())}" : "Không giới hạn hạn nộp")</span></div>
 }

@@ -12,7 +12,7 @@
 @section Actions { <a href="@(kiemTra ? "/GiangVien/DeThi" : "/GiangVien/CauHoi")" class="ql-nut phu">← Về danh sách</a> }
 @if (khoaRong)
 {
-<p class="ql-trong">Chưa có bài học được phân công. <a href="/GiangVien/NoiDung">Đến nội dung bài học</a> để tạo bài trước.</p>
+<p class="ql-trong">Chưa có bài học được phân công. <a href="/GiangVien/NoiDung">Đến khoá học của tôi</a> để tạo bài trước.</p>
     return;
 }
 @if (ViewBag.DaCoBaiNop is true)
@@ -54,6 +54,7 @@
 <section class="gb-panel" data-panel="3" hidden><h2>Xem lại @tenLoai</h2><div id="gbReview"></div></section>
 <footer class="gb-footer">
 <button type="button" class="ql-nut phu" id="gbTruoc">← Quay lại</button>
+<button type="button" class="ql-nut phu" id="gbXemTruoc" data-xem-truoc>Xem trước</button>
 <button type="button" class="ql-nut phu" id="gbNhap">Lưu nháp</button>
 <button type="button" class="ql-nut" id="gbTiep">Tiếp tục →</button>
 <button type="submit" class="ql-nut" id="gbGiao" hidden>@(kiemTra ? "Xuất bản bài kiểm tra" : "Giao bài tập cho học viên")</button>
@@ -64,3 +65,4 @@
 <script id="gbData" type="application/json">@Html.Raw(NoiDungBaiTap.Viet(Model))</script>
 <script id="gbBuoiData" type="application/json">@Html.Raw(NoiDungBaiTap.Viet(ViewBag.DsBuoi))</script>
 @section Scripts { <script src="~/js/giao-bai.js" asp-append-version="true"></script><script src="~/js/ban-nhap-ai.js" asp-append-version="true"></script> }
+<partial name="_KhungXemTruoc" />

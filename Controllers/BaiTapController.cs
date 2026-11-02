@@ -61,7 +61,8 @@ public class BaiTapController(AppDbContext db) : Controller
     {
         var bt = await DuocXem().AsNoTracking().Include(b => b.BuoiHoc).FirstOrDefaultAsync(b => b.Id == id);
         if (bt is null) return NotFound();
-        if (!NhanVien && bt.HanNop < DateTime.UtcNow) { TempData["LoiBaiTap"] = "Bài tập đã hết hạn nộp."; return RedirectToAction(nameof(Lam), new { id }); }
+        // Kiểm tra đã bắt đầu thì hạn nộp được tính vào đồng hồ bên dưới, không từ chối cả bài.
+        if (!NhanVien && bt.DeThi is null && bt.HanNop < DateTime.UtcNow) { TempData["LoiBaiTap"] = "Bài tập đã hết hạn nộp."; return RedirectToAction(nameof(Lam), new { id }); }
         if (!NhanVien && await db.BaiNopGiao.AnyAsync(n => n.BaiTapGiaoId == id && n.NguoiDungId == Uid)) return RedirectToAction(nameof(Lam), new { id });
         var hetGio = false;
         if (!NhanVien && bt.DeThi is not null)
@@ -69,7 +70,7 @@ public class BaiTapController(AppDbContext db) : Controller
             var luot = await db.LuotLamKiemTra.AsNoTracking().FirstOrDefaultAsync(x => x.BaiTapGiaoId == id && x.NguoiDungId == Uid);
             if (luot is null) { TempData["LoiBaiTap"] = "Anh/chị cần bấm Bắt đầu làm bài trước khi nộp."; return RedirectToAction(nameof(Lam), new { id }); }
             // Cho phép vài giây truyền bài tự nộp; thời gian bắt đầu luôn do server lưu.
-            hetGio = DateTime.UtcNow > luot.BatDauLuc.AddMinutes(bt.DeThi.SoPhut).AddSeconds(10);
+            hetGio = DateTime.UtcNow > HetGioKiemTra(bt, luot).AddSeconds(10);
         }
         var cau = NoiDungBaiTap.Doc(bt.NoiDungJson);
         if (NoiDungBaiTap.KiemTra(cau, true) is string loiNhap) return BadRequest($"Hoàn thiện bài tập trước khi làm thử: {loiNhap}");
@@ -108,8 +109,15 @@ public class BaiTapController(AppDbContext db) : Controller
             .FirstOrDefaultAsync(x => x.BaiTapGiaoId == bt.Id && x.NguoiDungId == Uid);
         return new LamBaiGiaoViewModel {
             BaiTap = bt, Cau = NoiDungBaiTap.Doc(bt.NoiDungJson), BaiNop = nop, XemTruoc = NhanVien,
-            HetGio = luot?.BatDauLuc.AddMinutes(bt.DeThi!.SoPhut),
+            HetGio = luot is null ? null : HetGioKiemTra(bt, luot),
             TraLoi = nop is null ? [] : JsonSerializer.Deserialize<Dictionary<string, string>>(nop.TraLoiJson) ?? []
         };
+    }
+
+    // Hết giờ là lúc sớm hơn giữa thời lượng làm bài và hạn nộp, để trang tự nộp kịp trước hạn.
+    private static DateTime HetGioKiemTra(BaiTapGiao bt, LuotLamKiemTra luot)
+    {
+        var hetGio = luot.BatDauLuc.AddMinutes(bt.DeThi!.SoPhut);
+        return bt.HanNop is DateTime han && han < hetGio ? han : hetGio;
     }
 }
