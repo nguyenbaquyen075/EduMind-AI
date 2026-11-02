@@ -61,6 +61,10 @@ builder.Services.AddHttpClient<ISoanNoiDungAiService, GeminiSoanNoiDungAiService
 // Dữ liệu các trang học viên: đọc từ database theo người đăng nhập
 builder.Services.AddScoped<IKhoaHocService, EfKhoaHocService>();
 builder.Services.AddScoped<AdminThongKeService>();
+// Thanh toán PayOS: khoá lưu bằng user-secrets (Development) hoặc biến môi trường PayOS__ClientId…
+builder.Services.Configure<PayOSOptions>(builder.Configuration.GetSection("PayOS"));
+builder.Services.AddHttpClient<PayOSService>(http => http.Timeout = TimeSpan.FromSeconds(20));
+builder.Services.AddScoped<DonHangService>();
 builder.Services.Configure<HocOnlineOptions>(builder.Configuration.GetSection("HocOnline"));
 
 // Giới hạn: 10 câu hỏi / phút / địa chỉ IP

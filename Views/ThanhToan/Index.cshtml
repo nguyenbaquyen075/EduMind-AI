@@ -1,0 +1,23 @@
+@model List<DonHang>
+@{ ViewData["Title"] = "Lịch sử thanh toán"; }
+@section Head { <link rel="stylesheet" href="~/css/quan-ly.css" asp-append-version="true"><link rel="stylesheet" href="~/css/giao-bai.css" asp-append-version="true"> }
+<main class="gb" style="margin:32px auto;padding:0 20px;max-width:720px">
+<a asp-controller="Home" asp-action="TongQuan">← Tổng quan</a>
+<h1>Lịch sử thanh toán</h1>
+@if (Model.Count == 0) { <p class="ql-trong">Bạn chưa có đơn mua gói nào. <a href="/#goi">Xem các gói học</a></p> }
+@foreach (var d in Model)
+{
+    var (chip, ten) = d.TrangThai switch
+    {
+        TrangThaiDon.DaThanhToan => ("xanh", "Đã thanh toán"),
+        TrangThaiDon.DaHuy => ("", "Đã huỷ"),
+        _ => ("vang", "Chờ thanh toán"),
+    };
+<article class="gb-panel" style="margin-bottom:12px;display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;align-items:center">
+<div><b>@d.TenGoi</b> <span class="ql-chip @chip">@ten</span>
+<div class="gb-muted">Mã đơn @d.MaThanhToan · @DinhDang.GioNgay(d.NgayTao.ToLocalTime())@(d.NgayThanhToan is DateTime tra ? $" · trả lúc {DinhDang.GioNgay(tra.ToLocalTime())}" : "")</div></div>
+<div style="text-align:right"><b>@DinhDang.Gia(d.SoTien)</b>
+@if (d.TrangThai == TrangThaiDon.ChoThanhToan) { <div><a href="/ThanhToan/KetQua?ma=@d.MaThanhToan">Kiểm tra trạng thái</a></div> }</div>
+</article>
+}
+</main>
