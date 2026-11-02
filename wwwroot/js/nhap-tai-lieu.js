@@ -7,16 +7,21 @@
     const apply = root.querySelector('[data-ap-dung-file]');
     const content = form.querySelector('[name=noiDung]');
     const title = form.querySelector('[name=tenBai]');
+    const topic = form.querySelector('[name=tenChuDe]');
     let result;
     let controller;
     const show = text => { status.hidden = false; status.textContent = text; };
     const fill = () => {
       if (!result) return;
       content.value = result.noiDung;
-      if (title && !title.value.trim()) title.value = result.tenBai;
+      // Tài liệu nhiều bài (Bài 1, Bài 2…): tiêu đề file là tên chủ đề, không phải tên bài
+      const soBai = (result.noiDung.match(/^\s*(?:#{1,6}\s*)?bài\s+\d+/gimu) || []).length;
+      if (soBai >= 2) {
+        if (topic && !topic.value.trim()) topic.value = result.tenBai.replace(/^\s*(?:chủ\s*đề|chương|chuyên\s*đề)\s*[0-9IVXLC]*\s*[.:\-–—]?\s*/iu, '');
+      } else if (title && !title.value.trim()) title.value = result.tenBai;
       content.dispatchEvent(new Event('input', { bubbles: true }));
       apply.hidden = true;
-      show('Đã điền nội dung và đề mục từ file. Anh kiểm tra lại, nhập số bài rồi chọn “Chia theo đề mục văn bản” để xem thử ngay, hoặc dùng AI.');
+      show('Đã điền nội dung từ file. Kiểm tra lại rồi chọn cách chia.');
     };
     apply.addEventListener('click', fill);
     file.addEventListener('change', async () => {
@@ -25,7 +30,7 @@
       const selected = file.files[0];
       if (!selected) { status.hidden = true; return; }
       if (!/\.(docx|pptx)$/i.test(selected.name) || selected.size > 20 * 1024 * 1024) {
-        show('Anh chọn file .docx hoặc .pptx, tối đa 20 MB nhé.'); return;
+        show('Chọn file .docx hoặc .pptx, tối đa 20 MB.'); return;
       }
       controller = new AbortController();
       const current = controller;
@@ -39,7 +44,7 @@
           headers: { RequestVerificationToken: form.querySelector('[name=__RequestVerificationToken]').value }
         });
         const json = await response.json();
-        if (!response.ok) throw new Error(json.loi || 'Không đọc được tài liệu. Anh thử lại nhé.');
+        if (!response.ok) throw new Error(json.loi || 'Không đọc được tài liệu. Thử lại sau.');
         result = json;
         for (const message of json.canhBao || []) {
           const li = document.createElement('li'); li.textContent = message; warnings.append(li);
@@ -47,10 +52,10 @@
         warnings.hidden = !warnings.children.length;
         if (content.value.trim()) {
           apply.hidden = false;
-          show('Đã đọc xong file. Ô nội dung đang có chữ; bấm “Điền nội dung từ file” nếu anh muốn thay bằng tài liệu vừa chọn.');
+          show('Đã đọc xong file. Bấm “Điền nội dung từ file” để thay nội dung đang có.');
         } else fill();
       } catch (error) {
-        if (error.name !== 'AbortError') show(error instanceof SyntaxError ? 'Phiên đăng nhập đã hết hoặc file không đọc được. Anh tải lại trang rồi thử lại nhé.' : error.message);
+        if (error.name !== 'AbortError') show(error instanceof SyntaxError ? 'Phiên đăng nhập đã hết hoặc file không đọc được. Tải lại trang rồi thử lại.' : error.message);
       } finally {
         if (current === controller) buttons.forEach(b => b.disabled = false);
       }

@@ -15,6 +15,11 @@ public sealed class KhoBanNhapNoiDung(IMemoryCache cache)
         return id;
     }
 
+    public void Xoa(string nguoiDungId, string? id)
+    {
+        if (Guid.TryParse(id, out var ma)) cache.Remove($"soan:{nguoiDungId}:{ma:N}");
+    }
+
     public T? Doc<T>(string nguoiDungId, string? id) where T : class
     {
         if (!Guid.TryParse(id, out var ma)) return null;

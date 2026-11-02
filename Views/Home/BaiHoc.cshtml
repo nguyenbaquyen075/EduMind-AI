@@ -78,58 +78,7 @@ else if (!Model.CoNoiDung)
 }
 else
 {
-    var tongMuc = Model.NoiDung.Count;
-    foreach (var muc in Model.NoiDung)
-    {
-<section class="muc-lon" id="muc-@muc.So" aria-labelledby="muc-@(muc.So)-tieu-de">
-<p class="muc-lon-nhan so">Mục @muc.So/@tongMuc</p>
-<h2 id="muc-@(muc.So)-tieu-de" class="muc-lon-ten">@muc.TieuDe</h2>
-        @foreach (var phan in muc.Phan)
-        {
-            var maPhan = $"muc-{muc.So}-{phan.Id}";
-<section class="muc-bai" id="@maPhan" aria-labelledby="@(maPhan)-tieu-de">
-<h3 id="@(maPhan)-tieu-de" class="ten-muc">@phan.TieuDe</h3>
-            @if (phan.LaGhiNho)
-            {
-<p class="ghi-nho">@string.Join(" ", phan.DoanVan)</p>
-            }
-            else
-            {
-                foreach (var doan in phan.DoanVan)
-                {
-<p class="doan-van">@doan</p>
-                }
-            }
-            @if (phan.Moc is { Count: > 0 })
-            {
-<ol class="dong-thoi-gian">
-                @foreach (var dot in phan.Moc)
-                {
-<li>
-<p class="dtg-moc">@dot.Ten · @dot.ThoiGian</p>
-<p class="dtg-noi-dung">@dot.NoiDung</p>
-</li>
-                }
-</ol>
-            }
-</section>
-        }
-<nav class="nhay-muc" aria-label="Chuyển nhanh giữa các mục">
-        @if (muc.So > 1)
-        {
-<a href="#muc-@(muc.So - 1)">← Mục trước</a>
-        }
-        else
-        {
-<span></span>
-        }
-        @if (muc.So < tongMuc)
-        {
-<a href="#muc-@(muc.So + 1)">Mục sau →</a>
-        }
-</nav>
-</section>
-    }
+<partial name="_NoiDungBai" model="Model.NoiDung" />
 
 <div class="ket-bai">
 <p>Bạn đã đọc hết bài @Model.SoBaiHienTai.</p>

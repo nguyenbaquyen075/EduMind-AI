@@ -1,0 +1,51 @@
+@model BanNhapChuDe
+@{
+    var khoa = (Khoa)ViewBag.Khoa;
+    var themVaoChuDe = Model.ChuDeId is not null;
+    ViewData["Title"] = "Xem thử chủ đề – Giảng viên";
+    ViewData["TieuDe"] = themVaoChuDe ? "Thêm bài từ tài liệu" : "Tạo chủ đề từ tài liệu";
+    ViewData["Muc"] = "NoiDung";
+    ViewData["Crumb"] = $"<a href=\"/GiangVien/NoiDung\">Khoá học của tôi</a> › <a href=\"/GiangVien/NoiDung?khoa={khoa.Id}\">{khoa.Ten}</a>";
+}
+<form method="post" asp-action="TaoChuDeTuBanNhap" class="ql-form" style="max-width: 920px">
+<input type="hidden" name="nhap" value="@ViewBag.Nhap">
+<section class="ql-khoi ql-khoi-than">
+@if (themVaoChuDe)
+{
+<p style="margin: 0"><span class="ql-phu">Thêm vào chủ đề</span><b>@Model.TenChuDe</b></p>
+}
+else
+{
+<div class="ql-truong"><label for="tenChuDe">Tên chủ đề</label><input id="tenChuDe" type="text" name="tenChuDe" value="@Model.TenChuDe" required>
+<small>Hiển thị: "Chủ đề @(Model.SoChuDe?.ToString() ?? "…") · tên chủ đề"</small></div>
+}
+<p class="ql-phu" style="margin: 12px 0 0">Tìm thấy <b>@Model.Bai.Count bài</b> trong tài liệu. Bỏ chọn bài không cần; tên và số bài sửa được. Các bài tạo ở dạng nháp.</p>
+</section>
+
+<ol class="ql-khoi xtc-ds">
+@for (var i = 0; i < Model.Bai.Count; i++)
+{
+    var b = Model.Bai[i];
+<li>
+<div class="xtc-dong">
+<label class="xtc-chon"><input type="checkbox" name="bai[@i].Chon" value="true" checked="@b.Chon" aria-label="Tạo bài @b.So"><input type="hidden" name="bai[@i].Chon" value="false"></label>
+<div class="ql-truong xtc-so"><label for="so-@i">Bài</label><input id="so-@i" type="number" name="bai[@i].So" value="@b.So" min="1" required></div>
+<div class="ql-truong xtc-ten"><label for="ten-@i">Tên bài</label><input id="ten-@i" type="text" name="bai[@i].Ten" value="@b.Ten" required></div>
+</div>
+<details class="xtc-muc">
+<summary>@b.Muc.Count mục</summary>
+<ul>
+@foreach (var m in b.Muc)
+{
+<li>@m.Ten<span class="ql-phu">@(m.Phan.Count) phần@(m.Phan.Any(p => p.LaGhiNho) ? " · ghi nhớ" : "")</span></li>
+}
+</ul>
+</details>
+</li>
+}
+</ol>
+<div class="ql-chan">
+<button class="ql-nut">@(themVaoChuDe ? "Thêm các bài đã chọn" : "Tạo chủ đề và các bài")</button>
+<a href="/GiangVien/NoiDung?khoa=@khoa.Id" class="ql-nut phu">Huỷ</a>
+</div>
+</form>

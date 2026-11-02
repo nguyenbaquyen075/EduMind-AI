@@ -27,13 +27,13 @@
       form.setAttribute('aria-busy', 'true');
       status.hidden = false;
       if (isText) {
-        status.textContent = 'Đang chia theo đề mục văn bản để mở bản xem thử…';
+        status.textContent = 'Đang chia theo đề mục…';
         return;
       }
       const started = Date.now();
       const update = () => {
         const seconds = Math.floor((Date.now() - started) / 1000);
-        status.textContent = `Đang chờ AI phân tích: ${seconds} giây. Nếu cần tiếp tục ngay, anh có thể bấm “Chia theo đề mục văn bản” bên dưới; nội dung đã nhập vẫn được giữ nguyên.`;
+        status.textContent = `AI đang chia nội dung… ${seconds} giây. Có thể bấm “Chia theo đề mục” để làm ngay.`;
       };
       update();
       timer = setInterval(update, 1000);
