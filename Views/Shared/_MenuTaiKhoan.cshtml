@@ -27,3 +27,5 @@
 <button type="submit">Đăng xuất</button>
 </form>
 </aside>
+<script>(() => { const a = document.querySelector('.hv-link.dang-mo'); const n = a?.parentElement;
+  if (n && n.scrollWidth > n.clientWidth) n.scrollLeft += a.getBoundingClientRect().left - n.getBoundingClientRect().left - (n.clientWidth - a.offsetWidth) / 2; })();</script>
