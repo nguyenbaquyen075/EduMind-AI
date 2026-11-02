@@ -54,7 +54,7 @@ public class HomeController : Controller
 
     // Bài học + khung trợ lý. Khi có dữ liệu thật: kiểm tra học sinh đã mua khoá chứa bài này
     [Authorize]
-    public IActionResult BaiHoc(int? id) => View(_svc.LayBaiHoc(id));
+    public IActionResult BaiHoc(int? id) => _svc.LayBaiHoc(id) is { } vm ? View(vm) : NotFound();
 
     // Làm đề: hiện câu hỏi, chưa có đáp án
     [HttpGet]

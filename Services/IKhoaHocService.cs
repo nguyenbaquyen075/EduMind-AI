@@ -14,7 +14,7 @@ public interface IKhoaHocService
     /// <param name="khoaId">null: chỉ hiện danh sách khoá; có giá trị: hiện thêm các bài của khoá đó</param>
     KhoaHocViewModel LayKhoaHoc(string? khoaId);
 
-    BaiHocViewModel LayBaiHoc(int? id);
+    BaiHocViewModel? LayBaiHoc(int? id); // null: không có bài nào để mở
 
     /// <param name="khoaId">null: chỉ hiện các khoá; có giá trị: đề thi thử + bài tập theo chủ đề của khoá đó</param>
     LuyenDeViewModel LayLuyenDe(string? khoaId);

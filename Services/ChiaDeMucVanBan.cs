@@ -6,9 +6,11 @@ namespace SuDia.Web.Services;
 public static class ChiaDeMucVanBan
 {
     private static readonly Regex Markdown = new(@"^(#{1,6})\s+\S", RegexOptions.Compiled);
-    private static readonly Regex Roman = new(@"^[IVXLCDM]+[.)\-:]\s+\S", RegexOptions.Compiled);
-    private static readonly Regex Number = new(@"^(\d+(?:\.\d+)*)(?:[.):]|\s*[-–])\s+\S", RegexOptions.Compiled);
-    private static readonly Regex Decimal = new(@"^(\d+(?:\.\d+)+)\s+\S", RegexOptions.Compiled);
+    // Một chữ C, D, L, M đứng riêng là phương án/chữ cái (A. B. C. D.), không phải số La Mã 100, 500…
+    private static readonly Regex Roman = new(@"^(?![CDLM][.)\-:])[IVXLCDM]+[.)\-:]\s+\S", RegexOptions.Compiled);
+    // Số đề mục tối đa 2 chữ số để dòng năm như "1945 – Nhật đảo chính Pháp" không thành đề mục.
+    private static readonly Regex Number = new(@"^(\d{1,2}(?:\.\d{1,2})*)(?:[.):]|\s*[-–])\s+\S", RegexOptions.Compiled);
+    private static readonly Regex Decimal = new(@"^(\d{1,2}(?:\.\d{1,2})+)\s+\S", RegexOptions.Compiled);
     private static readonly Regex Letter = new(@"^[a-zA-ZđĐ][.)]\s+\S", RegexOptions.Compiled);
 
     private static int? Cap(string line)
@@ -24,6 +26,9 @@ public static class ChiaDeMucVanBan
         if (Letter.IsMatch(text)) return 30;
         return null;
     }
+
+    // Mục / phần tên "Ghi nhớ" hiện kiểu ghi nhớ nhanh trên trang học viên
+    private static bool GhiNho(string ten) => ten.Trim().TrimEnd(':', '.').Equals("Ghi nhớ", StringComparison.OrdinalIgnoreCase);
 
     public static IReadOnlyList<NoiDungAiMuc> Chia(string tenBai, string noiDung)
     {
@@ -42,7 +47,7 @@ public static class ChiaDeMucVanBan
         void LuuPhan()
         {
             var text = string.Join("\n", body).Trim();
-            if (text.Length > 0 || coPhan) parts.Add(new(phan, text));
+            if (text.Length > 0 || coPhan) parts.Add(new(phan, text, GhiNho(phan) || GhiNho(muc)));
             body.Clear(); coPhan = false;
         }
         void LuuMuc()
