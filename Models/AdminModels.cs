@@ -51,8 +51,7 @@ public class AdminGhiDanhViewModel
     public int SoTrang => Math.Max(1, (int)Math.Ceiling(Tong / 25d));
 }
 
-public record AdminNoiDungRow(int Id, int So, string Ten, string ChuDe, string KhoaId, string Khoa, bool XuatBan, bool HocThu, int SoMuc, int SoCau, int SoBaiTap);
-public record AdminBaiTapRow(int Id, int BaiId, string Ten, string Bai, string KhoaId, string Khoa, bool DaGiao, DateTime? HanNop, int SoNop, int ChoCham);
+public record AdminBaiTapRow(int Id, int BaiId, string Ten, string Bai, string KhoaId, string Khoa, bool DaGiao, DateTime? HanNop, int SoNop, int ChoCham, int SoHocVien = 0);
 public class AdminNguoiDungViewModel
 {
     public required NguoiDung NguoiDung { get; init; }
@@ -73,4 +72,44 @@ public class AdminTroLyViewModel
     public List<AdminTaiLieu> TaiLieu { get; init; } = [];
     public int SoCauKiemThu { get; init; }
     public bool CoPrompt { get; init; }
+}
+
+/// <summary>Thẻ chọn giảng viên → khoá ở Nội dung / Bài tập / Lịch dạy (Admin); mã "none" = các khoá chưa phân công.</summary>
+public record AdminTheGiangVien(string Id, string HoTen, string? Email, IReadOnlyList<AdminKhoaCuaGv> Khoa);
+public record AdminKhoaCuaGv(string Id, string Ten, string Gv, int BaiXuatBan, int BaiNhap, int BaiTap, int ChoCham, int BuoiSapToi);
+
+/// <summary>Tỉ lệ hoàn thành bài tập của một khoá (biểu đồ ở Admin › Bài tập).</summary>
+public record AdminTiLeKhoa(string Id, string Ten, int SoBaiTap, int SoHocVien, int DaNop)
+{
+    public int CanNop => SoBaiTap * SoHocVien;
+    public int? PhanTram => CanNop == 0 ? null : (int)Math.Round(DaNop * 100.0 / CanNop);
+}
+
+// ======================================================= Doanh thu, giảng viên, học viên (Admin)
+
+public record AdminDoanhThuNgay(DateTime Ngay, long SoTien, int SoDon);
+public record AdminDoanhThuGoi(string TenGoi, long SoTien, int SoDon);
+
+public class AdminDoanhThuViewModel
+{
+    public DateTime Tu { get; init; }
+    public DateTime Den { get; init; }
+    public long DoanhThuKy { get; init; }
+    public int SoDonKy { get; init; }
+    public long TongTuTruoc { get; init; }
+    public int DonCho { get; init; }
+    public IReadOnlyList<AdminDoanhThuNgay> Ngay { get; init; } = [];
+    public IReadOnlyList<AdminDoanhThuGoi> TheoGoi { get; init; } = [];
+    public IReadOnlyList<DonHang> Don { get; init; } = [];
+    public string? TrangThai { get; init; }
+    public bool DaCauHinh { get; init; }
+}
+
+public record AdminGiaoVienRow(string Id, string HoTen, string? Email, bool BiKhoa, IReadOnlyList<string> Khoa,
+    int HocVien, int BaiXuatBan, int BaiTong, int BaiTap, int ChoCham, int? HoanThanh, int BuoiSapToi);
+
+public record AdminHocVienRow(string Id, string HoTen, string? Email, IReadOnlyList<string> Khoa, DateTime? HanGanNhat,
+    int BaiDaHoc, int BaiTong, int LuyenTap, int BaiNop, DateTime? HoatDongCuoi)
+{
+    public int? TienDo => BaiTong == 0 ? null : BaiDaHoc * 100 / BaiTong;
 }

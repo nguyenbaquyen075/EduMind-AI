@@ -10,3 +10,84 @@
 .ad-stats--3{grid-template-columns:repeat(3,minmax(0,1fr))}
 @media(max-width:1200px){.ad-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.ad-quick{grid-template-columns:repeat(2,minmax(0,1fr))}.ad-grid{grid-template-columns:1fr}}
 @media(max-width:650px){.ad-welcome{padding:18px;align-items:flex-start;flex-direction:column}.ad-welcome h2{font-size:21px}.ad-date{font-size:11px}.ad-stats{gap:10px}.ad-stat{padding:14px}.ad-stat>strong{font-size:25px}.ad-quick{gap:10px}.ad-quick>a{grid-template-columns:1fr;padding:13px}.ad-quick>a>span{grid-row:auto;margin-bottom:5px}.ad-activity time{white-space:normal;max-width:58px;text-align:right}.ad-metadata{grid-template-columns:1fr}.ad-filters .ql-truong{min-width:100%;flex-basis:100%}.ad-chart{gap:8px}.ad-profile{align-items:flex-start}.ad-pagination{flex-wrap:wrap}}
+/* Admin › Giảng viên: thẻ từng người, đầu trang có tab Bài học / Bài tập / Lịch dạy */
+.gd-tab{display:flex;gap:4px;padding:4px;border-radius:10px;background:#F3F4F6;overflow-x:auto;max-width:100%}
+.gd-tab a{padding:8px 16px;border-radius:7px;color:#4B5563;font-size:13.5px;font-weight:600;text-decoration:none;white-space:nowrap}
+.gd-tab a[aria-current=page]{background:#FFFFFF;color:#111827;box-shadow:0 1px 2px rgba(0,0,0,.08)}
+/* Bước chọn giảng viên → khoá (Nội dung / Bài tập / Lịch dạy) */
+.gv-avatar{display:grid;place-items:center;width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#6366F1,#8B5CF6);color:#FFF;font-weight:700;font-size:15px}
+.gv-avatar.trong{background:#E5E7EB;color:#6B7280}
+.gv-so{font-size:13px;color:#6B7280;white-space:nowrap}.gv-so b{color:#111827;font-size:14px}
+.gv-so em{margin-left:8px;padding:2px 8px;border-radius:99px;background:#FEF3C7;color:#92400E;font-style:normal;font-size:12px;font-weight:600}
+.gv-xem{font-size:12.5px;font-weight:600;color:#4F46E5;white-space:nowrap}
+@media(max-width:650px){
+.gv-avatar{width:36px;height:36px}
+}
+/* Biểu đồ tỉ lệ hoàn thành bài tập theo khoá: một chuỗi, một màu, cột ngang mảnh */
+.bd-ht{margin-bottom:20px}
+.bd-ht .ql-khoi-dau{align-items:flex-start}
+.bd-ht .ql-khoi-dau .ql-phu{display:block;margin-top:2px}
+.bd-ht-chung{margin:0;text-align:right;line-height:1.1}.bd-ht-chung b{display:block;font-size:24px;color:#111827}.bd-ht-chung span{font-size:12px;color:#6B7280}
+.bd-ht-ds{list-style:none;margin:0;padding:14px 20px 4px;display:grid;gap:4px}
+.bd-ht-dong,.bd-ht-truc{display:grid;grid-template-columns:minmax(90px,180px) minmax(0,1fr) 128px;align-items:center;gap:14px}
+.bd-ht-dong{position:relative;padding:8px 0;border-radius:6px;outline:none}
+.bd-ht-dong:hover .bd-ht-ray,.bd-ht-dong:focus-visible .bd-ht-ray{background:#EEF0F4}
+.bd-ht-dong:focus-visible{box-shadow:0 0 0 2px #6366F1}
+.bd-ht-ten{font-size:13.5px;font-weight:600;color:#111827;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bd-ht-ray{height:14px;border-radius:4px;background:#F3F4F6;background-image:linear-gradient(90deg,transparent calc(50% - .5px),#E5E7EB calc(50% - .5px),#E5E7EB calc(50% + .5px),transparent calc(50% + .5px));overflow:hidden}
+.bd-ht-thanh{display:block;height:100%;border-radius:0 4px 4px 0;background:#4F46E5}
+.bd-ht-so{font-size:13px;color:#111827;white-space:nowrap}.bd-ht-so b{font-weight:700}.bd-ht-so small{margin-left:6px;color:#6B7280;font-size:12px}
+.bd-ht-dong[data-tip]:hover::after,.bd-ht-dong[data-tip]:focus-visible::after{content:attr(data-tip);position:absolute;left:min(200px,30%);bottom:calc(100% - 2px);z-index:5;max-width:min(360px,80vw);padding:7px 10px;border-radius:8px;background:#111827;color:#FFF;font-size:12px;line-height:1.4;box-shadow:0 6px 18px -6px rgba(0,0,0,.35);pointer-events:none}
+.bd-ht-truc{padding:0 20px 14px;font-size:11px;color:#9CA3AF}
+.bd-ht-truc span:nth-child(2){grid-column:2;grid-row:1;justify-self:start}
+.bd-ht-truc span:nth-child(3){grid-column:2;grid-row:1;justify-self:center}
+.bd-ht-truc span:nth-child(4){grid-column:2;grid-row:1;justify-self:end}
+@media(max-width:650px){.bd-ht-dong,.bd-ht-truc{grid-template-columns:minmax(0,1fr) auto;gap:6px 10px}.bd-ht-ray{grid-column:1/-1;grid-row:2}.bd-ht-ten{grid-column:1}.bd-ht-so{grid-column:2;grid-row:1}.bd-ht-truc span:nth-child(n){grid-column:1/-1}.bd-ht-ds,.bd-ht-truc{padding-left:16px;padding-right:16px}}
+/* Doanh thu: cột theo ngày (một chuỗi), lọc đơn; giảng viên / học viên: thanh tỉ lệ trong bảng */
+.dt-grid{grid-template-columns:minmax(0,1.6fr) minmax(0,1fr)}
+.dt-cot{display:flex;align-items:flex-end;gap:2px;height:180px;padding:20px 20px 0}
+.dt-ngay{position:relative;flex:1 1 0;height:100%;display:flex;align-items:flex-end;border-radius:4px 4px 0 0;outline:none}
+.dt-ngay:hover,.dt-ngay:focus-visible{background:#F3F4F6}
+.dt-ngay:focus-visible{box-shadow:0 0 0 2px #6366F1}
+.dt-thanh{display:block;width:100%;max-width:18px;margin:0 auto;border-radius:4px 4px 0 0;background:#4F46E5}
+.dt-ngay[data-tip]:hover::after,.dt-ngay[data-tip]:focus-visible::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);z-index:5;white-space:nowrap;padding:6px 9px;border-radius:8px;background:#111827;color:#FFF;font-size:12px;pointer-events:none}
+.dt-truc{display:flex;justify-content:space-between;padding:8px 20px 16px;border-top:1px solid #E5E7EB;margin:0 20px;padding-left:0;padding-right:0;font-size:11px;color:#9CA3AF}
+.dt-goi .bd-ht-dong{grid-template-columns:minmax(70px,120px) minmax(0,1fr) 84px}
+.dt-loc{margin:12px 20px 4px;width:max-content}
+.gv-tl{display:flex;align-items:center;gap:8px;min-width:120px}.gv-tl .bd-ht-ray{flex:1;height:8px}.gv-tl b{font-size:13px}
+.kh-dong .gv-avatar{flex:0 0 32px;width:32px;height:32px;font-size:13px}
+.hv-cham{color:#B45309;font-weight:600}
+@media(max-width:900px){.dt-grid{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:650px){.dt-cot{height:140px;padding:16px 16px 0}.dt-truc{margin:0 16px}.dt-loc{margin:12px 16px 4px;width:auto}}
+/* Bài tập / Lịch dạy (Admin): tab trạng thái có số, ô tìm gọn, lịch nhóm theo ngày */
+.bt-dau{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;padding:14px 20px;border-bottom:1px solid #F0F1F4}
+.bt-dem{display:inline-block;min-width:20px;margin-left:4px;padding:0 6px;border-radius:99px;background:#E5E7EB;color:#4B5563;font-size:11.5px;text-align:center}
+.gd-tab a[aria-current=page] .bt-dem{background:#EEF2FF;color:#4338CA}
+.bt-tim input{width:260px;max-width:100%;padding:8px 12px;border:1px solid #E2E5EA;border-radius:8px;font:inherit;font-size:13.5px}
+.bt-tim{flex:0 1 260px}
+.bt-chan{margin:0;padding:10px 20px 14px;color:#9CA3AF;font-size:12px}
+.ld-ds{padding:6px 20px 16px}
+.ld-ngay{margin:14px 0 8px;font-size:12.5px;font-weight:700;color:#6B7280;text-transform:none}
+.ld-ds ul{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.ld-buoi{display:grid;grid-template-columns:64px minmax(0,1fr) auto;align-items:center;gap:14px;padding:12px 14px;border:1px solid #E5E7EB;border-radius:10px}
+.ld-buoi.qua{opacity:.65}
+.ld-gio{font-weight:700;font-size:15px;color:#4338CA;font-variant-numeric:tabular-nums}
+.ld-noi-dung{min-width:0}.ld-noi-dung b{display:block;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.ld-noi-dung small{color:#6B7280;font-size:12.5px}
+@media(max-width:650px){.bt-dau{padding:12px 16px}.bt-tim,.bt-tim input{flex-basis:100%;width:100%}.ld-ds{padding:4px 16px 14px}.ld-buoi{grid-template-columns:52px minmax(0,1fr);}.ld-buoi>:last-child{grid-column:2;justify-self:start}}
+/* Đầu trang giảng viên đang xem (Bài tập / Lịch dạy): một hàng, nút người bên trái, khoá dạng viên thuốc */
+.dgv{display:flex;flex-wrap:wrap;align-items:center;gap:12px 16px;margin-bottom:16px}
+.dgv-khoa{display:flex;flex-wrap:wrap;gap:6px}
+.dgv-khoa a{padding:7px 14px;border:1px solid #E2E5EA;border-radius:99px;background:#FFF;color:#4B5563;font-size:13px;font-weight:600;text-decoration:none;white-space:nowrap}
+.dgv-khoa a:hover{border-color:#A5B4FC;color:#4338CA}
+.dgv-khoa a[aria-current=page]{border-color:#4F46E5;background:#4F46E5;color:#FFF}
+/* Bước chọn khoá (Bài tập / Lịch dạy) và đầu trang khoá đang xem */
+.ck-ds{list-style:none;margin:0;padding:12px 20px 18px;display:grid;gap:8px}
+.ck-ds a{display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:18px;padding:14px 16px;border:1px solid #E5E7EB;border-radius:12px;color:#111827;text-decoration:none;transition:border-color .12s,box-shadow .12s}
+.ck-ds a:hover,.ck-ds a:focus-visible{border-color:#A5B4FC;box-shadow:0 2px 10px -4px rgba(79,70,229,.35)}
+.ck-ten{min-width:0}.ck-ten b{display:block;font-size:15px}.ck-ten small{display:block;margin-top:2px;font-size:12.5px;color:#6B7280}.ck-ten .ck-thieu{color:#B45309;font-weight:600}
+.dgv-ve{padding:8px 14px;border:1px solid #E2E5EA;border-radius:99px;background:#FFF;color:#4B5563;font-size:13px;font-weight:600;text-decoration:none;white-space:nowrap}
+.dgv-ve:hover{border-color:#A5B4FC;color:#4338CA}
+.dgv-khoa-ten b{display:block;font-size:17px;color:#111827;line-height:1.2}.dgv-khoa-ten small{font-size:12.5px;color:#6B7280}
+@media(max-width:650px){.ck-ds{padding:10px 16px 16px}.ck-ds a{grid-template-columns:minmax(0,1fr) auto;gap:4px 12px}.ck-ds .gv-so{grid-column:1;grid-row:2}.ck-ds .gv-xem{grid-column:2;grid-row:1/span 2}}
+.bt-ht{margin-left:auto;padding:5px 12px;border-radius:99px;background:#EEF2FF;color:#4338CA;font-size:13px}.bt-ht b{font-weight:700}
+.bt-ht+.bt-tim{margin-left:0}

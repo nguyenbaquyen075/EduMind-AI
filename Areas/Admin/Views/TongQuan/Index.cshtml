@@ -5,10 +5,9 @@
     ViewData["Muc"] = "TongQuan";
 }
 @section Actions {
-<a href="/Admin/BaoCao" class="ql-nut phu">Xem báo cáo</a>
+<a href="/Admin/DoanhThu" class="ql-nut phu">Doanh thu</a>
 <a href="/Admin/KhoaHoc/Tao" class="ql-nut">+ Tạo khoá học</a>
 }
-<section class="ad-welcome"><div><p class="ad-eyebrow">TRUNG TÂM QUẢN TRỊ</p><h2>Nắm bắt hoạt động, điều hành việc học.</h2><p>Theo dõi học viên, nội dung và các việc cần xử lý trên toàn hệ thống.</p></div><span class="ad-date">@SuDia.Web.Services.AdminThongKeService.HomNay.ToString("dd/MM/yyyy")</span></section>
 <div class="ad-stats">
 @foreach (var s in Model.SoLieu)
 {
@@ -26,12 +25,6 @@ else {
 }
 </section>
 </div>
-<section class="ad-quick">
-<a href="/Admin/NguoiDung/Tao"><span>＋</span><b>Tạo tài khoản</b><small>Học viên, giảng viên hoặc quản trị</small></a>
-<a href="/Admin/GhiDanh"><span>↗</span><b>Ghi danh học viên</b><small>Mở khoá và quản lý hạn học</small></a>
-<a href="/Admin/NoiDung"><span>▤</span><b>Kiểm tra nội dung</b><small>Bài nháp, bài đã xuất bản, bài còn thiếu</small></a>
-<a href="/Admin/LichDay"><span>◷</span><b>Quản lý lịch dạy</b><small>Các buổi học trên mọi khoá</small></a>
-</section>
 <section class="ql-khoi"><div class="ql-khoi-dau"><div><h2>Tình hình các khoá học</h2><p>Nội dung và ghi danh hiện tại</p></div><a href="/Admin/KhoaHoc" class="ql-nut-chu">Quản lý khoá →</a></div>
 @if (Model.Khoa.Count == 0) { <p class="ql-trong">Chưa có khoá học. Tạo khoá đầu tiên để bắt đầu.</p> }
 else {
@@ -44,7 +37,7 @@ else {
 }
 </section>
 <div class="ad-grid">
-<section class="ql-khoi"><div class="ql-khoi-dau"><h2>Bài nộp gần đây</h2><a href="/Admin/BaiTap" class="ql-nut-chu">Xem bài tập →</a></div>
+<section class="ql-khoi"><div class="ql-khoi-dau"><h2>Bài nộp gần đây</h2><a href="/Admin/HocVien" class="ql-nut-chu">Học viên →</a></div>
 @if (Model.HoatDong.Count == 0) { <div class="ad-empty"><b>Chưa có hoạt động học tập</b><p>Bài nộp của học viên sẽ xuất hiện tại đây.</p></div> }
 else {
 <div class="ad-activity">

@@ -20,7 +20,9 @@ public record GoiHoc(
     decimal? Gia,             // null => hiển thị [GIÁ]
     string MauNhan,
     bool NoiBat,
-    IReadOnlyList<string> QuyenLoi);
+    IReadOnlyList<string> QuyenLoi,
+    int Id = 0,               // mã gói trong database; 0 = dữ liệu mẫu, chưa mua được
+    int SoThang = 12);
 
 public record DongSoSanh(string QuyenLoi, string HocThu, string MotMon, string TronBo);
 
@@ -78,6 +80,9 @@ public record BaiTrongKhoa(int Id, int So, string Ten, TrangThaiBai TrangThai, b
 
 public record ChuongTrongKhoa(string Ten, IReadOnlyList<BaiTrongKhoa> Bai);
 
+/// <summary>Thông tin admin nhập ở form khoá: môn, mục tiêu, đối tượng; giá lấy từ gói bán lẻ đang bán.</summary>
+public record GioiThieuKhoa(string Mon, IReadOnlyList<string> MucTieu, string DoiTuong, int? GoiId, int? Gia, int SoThang);
+
 public record KhoaHocChinh(
     string Id,                // "lich-su-12"
     string Ten,
@@ -86,7 +91,8 @@ public record KhoaHocChinh(
     string Anh,               // ảnh bìa, đường dẫn trong wwwroot
     bool DaMo,
     DateTime? HanDen,
-    IReadOnlyList<ChuongTrongKhoa> Chuong)
+    IReadOnlyList<ChuongTrongKhoa> Chuong,
+    GioiThieuKhoa? GioiThieu = null)
 {
     public IEnumerable<BaiTrongKhoa> TatCaBai => Chuong.SelectMany(c => c.Bai);
     public int TongBai => TatCaBai.Count();

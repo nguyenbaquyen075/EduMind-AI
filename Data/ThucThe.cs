@@ -22,10 +22,14 @@ public class Khoa
 {
     public string Id { get; set; } = "";          // "lich-su-12"
     public string Ten { get; set; } = "";
+    public string Mon { get; set; } = "";         // "Lịch sử", "Địa lí"…
     public string KyHieu { get; set; } = "";
     public string MoTa { get; set; } = "";
     public string Anh { get; set; } = "";
     public int ThuTu { get; set; }
+    public bool HienThi { get; set; } = true;     // false: học viên chưa ghi danh không thấy khoá
+    public string MucTieu { get; set; } = "";     // mỗi dòng một mục tiêu
+    public string DoiTuong { get; set; } = "";
     public string? GiangVienId { get; set; }      // giảng viên phụ trách
     public NguoiDung? GiangVien { get; set; }
     public List<ChuDe> ChuDe { get; set; } = [];

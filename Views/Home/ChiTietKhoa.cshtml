@@ -4,6 +4,8 @@
     var k = Model.DangChon!;
     ViewData["Title"] = $"{k.Ten} – Khoá của tôi";
     var tiep = k.BaiHocTiep;
+    var gt = k.GioiThieu;
+    var nhan = gt is null ? [] : new[] { gt.Mon }.Where(x => !string.IsNullOrWhiteSpace(x)).ToArray();
 }
 @section Head {
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -26,8 +28,12 @@
 </nav>
 
 @* ---------------------------------------------------------------- Thông tin khoá *@
-<section class="kd-hero" aria-labelledby="ten-khoa">
+<section class="kd-hero@(string.IsNullOrEmpty(k.Anh) ? " don" : "")" aria-labelledby="ten-khoa">
 <div>
+@if (nhan.Length > 0)
+{
+<p class="kd-nhan">@foreach (var n in nhan) { <span>@n</span> }</p>
+}
 <h1 id="ten-khoa" class="kh-title">@k.Ten</h1>
 <p class="kd-desc">@k.MoTa</p>
 @if (k.DaMo)
@@ -49,12 +55,37 @@
 }
 else
 {
+if (gt?.GoiId is int goiId)
+{
+<a href="/ThanhToan/Mua/@goiId" class="kh-btn phu">Mua khoá · @gt.Gia!.Value.ToString("N0", new System.Globalization.CultureInfo("vi-VN")) đ<span class="kd-han">/ @gt.SoThang tháng</span></a>
+}
+else
+{
 <a asp-controller="Home" asp-action="Index" asp-fragment="goi" class="kh-btn phu">Mở khoá đầy đủ</a>
+}
 }
 </div>
 </div>
+@if (!string.IsNullOrEmpty(k.Anh))
+{
 <img class="kd-cover" src="@k.Anh" alt="" width="960" height="540">
+}
 </section>
+
+@if (gt is not null && (gt.MucTieu.Count > 0 || !string.IsNullOrWhiteSpace(gt.DoiTuong)))
+{
+<section class="kd-gioi-thieu" aria-label="Giới thiệu khoá">
+@if (gt.MucTieu.Count > 0)
+{
+<div><h2 class="kh-h2">Học xong bạn sẽ</h2>
+<ul class="kd-muc-tieu">@foreach (var m in gt.MucTieu) { <li>@m</li> }</ul></div>
+}
+@if (!string.IsNullOrWhiteSpace(gt.DoiTuong))
+{
+<div><h2 class="kh-h2">Dành cho</h2><p class="kd-desc">@gt.DoiTuong</p></div>
+}
+</section>
+}
 
 
 @* ---------------------------------------------------------------- Nội dung khoá *@

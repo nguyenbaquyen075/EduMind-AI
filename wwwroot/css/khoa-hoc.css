@@ -250,3 +250,14 @@ a.kh-lesson:hover .kh-go{color:var(--accent);transform:translateX(2px)}
 .kh-more-menu small{display:block;font-size:12px;font-weight:400;color:var(--text-3)}
 .kh-more-menu .tat{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;font-size:14px;font-weight:500;color:var(--text-3);cursor:not-allowed}
 .kh-more-menu .tat svg{flex:0 0 18px;color:var(--text-3)}
+/* Giới thiệu khoá: nhãn môn/lớp/cấp độ, mục tiêu, đối tượng */
+.kd-nhan{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px}
+.kd-nhan span{padding:3px 10px;border-radius:99px;border:1px solid var(--line);font-size:12.5px;font-weight:600;color:var(--text-2)}
+.kd-han{font-weight:400;opacity:.75;margin-left:4px}
+.kd-gioi-thieu{display:grid;grid-template-columns:minmax(0,3fr) minmax(0,2fr);gap:24px;margin-bottom:28px;padding:24px;border:1px solid var(--line);border-radius:14px;background:var(--surface)}
+.kd-gioi-thieu .kh-h2{margin:0 0 12px}
+.kd-gioi-thieu .kd-desc{margin:0}
+.kd-muc-tieu{margin:0;padding:0;list-style:none;display:grid;gap:8px}
+.kd-muc-tieu li{position:relative;padding-left:26px;color:var(--text-2)}
+.kd-muc-tieu li::before{content:"✓";position:absolute;left:0;top:0;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;background:var(--accent-soft,#F3EBDD);color:var(--accent,#8A6A2F)}
+@media (max-width:700px){.kd-gioi-thieu{grid-template-columns:minmax(0,1fr);padding:16px}}

@@ -1,0 +1,30 @@
+@model List<AdminTiLeKhoa>
+@{
+    // Cột ngang: mỗi khoá một thanh, độ dài = % bài tập học viên đã nộp. Khoá chưa giao bài / chưa có học viên không vẽ thanh.
+    var coSo = Model.Where(k => k.PhanTram is not null).ToList();
+    var chung = coSo.Sum(k => k.CanNop) is var can and > 0 ? (int)Math.Round(coSo.Sum(k => k.DaNop) * 100.0 / can) : (int?)null;
+}
+<section class="ql-khoi bd-ht" aria-labelledby="bd-ht-tieu-de">
+<div class="ql-khoi-dau"><div><h2 id="bd-ht-tieu-de">Tỉ lệ hoàn thành bài tập</h2><span class="ql-phu">Bài đã nộp / bài cần nộp của học viên còn hạn</span></div>
+@if (chung is not null) { <p class="bd-ht-chung"><b>@chung%</b><span>chung</span></p> }</div>
+@if (Model.Count == 0)
+{
+<p class="ql-trong">Chưa có khoá học.</p>
+}
+else
+{
+<ul class="bd-ht-ds" role="list">
+@foreach (var k in Model)
+{
+    var moTa = k.PhanTram is int p ? $"{k.Ten}: {p}% — {k.DaNop}/{k.CanNop} bài nộp ({k.SoBaiTap} bài tập × {k.SoHocVien} học viên)"
+        : $"{k.Ten}: {(k.SoBaiTap == 0 ? "chưa giao bài tập" : "chưa có học viên còn hạn")}";
+<li class="bd-ht-dong" tabindex="0" aria-label="@moTa" data-tip="@moTa">
+<span class="bd-ht-ten">@k.Ten</span>
+<span class="bd-ht-ray">@if (k.PhanTram is int pt) { <span class="bd-ht-thanh" style="width: @(Math.Max(pt, 1))%"></span> }</span>
+<span class="bd-ht-so">@if (k.PhanTram is int pt2) { <b>@pt2%</b><small>@k.DaNop/@k.CanNop</small> } else { <small>@(k.SoBaiTap == 0 ? "Chưa giao bài" : "Chưa có học viên")</small> }</span>
+</li>
+}
+</ul>
+<div class="bd-ht-truc" aria-hidden="true"><span></span><span>0%</span><span>50%</span><span>100%</span><span></span></div>
+}
+</section>

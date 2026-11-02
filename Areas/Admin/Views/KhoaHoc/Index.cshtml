@@ -3,16 +3,21 @@
     ViewData["TieuDe"] = "Khoá học";
     ViewData["Muc"] = "KhoaHoc";
     var dsGv = (List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>)ViewBag.DsGiangVien;
+    var giaLe = (Dictionary<string, int?>)ViewBag.GiaLe;
+    var vi = new System.Globalization.CultureInfo("vi-VN");
 }
 @section Actions { <a href="/Admin/GhiDanh" class="ql-nut phu">Quản lý ghi danh</a><a href="/Admin/KhoaHoc/Tao" class="ql-nut">+ Tạo khoá học</a> }
 <p class="ad-filter-note">Quản lý danh mục khoá, phân công giảng viên và mở nội dung học cho học viên.</p>
 <section class="ql-khoi">
 <table class="ql-bang so">
-<thead><tr><th>Khoá</th><th>Giảng viên phụ trách</th><th class="so">Bài</th><th class="so">Học viên</th><th></th></tr></thead>
+<thead><tr><th>Khoá</th><th>Môn</th><th class="so">Giá</th><th>Trạng thái</th><th>Giảng viên phụ trách</th><th class="so">Bài</th><th class="so">Học viên</th><th></th></tr></thead>
 <tbody>
 @foreach (var k in ViewBag.Khoa)
 {
-<tr><td><b>@k.Ten</b><span class="ql-phu">@k.Id</span></td>
+<tr><td><div class="kh-dong">@if (!string.IsNullOrEmpty(k.Anh)) { <img src="@k.Anh" alt="" loading="lazy"> } else { <span class="kh-ky" aria-hidden="true">@k.KyHieu</span> }<div><b>@k.Ten</b><span class="ql-phu">@k.Id</span></div></div></td>
+<td class="kh-mon">@(string.IsNullOrEmpty(k.Mon) ? "—" : k.Mon)</td>
+<td class="so kh-mon">@{ int? gia = giaLe.TryGetValue((string)k.Id, out var x) ? x : null; }@(gia is null ? "—" : gia.Value.ToString("N0", vi) + " đ")</td>
+<td><form method="post" asp-action="DoiHienThi"><input type="hidden" name="id" value="@k.Id"><button class="ql-chip @(k.HienThi ? "xanh" : "vang")" style="border: 0; cursor: pointer" title="@(k.HienThi ? "Bấm để ẩn khoá" : "Bấm để hiện khoá")">@(k.HienThi ? "Đang hiện" : "Đang ẩn")</button></form></td>
 <td><form method="post" asp-action="GanGiangVien"><input type="hidden" name="id" value="@k.Id"><span class="ql-truong" style="margin: 0; display: block; max-width: 300px"><select name="giangVienId" onchange="this.form.submit()" aria-label="Giảng viên khoá @k.Ten"><option value="">— Chưa gán —</option>
 @foreach (var g in dsGv)
 {
@@ -20,7 +25,7 @@
 }
 </select></span></form></td>
 <td class="so">@k.SoBai</td><td class="so">@k.SoHocVien</td>
-<td class="hanh-dong"><span class="ql-hang-nut" style="justify-content: flex-end"><a href="/Admin/NoiDung?khoa=@k.Id" class="ql-nut phu nho">Nội dung</a><a href="/Admin/KhoaHoc/GhiDanh/@k.Id" class="ql-nut nho">Ghi danh</a><a href="/Admin/KhoaHoc/Sua/@k.Id" class="ql-nut phu nho">Sửa khoá</a></span></td></tr>
+<td class="hanh-dong"><span class="ql-hang-nut" style="justify-content: flex-end"><a href="/GiangVien/NoiDung?khoa=@k.Id" class="ql-nut phu nho">Nội dung</a><a href="/Admin/KhoaHoc/GhiDanh/@k.Id" class="ql-nut nho">Ghi danh</a><a href="/Admin/KhoaHoc/Sua/@k.Id" class="ql-nut phu nho">Sửa khoá</a></span></td></tr>
 }
 </tbody>
 </table>
