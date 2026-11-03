@@ -126,6 +126,12 @@ public class KhoaForm
 /// <summary>Trang xem trước nội dung bài như học viên trong khu giảng viên.</summary>
 public record XemTruocBaiModel(string Nhan, string TieuDe, IReadOnlyList<MucNoiDung> Muc, string? GhiChu);
 
+/// <summary>Một bài tập đã giao ở trang thống kê nộp bài của giảng viên.</summary>
+public record GvBaiTapRow(int Id, int BaiId, string Ten, DateTime? HanNop, bool DaGiao, int SoNop, int SoHocVien, int ChoCham);
+
+/// <summary>Khoá trong thanh chọn khoá ở trang Bài tập & nộp bài.</summary>
+public record GvKhoaTomTat(string Id, string Ten, int SoBai, int BaiDaGiao, int ChoCham);
+
 /// <summary>Thẻ khoá ở trang "Khoá học của tôi" của giảng viên.</summary>
 public record TheKhoaGiangVien(string Id, string Ten, string MoTa, string Anh, int SoChuDe, int SoBaiXuatBan, int SoBaiNhap, int SoHocVien, bool HienThi = true);
 
