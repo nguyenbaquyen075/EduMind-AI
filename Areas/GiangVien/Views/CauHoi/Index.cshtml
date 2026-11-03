@@ -11,41 +11,29 @@
 <p class="ql-trong">Bạn chưa được gán khoá nào. Admin gán khoá ở mục Khoá học.</p>
     return;
 }
-@section Actions {
-@if (dsKhoa.Count > 1)
-{
-<form method="get" class="ql-hang-nut"><div class="ql-truong" style="margin: 0"><select name="khoa" onchange="this.form.submit()" aria-label="Chọn khoá">
+<form method="get" class="bt-giao" aria-label="Giao bài tập">
+<div class="ql-truong"><label for="btKhoa">Khoá</label><select id="btKhoa" name="khoa" onchange="this.form.submit()">
 @foreach (var k in dsKhoa)
 {
 <option value="@k.Id" selected="@(k.Id == Model.Id)">@k.Ten</option>
 }
-</select></div></form>
-}
-}
-
-<div class="ql-them mot" aria-label="Giao bài tập">
-<form method="get" action="/GiangVien/GiaoBai/Tao">
-<h2>+ Giao bài tập</h2>
-<div class="ql-hang-nut">
-<div class="ql-truong" style="flex: 1 1 320px"><select name="bai" aria-label="Giao bài tập cho bài" required>
-<option value="">— Chọn bài cần giao bài tập —</option>
+</select></div>
+<div class="ql-truong"><label for="btBai">Bài học</label><select id="btBai" name="bai" required>
+<option value="">— Chọn bài học —</option>
 @foreach (var cd in Model.ChuDe.OrderBy(c => c.ThuTu))
 {
 <optgroup label="@cd.Ten">
 @foreach (var b in cd.Bai.OrderBy(x => x.ThuTu))
 {
-<option value="@b.Id">Bài @b.So. @b.Ten (@b.CauHoi.Count câu)</option>
+<option value="@b.Id">Bài @b.So. @b.Ten</option>
 }
 </optgroup>
 }
 </select></div>
-<button class="ql-nut">Soạn bài tập →</button>
-</div>
-<p class="ql-phu" style="margin: 0">Giao một bài tập cho buổi học, gồm nhiều câu trắc nghiệm, đúng / sai và tự luận.</p>
+<button type="submit" formaction="/GiangVien/GiaoBai/Tao" class="ql-nut">+ Tạo bài tập</button>
 </form>
-</div>
 
-<section class="ql-khoi" aria-labelledby="cay">
+<section class="ql-khoi ql-noi-dung-cay" aria-labelledby="cay">
 <div class="ql-khoi-dau"><h2 id="cay">@Model.Ten · bài tập theo chủ đề và bài</h2><p>Bấm vào bài để xem hoặc soạn bài tập.</p></div>
 <ul class="ql-cay">
 @foreach (var cd in Model.ChuDe.OrderBy(c => c.ThuTu))

@@ -9,7 +9,7 @@ a{color:var(--nhan,#4F46E5)}
 .ql{min-height:100vh;display:flex}
 
 /* Menu trái */
-.ql-side{flex:0 0 240px;box-sizing:border-box;position:sticky;top:0;height:100vh;overflow-y:auto;display:flex;flex-direction:column;padding:18px 12px;background:var(--mat);border-right:1px solid var(--vien)}
+.ql-side{flex:0 0 256px;box-sizing:border-box;position:sticky;top:0;height:100vh;overflow-y:auto;display:flex;flex-direction:column;padding:18px 12px;background:var(--mat);border-right:1px solid var(--vien)}
 .ql-logo{display:flex;align-items:center;gap:8px;padding:4px 10px 18px;color:var(--chu);text-decoration:none}
 .ql-logo b{font-size:19px;font-weight:800}
 .ql-logo span{color:var(--nhan)}
@@ -303,3 +303,30 @@ a{color:var(--nhan,#4F46E5)}
 .ql-bang td.hanh-dong,.ql-bang td:last-child>.ql-hang-nut{white-space:nowrap}
 .ql-bang td.hanh-dong .ql-hang-nut,.ql-bang td:last-child>.ql-hang-nut{flex-wrap:nowrap}
 .ql-bang td.hanh-dong form{display:inline-flex}
+
+/* Avatar và nút Đăng xuất luôn đi cùng nhau */
+.ql-tk{display:inline-flex;align-items:center;gap:10px}
+
+/* Không để chữ gãy dòng: menu bên, đầu trang trên điện thoại, bảng hẹp */
+.ql-link{white-space:nowrap}
+.ql-link>svg{flex:none}
+@media (max-width:640px){
+.ql-top-phai{gap:8px}
+.ql-nguoi{font-size:0;gap:0;padding-left:0;margin-left:0;border-left:0}
+.ql-nguoi .ql-avatar{font-size:13px}
+}
+@media (max-width:820px){
+.ql-bang td:first-child,.ql-bang th:first-child{min-width:150px}
+.ql-bang select{min-width:120px}
+.ql-bang td,.ql-bang th{white-space:nowrap}
+.ql-bang td:first-child{white-space:normal}
+}
+
+/* Thanh tạo bài tập gọn: khoá, bài học, nút tạo */
+.bt-giao{display:flex;flex-wrap:wrap;align-items:flex-end;gap:12px;margin-bottom:16px;padding:12px 16px;background:var(--mat);border:1px solid var(--vien);border-radius:10px}
+.bt-giao .ql-truong{margin:0;flex:1 1 200px;min-width:0}
+.bt-giao .ql-truong:first-child{flex:0 1 220px}
+.bt-giao label{display:block;margin-bottom:4px;font-size:12px;color:var(--chu-3,#6B7280)}
+.bt-giao select{width:100%;height:40px;box-sizing:border-box}
+.bt-giao .ql-nut{flex:none;height:40px;white-space:nowrap}
+@media (max-width:640px){.bt-giao .ql-truong,.bt-giao .ql-truong:first-child{flex-basis:100%}.bt-giao .ql-nut{width:100%}}

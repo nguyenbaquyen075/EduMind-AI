@@ -20,7 +20,7 @@ else {
 <tr><td><div class="kh-dong"><span class="gv-avatar" aria-hidden="true">@g.HoTen[..1]</span><div><a href="/Admin/NguoiDung/ChiTiet/@g.Id"><b>@g.HoTen</b></a><span class="ql-phu">@g.Email</span>@if (g.BiKhoa) { <span class="ql-chip do">Đã khoá</span> }</div></div></td>
 <td>@(g.Khoa.Count == 0 ? "—" : string.Join(", ", g.Khoa))</td>
 <td class="so">@g.HocVien</td>
-<td class="so">@g.BaiXuatBan<span class="ql-phu">/ @g.BaiTong bài</span></td>
+<td class="so" style="white-space:nowrap">@g.BaiXuatBan <span class="ql-phu" style="display:inline">/ @g.BaiTong bài</span></td>
 <td>@if (g.HoanThanh is int ht) { <div class="gv-tl"><span class="bd-ht-ray"><span class="bd-ht-thanh" style="width:@(Math.Max(ht, 1))%"></span></span><b>@ht%</b></div><span class="ql-phu">@g.BaiTap bài tập đã giao</span> } else { <span class="ql-phu">@(g.BaiTap == 0 ? "Chưa giao bài" : "Chưa có học viên")</span> }</td>
 <td class="so">@if (g.ChoCham > 0) { <span class="ql-chip vang">@g.ChoCham</span> } else { <span>0</span> }</td>
 <td class="so">@g.BuoiSapToi</td>
