@@ -1,5 +1,5 @@
 [hidden]{display:none !important}
-body{margin:0;background:#14120F;color:#D9D2C5;font-family:'Be Vietnam Pro',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
+body{margin:0;background:#14120F;color:#D9D2C5;font-family:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
 a{color:#C8A15A}a:hover{color:#E2C27F}
 :focus-visible{outline:3px solid #E2C27F;outline-offset:2px}
 .tk{min-height:100vh;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
@@ -8,7 +8,7 @@ a{color:#C8A15A}a:hover{color:#E2C27F}
 .tk-anh::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(15,13,10,.5) 0%,rgba(15,13,10,.1) 45%,rgba(15,13,10,.85) 100%)}
 .tk-form{display:flex;align-items:center;justify-content:center;padding:48px 24px;background-color:#14120F;background-image:radial-gradient(ellipse 50% 35% at 50% 30%,rgba(110,92,190,.10),transparent 70%),radial-gradient(1.5px 1.5px at 23px 41px,rgba(255,248,232,.4),transparent),radial-gradient(2px 2px at 151px 117px,rgba(226,194,127,.4),transparent);background-size:100% 100%,260px 260px,300px 300px}
 .tk-hop{width:100%;max-width:380px}
-.tk-hop h1{margin:0 0 6px;font-family:'Playfair Display',Georgia,serif;font-size:38px;font-weight:600;line-height:1.15;color:#F4EEE2}
+.tk-hop h1{margin:0 0 6px;font-family:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;font-size:38px;font-weight:600;line-height:1.15;color:#F4EEE2}
 .tk-hop>p{margin:0 0 28px;color:#A39B8E}
 .tk-truong{margin-bottom:16px}
 .tk-truong label{display:block;margin-bottom:6px;font-size:13px;font-weight:500;color:#CFC6B6}
@@ -42,3 +42,7 @@ a{color:#C8A15A}a:hover{color:#E2C27F}
   .tk-hop h1{font-size:30px}
   .tk-hop>p{margin-bottom:20px}
 }
+.tk-hang{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin:0 0 16px}
+.tk-hang .tk-ghi-nho{margin:0}
+.tk-quen{font-size:14px;color:#C8A15A;text-decoration:none;white-space:nowrap}
+.tk-quen:hover{text-decoration:underline}

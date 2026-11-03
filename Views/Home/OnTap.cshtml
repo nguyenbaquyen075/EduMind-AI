@@ -1,0 +1,46 @@
+@model OnTapViewModel
+@{
+    ViewData["Title"] = "Ôn câu sai · Sử Địa";
+    const string chu = "ABCD";
+}
+@section Head {
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500;1,600&display=swap">
+<link rel="stylesheet" href="~/css/hoc-vien.css" asp-append-version="true">
+}
+<div class="hv-trang">
+<partial name="_MenuTaiKhoan" model="Model.Menu" />
+<main class="hv-main">
+<h1>Ôn câu sai</h1>
+<p class="hv-mo-ta">Những câu bạn trả lời sai ở lần làm gần nhất. Lần sau làm đúng thì câu sẽ không còn ở đây.</p>
+@if (Model.DsKhoa.Count > 1)
+{
+<nav class="hv-loc" aria-label="Lọc theo khoá">
+<a href="/Home/OnTap" aria-current="@(Model.KhoaId is null ? "page" : null)">Tất cả</a>
+@foreach (var k in Model.DsKhoa) { <a href="/Home/OnTap?khoa=@k.Id" aria-current="@(Model.KhoaId == k.Id ? "page" : null)">@k.Ten</a> }
+</nav>
+}
+@if (Model.Cau.Count == 0)
+{
+<section class="hv-khoi"><p class="hv-trong">Không có câu sai nào. <a asp-controller="Home" asp-action="LuyenDe" asp-route-id="">Luyện đề</a></p></section>
+}
+@foreach (var c in Model.Cau)
+{
+<article class="hv-cau">
+<div class="hv-cau-dau"><span class="hv-chip">@c.Khoa</span><span>@c.Bai</span></div>
+<p class="de">@c.NoiDung</p>
+<ul class="hv-pa">
+@for (var i = 0; i < c.PhuongAn.Count && i < 4; i++)
+{
+    var ma = chu[i].ToString();
+<li class="@(ma == c.DapAnDung ? "dung" : ma == c.DaChon ? "sai" : null)"><b>@ma.</b> @c.PhuongAn[i]@if (ma == c.DaChon) {<span class="hv-phu"> · lần trước bạn chọn</span>}</li>
+}
+</ul>
+<button type="button" class="hv-nut phu" data-hien-dap-an>Xem đáp án</button>
+<div class="hv-giai"><b>Đáp án @c.DapAnDung.</b> @c.GiaiThich <a href="/Home/BaiHoc/@c.BaiId">Đọc lại bài học →</a></div>
+</article>
+}
+</main>
+</div>
+<script>
+document.querySelectorAll('[data-hien-dap-an]').forEach(b => b.addEventListener('click', () => b.closest('.hv-cau').classList.add('hien')));
+</script>

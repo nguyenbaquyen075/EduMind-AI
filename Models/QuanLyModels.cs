@@ -132,6 +132,16 @@ public record GvBaiTapRow(int Id, int BaiId, string Ten, DateTime? HanNop, bool 
 /// <summary>Khoá trong thanh chọn khoá ở trang Bài tập & nộp bài.</summary>
 public record GvKhoaTomTat(string Id, string Ten, int SoBai, int BaiDaGiao, int ChoCham);
 
+/// <summary>Một học viên trong bảng Lớp học của giảng viên (điểm thang 10).</summary>
+public record GvHocVienRow(string Id, string Ten, string Email, DateTime? HanDen, bool ConHan, int DaHoc, int TongBai,
+    int DaNop, int BaiTapGiao, decimal? DiemBaiTap, decimal? DiemThi, int? TiLeDung, DateTime? LanCuoi)
+{
+    public int PhanTramHoc => TongBai == 0 ? 0 : DaHoc * 100 / TongBai;
+}
+
+/// <summary>Điểm một bài tập đã giao của một học viên.</summary>
+public record GvDiemBaiTap(int Id, string Ten, string Bai, DateTime? HanNop, DateTime? NopLuc, decimal? Diem, bool ChoCham);
+
 /// <summary>Thẻ khoá ở trang "Khoá học của tôi" của giảng viên.</summary>
 public record TheKhoaGiangVien(string Id, string Ten, string MoTa, string Anh, int SoChuDe, int SoBaiXuatBan, int SoBaiNhap, int SoHocVien, bool HienThi = true);
 
