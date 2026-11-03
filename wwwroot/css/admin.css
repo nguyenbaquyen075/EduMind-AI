@@ -91,3 +91,9 @@
 @media(max-width:650px){.ck-ds{padding:10px 16px 16px}.ck-ds a{grid-template-columns:minmax(0,1fr) auto;gap:4px 12px}.ck-ds .gv-so{grid-column:1;grid-row:2}.ck-ds .gv-xem{grid-column:2;grid-row:1/span 2}}
 .bt-ht{margin-left:auto;padding:5px 12px;border-radius:99px;background:#EEF2FF;color:#4338CA;font-size:13px}.bt-ht b{font-weight:700}
 .bt-ht+.bt-tim{margin-left:0}
+.ad-filters .ql-nut,.ad-filters .ql-nut-chu{flex:none;min-height:40px;display:inline-flex;align-items:center;justify-content:center;box-sizing:border-box}
+.ad-filters .ql-nut-chu{padding:0 6px;white-space:nowrap}
+.ad-filters .ql-truong label{white-space:nowrap}
+.ad-filters .ql-truong{display:flex;flex-direction:column;gap:6px;margin:0}
+.ad-filters .ql-truong label{margin:0;line-height:18px;height:18px}
+.ad-filters .ql-truong :is(input,select){height:40px;box-sizing:border-box;margin:0}

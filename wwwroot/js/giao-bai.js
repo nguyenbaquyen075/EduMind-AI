@@ -23,7 +23,9 @@
     $('gbHan').value = new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
   }
   function renderBuoi(selected) {
-    $('gbBuoi').innerHTML = '<option value="">Bài tập của bài học (không gắn buổi)</option>' + buoi.filter(b => b.baiId === Number($('gbBai').value))
+    const dsBuoi = buoi.filter(b => b.baiId === Number($('gbBai').value));
+    $('gbBuoiBox').hidden = data.laKiemTra || dsBuoi.length === 0;
+    $('gbBuoi').innerHTML = '<option value="">Không gắn buổi</option>' + dsBuoi
       .map(b => `<option value="${b.id}">${b.thoiGian ? esc(new Date(b.thoiGian).toLocaleString('vi-VN')) : `Buổi #${b.id} · chưa đặt giờ`}</option>`).join('');
     $('gbBuoi').value = selected || '';
   }
