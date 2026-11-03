@@ -113,7 +113,7 @@ public class EfKhoaHocService : IKhoaHocService
             NgayHomNay = DateTime.Today,
             LuotHoiDaDung = 0,
             LuotHoiToiDa = LuotHoiToiDa,
-            TiepTuc = new TiepTucHoc(khoaChinh.Ten, tiep is null ? "Đã học hết các bài" : $"Bài {tiep.So}. {tiep.Ten}",
+            TiepTuc = new TiepTucHoc(khoaChinh.Ten, tiep is not null ? $"Bài {tiep.So}. {tiep.Ten}" : khoaChinh.TongBai == 0 ? "Khoá chưa có bài" : "Bạn đã học hết các bài",
                 tiep is null ? "" : $"{tiep.SoMuc} mục", khoaChinh.TienDoPhanTram),
             ThongKe = new ThongKeTuan(
                 danhMuc.Sum(k => k.BaiDaHoc), cauTuan,

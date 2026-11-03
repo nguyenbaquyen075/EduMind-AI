@@ -1,0 +1,42 @@
+@model HoSoModel
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Tài khoản · Sử Địa";
+    var dmk = (DoiMatKhauModel)ViewBag.DoiMatKhau;
+}
+@section Head {
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500;1,600&display=swap">
+<link rel="stylesheet" href="~/css/hoc-vien.css" asp-append-version="true">
+}
+<div class="hv-trang">
+<partial name="_MenuTaiKhoan" model="(MenuTaiKhoan)ViewBag.Menu" />
+<main class="hv-main">
+<h1>Tài khoản</h1>
+@if (TempData["ThongBao"] is string tb) { <p class="hv-tb" role="status">@tb</p> }
+
+<section class="hv-khoi">
+<h2>Thông tin cá nhân</h2>
+<form asp-action="HoSo" method="post" class="hv-form">
+<div><label asp-for="HoTen">Họ tên</label><input asp-for="HoTen" maxlength="80" autocomplete="name"><span asp-validation-for="HoTen" class="hv-loi"></span></div>
+<div><label for="email">Email đăng nhập</label><input id="email" value="@Model.Email" readonly></div>
+<div><button type="submit" class="hv-nut">Lưu họ tên</button></div>
+</form>
+</section>
+
+<section class="hv-khoi" id="doi-mat-khau">
+<h2>Đổi mật khẩu</h2>
+<form asp-action="DoiMatKhau" method="post" class="hv-form">
+@if (ViewData.ModelState["dmk"]?.Errors is { Count: > 0 } loi) { <p class="hv-loi" role="alert" style="margin:0">@string.Join(" ", loi.Select(e => e.ErrorMessage))</p> }
+<div><label for="dmk_MatKhauCu">Mật khẩu hiện tại</label><input id="dmk_MatKhauCu" name="dmk.MatKhauCu" type="password" autocomplete="current-password" required><span class="hv-loi">@ViewData.ModelState["dmk.MatKhauCu"]?.Errors.FirstOrDefault()?.ErrorMessage</span></div>
+<div><label for="dmk_MatKhauMoi">Mật khẩu mới</label><input id="dmk_MatKhauMoi" name="dmk.MatKhauMoi" type="password" autocomplete="new-password" minlength="8" required><span class="hv-loi">@ViewData.ModelState["dmk.MatKhauMoi"]?.Errors.FirstOrDefault()?.ErrorMessage</span></div>
+<div><label for="dmk_NhapLai">Nhập lại mật khẩu mới</label><input id="dmk_NhapLai" name="dmk.NhapLai" type="password" autocomplete="new-password" required><span class="hv-loi">@ViewData.ModelState["dmk.NhapLai"]?.Errors.FirstOrDefault()?.ErrorMessage</span></div>
+<div><button type="submit" class="hv-nut">Đổi mật khẩu</button></div>
+</form>
+</section>
+
+<section class="hv-khoi">
+<h2>Thanh toán</h2>
+<p class="hv-trong"><a href="/ThanhToan">Lịch sử thanh toán</a> · <a asp-controller="Home" asp-action="Index" asp-fragment="goi">Mua thêm gói</a></p>
+</section>
+</main>
+</div>
