@@ -1,0 +1,89 @@
+@model ThiThuViewModel
+@{
+    ViewData["Title"] = "Thi thử · Sử Địa";
+    var vi = new System.Globalization.CultureInfo("vi-VN");
+    var khoa = Model.Khoa.Where(k => k.DeThi.Count > 0 && (Model.KhoaId is null || k.Khoa.Id == Model.KhoaId)).ToList();
+    var tatCaDe = khoa.SelectMany(k => k.DeThi).ToList();
+    var lichSu = Model.KhoaId is null ? Model.LichSu : Model.LichSu.Where(l => l.Khoa == Model.Khoa.First(k => k.Khoa.Id == Model.KhoaId).Khoa.Ten).ToList();
+    var coDiem = lichSu.Where(l => l.SoCau > 0).ToList();
+    string D(decimal d) => d.ToString("0.#", vi);
+    string Mau(decimal d) => d >= 8 ? "xanh" : d >= 5 ? "vang" : "do";
+}
+@section Head {
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500;1,600&display=swap">
+<link rel="stylesheet" href="~/css/hoc-vien.css" asp-append-version="true">
+}
+<div class="hv-trang">
+<partial name="_MenuTaiKhoan" model="Model.Menu" />
+<main class="hv-main">
+<h1>Thi thử</h1>
+<p class="hv-mo-ta">Đề có tính giờ, làm như thi thật. Làm lại bao nhiêu lần cũng được.</p>
+@if (Model.Khoa.Count(k => k.DeThi.Count > 0) > 1)
+{
+<nav class="hv-loc" aria-label="Lọc theo khoá">
+<a href="/Home/ThiThu" aria-current="@(Model.KhoaId is null ? "page" : null)">Tất cả</a>
+@foreach (var k in Model.Khoa.Where(k => k.DeThi.Count > 0)) { <a href="/Home/ThiThu?khoa=@k.Khoa.Id" aria-current="@(Model.KhoaId == k.Khoa.Id ? "page" : null)">@k.Khoa.Ten</a> }
+</nav>
+}
+
+<div class="hv-so">
+<div><p>Số đề</p><b>@tatCaDe.Count</b></div>
+<div><p>Đã làm</p><b>@tatCaDe.Count(d => d.Dung is not null || d.KetQua is not null)<small>/@tatCaDe.Count</small></b></div>
+<div><p>Điểm trung bình</p><b>@(coDiem.Count == 0 ? "—" : D(Math.Round(coDiem.Average(l => l.Diem10), 1)))<small>/10</small></b></div>
+<div><p>Điểm cao nhất</p><b>@(coDiem.Count == 0 ? "—" : D(coDiem.Max(l => l.Diem10)))<small>/10</small></b></div>
+</div>
+
+@if (tatCaDe.Count == 0)
+{
+<section class="hv-khoi"><p class="hv-trong">Chưa có đề thi thử nào.</p></section>
+}
+@foreach (var k in khoa)
+{
+<section class="hv-khoi">
+<div class="hv-khoi-dau"><h2>@k.Khoa.Ten</h2><span>@k.DeThi.Count đề</span></div>
+<ul class="hv-ds">
+@foreach (var d in k.DeThi)
+{
+    decimal? diem = d.Dung is int dung && d.SoCau > 0 ? Math.Round(dung * 10m / d.SoCau, 1) : null;
+<li>
+<span class="ten"><b>@d.Ten</b><small>@d.SoCau câu · @d.SoPhut phút</small></span>
+@if (d.BiKhoa)
+{
+<span class="hv-chip">Cần mở khoá</span>
+<a asp-controller="Home" asp-action="Index" asp-fragment="goi" class="hv-nut phu">Mở khoá</a>
+}
+else
+{
+    if (d.KetQua is not null) { <span class="hv-chip tim">@d.KetQua</span> }
+    else if (diem is decimal x) { <span class="hv-chip @Mau(x)">@d.Dung/@d.SoCau · @D(x) điểm</span> }
+    else if (d.Dung is not null) { <span class="hv-chip xanh">Đã làm</span> }
+    else { <span class="hv-chip">Chưa làm</span> }
+    var daLam = d.Dung is not null || d.KetQua is not null;
+<a href="/Home/LamCauHoi/@d.Id" class="hv-nut @(daLam ? "phu" : null)">@(daLam ? "Làm lại" : "Làm bài")</a>
+}
+</li>
+}
+</ul>
+</section>
+}
+
+<section class="hv-khoi">
+<div class="hv-khoi-dau"><h2>Lịch sử làm đề</h2><span>@lichSu.Count lượt</span></div>
+@if (lichSu.Count == 0)
+{
+<p class="hv-trong">Chưa làm đề nào.</p>
+}
+else
+{
+<div class="hv-bang-boc"><table class="hv-bang">
+<thead><tr><th>Đề</th><th>Ngày làm</th><th class="so">Đúng</th><th class="so">Điểm</th></tr></thead>
+<tbody>
+@foreach (var l in lichSu)
+{
+<tr><td><b>@l.Ten</b><small>@l.Khoa</small></td><td class="hv-nowrap">@l.NopLuc.ToLocalTime().ToString("HH:mm dd/MM/yyyy")</td><td class="so hv-nowrap">@l.SoDung/@l.SoCau</td><td class="so"><span class="hv-chip @Mau(l.Diem10)">@D(l.Diem10)</span></td></tr>
+}
+</tbody></table></div>
+}
+</section>
+</main>
+</div>

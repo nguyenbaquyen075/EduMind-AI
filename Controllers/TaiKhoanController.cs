@@ -83,6 +83,63 @@ public class TaiKhoanController : Controller
     [HttpGet]
     public IActionResult KhongCoQuyen() => View();
 
+    // Chưa có dịch vụ gửi email: hướng dẫn liên hệ quản trị để được đặt lại mật khẩu
+    [HttpGet]
+    public IActionResult QuenMatKhau() => View();
+
+    // Hồ sơ: đổi họ tên và mật khẩu
+    [Authorize, HttpGet]
+    public async Task<IActionResult> HoSo([FromServices] Services.IKhoaHocService svc)
+    {
+        var nd = await _users.GetUserAsync(User);
+        if (nd is null) return Challenge();
+        ViewBag.Menu = svc.LayKhoaHoc(null).Menu with { MucDangMo = "HoSo" };
+        ViewBag.DoiMatKhau = new DoiMatKhauModel();
+        return View(new HoSoModel { HoTen = nd.HoTen, Email = nd.Email ?? "" });
+    }
+
+    [Authorize, HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> HoSo(HoSoModel m, [FromServices] Services.IKhoaHocService svc)
+    {
+        var nd = await _users.GetUserAsync(User);
+        if (nd is null) return Challenge();
+        if (!ModelState.IsValid)
+        {
+            ViewBag.Menu = svc.LayKhoaHoc(null).Menu with { MucDangMo = "HoSo" };
+            ViewBag.DoiMatKhau = new DoiMatKhauModel();
+            m.Email = nd.Email ?? "";
+            return View(m);
+        }
+        nd.HoTen = m.HoTen.Trim();
+        await _users.UpdateAsync(nd);
+        await _signIn.RefreshSignInAsync(nd);
+        TempData["ThongBao"] = "Đã lưu họ tên.";
+        return RedirectToAction(nameof(HoSo));
+    }
+
+    [Authorize, HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> DoiMatKhau([Bind(Prefix = "dmk")] DoiMatKhauModel m, [FromServices] Services.IKhoaHocService svc)
+    {
+        var nd = await _users.GetUserAsync(User);
+        if (nd is null) return Challenge();
+        if (ModelState.IsValid)
+        {
+            var kq = await _users.ChangePasswordAsync(nd, m.MatKhauCu, m.MatKhauMoi);
+            if (kq.Succeeded)
+            {
+                await _signIn.RefreshSignInAsync(nd);
+                TempData["ThongBao"] = "Đã đổi mật khẩu.";
+                return RedirectToAction(nameof(HoSo));
+            }
+            foreach (var e in kq.Errors)
+                ModelState.AddModelError("dmk", e.Code == "PasswordMismatch" ? "Mật khẩu hiện tại chưa đúng." : e.Code.StartsWith("Password") ? "Mật khẩu mới cần ít nhất 8 ký tự, có chữ thường và chữ số." : e.Description);
+        }
+        ViewBag.Menu = svc.LayKhoaHoc(null).Menu with { MucDangMo = "HoSo" };
+        ViewBag.DoiMatKhau = m;
+        ViewBag.MoDoiMatKhau = true;
+        return View(nameof(HoSo), new HoSoModel { HoTen = nd.HoTen, Email = nd.Email ?? "" });
+    }
+
     private async Task<IActionResult> VeTrangTheoVaiTro(NguoiDung nd)
     {
         var vaiTro = await _users.GetRolesAsync(nd);

@@ -2,20 +2,26 @@
     Layout = "_Layout";
 }
 @section Head {
-<link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500;1,600&display=swap">
 <link rel="stylesheet" href="~/css/tai-khoan.css" asp-append-version="true">
 }
-@* Khung chung trang Đăng nhập / Đăng ký: ảnh bìa bên trái, biểu mẫu bên phải *@
+@* Khung chung trang Đăng nhập / Đăng ký: ảnh bàn học (quả cầu) bên trái, biểu mẫu nền tối bên phải *@
 <div class="tk">
-<div class="tk-anh">
-<a href="/" class="tk-logo">Sử<span>·</span>Địa</a>
-<p class="tk-cau">Ôn thi Lịch sử &amp; Địa lí 12 cùng trợ lý trả lời đúng theo tài liệu khoá.<small>Đọc bài, luyện đề, hỏi chỗ chưa hiểu — mỗi câu trả lời đều có nguồn.</small></p>
-</div>
-<div class="tk-form">
+<div class="tk-anh" aria-hidden="true"></div>
+<main class="tk-form">
 <div class="tk-hop">
 @RenderBody()
 </div>
+</main>
 </div>
-</div>
+<script>
+// Nút hiện / ẩn mật khẩu cạnh ô nhập
+document.querySelectorAll('[data-hien-mk]').forEach((nut) => nut.addEventListener('click', () => {
+  const o = document.getElementById(nut.dataset.hienMk);
+  const hien = o.type === 'password';
+  o.type = hien ? 'text' : 'password';
+  nut.setAttribute('aria-pressed', hien);
+  nut.setAttribute('aria-label', hien ? 'Ẩn mật khẩu' : 'Hiện mật khẩu');
+}));
+</script>

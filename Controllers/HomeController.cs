@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SuDia.Web.Services;
@@ -18,7 +19,40 @@ public class HomeController : Controller
 
     // Trang trong tài khoản. Khi có Identity: thêm [Authorize]
     [Authorize]
-    public IActionResult TongQuan() => View(_svc.LayTongQuan());
+    public async Task<IActionResult> TongQuan([FromServices] HocVienService hv)
+    {
+        var uid = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+        ViewBag.ViecCanLam = await hv.ViecCanLam(uid);
+        ViewBag.BuoiSapToi = await hv.BuoiSapToi(uid);
+        ViewBag.SapHetHan = await hv.SapHetHan(uid);
+        return View(_svc.LayTongQuan());
+    }
+
+    // Điểm của tôi: điểm bài tập, thi thử, luyện tập và huy hiệu
+    [Authorize]
+    public async Task<IActionResult> Diem([FromServices] HocVienService hv) =>
+        View(await hv.BangDiem(User.FindFirstValue(ClaimTypes.NameIdentifier)!, _svc.LayKhoaHoc(null).Menu with { MucDangMo = "Diem" }));
+
+    // Thi thử: mọi đề thi thử của các khoá, kết quả gần nhất và lịch sử làm đề
+    [Authorize]
+    public async Task<IActionResult> ThiThu([FromServices] HocVienService hv, string? khoa)
+    {
+        var luyen = _svc.LayLuyenDe(null);
+        if (khoa is not null && !luyen.Khoa.Any(k => k.Khoa.Id == khoa)) khoa = null;
+        return View(new ThiThuViewModel { Menu = luyen.Menu with { MucDangMo = "ThiThu" }, Khoa = luyen.Khoa, KhoaId = khoa,
+            LichSu = await hv.LichSuThi(User.FindFirstValue(ClaimTypes.NameIdentifier)!) });
+    }
+
+    // Ôn câu sai: các câu mà lần trả lời gần nhất còn sai, xem lại đáp án và giải thích
+    [Authorize]
+    public async Task<IActionResult> OnTap([FromServices] HocVienService hv, string? khoa)
+    {
+        var uid = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+        var dsKhoa = await hv.KhoaCuaToi(uid);
+        if (khoa is not null && !dsKhoa.Any(k => k.Id == khoa)) khoa = null;
+        return View(new OnTapViewModel { Menu = _svc.LayKhoaHoc(null).Menu with { MucDangMo = "OnTap" },
+            Cau = await hv.CauSai(uid, khoa), DsKhoa = dsKhoa, KhoaId = khoa });
+    }
 
     [Authorize]
     public IActionResult HoiAi([FromServices] IAiService ai, string? khoa, string? hoi)
@@ -54,7 +88,7 @@ public class HomeController : Controller
 
     // Bài học + khung trợ lý. Khi có dữ liệu thật: kiểm tra học sinh đã mua khoá chứa bài này
     [Authorize]
-    public IActionResult BaiHoc(int? id) => View(_svc.LayBaiHoc(id));
+    public IActionResult BaiHoc(int? id) => _svc.LayBaiHoc(id) is { } vm ? View(vm) : NotFound();
 
     // Làm đề: hiện câu hỏi, chưa có đáp án
     [HttpGet]

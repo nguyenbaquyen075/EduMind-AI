@@ -1,0 +1,38 @@
+@model List<AdminTheGiangVien>
+@{
+    // Bước 1 của Bài tập / Lịch dạy: danh sách khoá (kèm giảng viên phụ trách), bấm khoá để xem
+    var muc = (string)ViewData["Muc"]!;
+    var khoa = Model.SelectMany(g => g.Khoa.Select(k => (Khoa: k, Gv: g))).ToList();
+    (string So, string Nhan, int Canh) SoLieu(AdminKhoaCuaGv k) => muc switch
+    {
+        "BaiTap" => (k.BaiTap.ToString(), "bài tập", k.ChoCham),
+        "LichDay" => (k.BuoiSapToi.ToString(), "buổi sắp tới", 0),
+        _ => (k.BaiXuatBan.ToString(), "bài xuất bản", 0),
+    };
+}
+@if (ViewBag.TiLe is List<AdminTiLeKhoa> tiLe)
+{
+<partial name="_BieuDoHoanThanh" model="tiLe" />
+}
+<section class="ql-khoi">
+<div class="ql-khoi-dau"><h2>Chọn khoá học</h2><span>@khoa.Count khoá</span></div>
+@if (khoa.Count == 0)
+{
+<div class="ad-empty"><b>Chưa có khoá học</b><p>Tạo khoá ở mục Khoá học.</p></div>
+}
+else
+{
+<ul class="ck-ds">
+@foreach (var (k, g) in khoa)
+{
+    var s = SoLieu(k);
+    var khong = g.Id == SuDia.Web.Areas.Admin.Controllers.AdminControllerBase.KhongPhanCong;
+<li><a href="/Admin/@muc?khoa=@k.Id">
+<span class="ck-ten"><b>@k.Ten</b><small class="@(khong ? "ck-thieu" : null)">@(khong ? "Chưa có giảng viên" : "GV " + g.HoTen)</small></span>
+<span class="gv-so"><b>@s.So</b> @s.Nhan@if (s.Canh > 0) {<em>@s.Canh chờ chấm</em>}</span>
+<span class="gv-xem">Xem →</span>
+</a></li>
+}
+</ul>
+}
+</section>

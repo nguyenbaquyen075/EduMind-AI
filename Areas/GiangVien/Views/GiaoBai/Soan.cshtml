@@ -4,7 +4,7 @@
     var tenLoai = kiemTra ? "bài kiểm tra" : "bài tập";
     ViewData["Title"] = kiemTra ? "Soạn bài kiểm tra" : "Giao bài tập";
     ViewData["TieuDe"] = (Model.Id == 0 && Model.DeThiId is null ? "Soạn " : "Chỉnh sửa ") + tenLoai;
-    ViewData["Muc"] = kiemTra ? "DeThi" : "GiaoBai";
+    ViewData["Muc"] = kiemTra ? "DeThi" : "CauHoi";
     var khoa = (IEnumerable<dynamic>)ViewBag.DsBai;
     var khoaRong = !khoa.Any();
 }
@@ -12,7 +12,7 @@
 @section Actions { <a href="@(kiemTra ? "/GiangVien/DeThi" : "/GiangVien/CauHoi")" class="ql-nut phu">← Về danh sách</a> }
 @if (khoaRong)
 {
-<p class="ql-trong">Chưa có bài học được phân công. <a href="/GiangVien/NoiDung">Đến nội dung bài học</a> để tạo bài trước.</p>
+<p class="ql-trong">Chưa có bài học được phân công. <a href="/GiangVien/NoiDung">Đến khoá học của tôi</a> để tạo bài trước.</p>
     return;
 }
 @if (ViewBag.DaCoBaiNop is true)
@@ -31,13 +31,14 @@
 <form id="gbForm" novalidate>
 @Html.AntiForgeryToken()
 <section class="gb-panel" data-panel="1">
-<h2>Thông tin @tenLoai</h2><p class="gb-muted">@(kiemTra ? "Đặt tên, chọn bài học và thời gian làm bài." : "Chọn bài và buổi học cần giao bài tập cho học viên.")</p>
+<h2>Thông tin @tenLoai</h2>@{ var baiChon = Model.BaiId != 0 ? khoa.FirstOrDefault(b => b.Id == Model.BaiId) : null; }
+<p class="gb-muted">@(baiChon is not null ? "Cho " + (string)baiChon.Ten : "Chọn bài học cần giao.")</p>
 <div class="ql-truong"><label for="gbTen">Tên @tenLoai <span aria-hidden="true">*</span></label><input id="gbTen" type="text" maxlength="200" placeholder="@(kiemTra ? "Ví dụ: Kiểm tra chủ đề 1" : "Ví dụ: Bài tập củng cố buổi 2")" required></div>
-<div class="ql-truong"><label for="gbBai">Thuộc bài học</label><select id="gbBai" required><option value="">— Chọn bài học —</option>
+<div class="ql-truong" hidden="@(baiChon is not null)"><label for="gbBai">Thuộc bài học</label><select id="gbBai" required><option value="">— Chọn bài học —</option>
 @foreach (var b in khoa) { <option value="@b.Id">@b.Ten</option> }
 </select></div>
 <div class="ql-2cot">
-<div class="ql-truong" hidden="@kiemTra"><label for="gbBuoi">Giao cho buổi học</label><select id="gbBuoi"><option value="">Bài tập của bài học (không gắn buổi)</option></select><small>Buổi học lấy từ Lịch dạy online của bài này.</small></div>
+<div class="ql-truong" id="gbBuoiBox" hidden="@kiemTra"><label for="gbBuoi">Giao cho buổi học</label><select id="gbBuoi"><option value="">Không gắn buổi</option></select></div>
 @if (kiemTra) { <div class="ql-truong"><label for="gbPhut">Thời gian làm bài (phút)</label><input id="gbPhut" type="number" min="5" max="240" step="1" required><small>Đồng hồ bắt đầu khi học viên bấm Bắt đầu làm bài.</small></div> }
 <div class="ql-truong"><label for="gbHan">Hạn nộp</label><input id="gbHan" type="datetime-local"><small>Để trống nếu không giới hạn hạn nộp.</small></div>
 </div>
@@ -54,6 +55,7 @@
 <section class="gb-panel" data-panel="3" hidden><h2>Xem lại @tenLoai</h2><div id="gbReview"></div></section>
 <footer class="gb-footer">
 <button type="button" class="ql-nut phu" id="gbTruoc">← Quay lại</button>
+<button type="button" class="ql-nut phu" id="gbXemTruoc" data-xem-truoc>Xem trước</button>
 <button type="button" class="ql-nut phu" id="gbNhap">Lưu nháp</button>
 <button type="button" class="ql-nut" id="gbTiep">Tiếp tục →</button>
 <button type="submit" class="ql-nut" id="gbGiao" hidden>@(kiemTra ? "Xuất bản bài kiểm tra" : "Giao bài tập cho học viên")</button>
@@ -64,3 +66,4 @@
 <script id="gbData" type="application/json">@Html.Raw(NoiDungBaiTap.Viet(Model))</script>
 <script id="gbBuoiData" type="application/json">@Html.Raw(NoiDungBaiTap.Viet(ViewBag.DsBuoi))</script>
 @section Scripts { <script src="~/js/giao-bai.js" asp-append-version="true"></script><script src="~/js/ban-nhap-ai.js" asp-append-version="true"></script> }
+<partial name="_KhungXemTruoc" />

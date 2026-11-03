@@ -71,3 +71,56 @@ onScroll();
 const setHeadH = () => document.documentElement.style.setProperty('--head-h', head.offsetHeight + 'px');
 new ResizeObserver(setHeadH).observe(head);
 setHeadH();
+
+// Tải lại trang thì luôn hiện từ đầu trang chủ: không giữ vị trí cuộn cũ, bỏ #mục trên địa chỉ.
+// Mở liên kết /#monhoc từ trang khác hoặc bấm menu vẫn nhảy tới mục như bình thường.
+// Trình duyệt chốt việc khôi phục vị trí trước khi trang chạy mã, nên phải tắt sẵn từ lần mở trước.
+// Dùng window.history: biến `history` ở đầu file là lịch sử hỏi đáp của khung chat.
+window.history.scrollRestoration = 'manual';
+if (performance.getEntriesByType('navigation')[0]?.type === 'reload') {
+  if (location.hash) window.history.replaceState(null, '', location.pathname + location.search);
+  const veDau = () => window.scrollTo({ top: 0, behavior: 'instant' });
+  veDau();
+  // Chrome vẫn cuộn lại chỗ cũ ở khung hình đầu sau khi tải xong, nên đưa về đầu thêm lần nữa sau đó
+  window.addEventListener('load', () => requestAnimationFrame(() => requestAnimationFrame(veDau)), { once: true });
+}
+
+// Lướt / kéo trang thì nền sao trôi nhanh hơn, dừng tay thì chậm dần về tốc độ thường.
+// Chỉ tăng tốc phần quay và trôi; nhấp nháy giữ nguyên để không bị chớp loạn.
+const stars = document.querySelector('.stars');
+if (stars && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  const CHUYEN_DONG = ['galaxySpin', 'drift1', 'drift2', 'drift3'];
+  const TOI_DA = 30;
+  let rate = 1, target = 1, frame = 0;
+  let lastY = window.scrollY, lastT = performance.now();
+  const apply = () => stars.getAnimations({ subtree: true })
+    .filter((a) => CHUYEN_DONG.includes(a.animationName))
+    .forEach((a) => { a.playbackRate = rate; });
+  const step = () => {
+    target += (1 - target) * 0.06; // không lướt nữa thì tốc độ mục tiêu tự về 1
+    rate += (target - rate) * 0.15;
+    if (Math.abs(rate - 1) < 0.01 && target < 1.01) { rate = 1; apply(); frame = 0; return; }
+    apply();
+    frame = requestAnimationFrame(step);
+  };
+  // px trong ms → tốc độ: lướt nhanh 2–3 px/ms là gần tối đa
+  const boost = (px, ms) => {
+    target = Math.min(TOI_DA, Math.max(target, 1 + (px / Math.max(ms, 16)) * 12));
+    if (!frame) frame = requestAnimationFrame(step);
+  };
+  window.addEventListener('scroll', () => {
+    const now = performance.now();
+    boost(Math.abs(window.scrollY - lastY), now - lastT);
+    lastY = window.scrollY; lastT = now;
+  }, { passive: true });
+  // Kéo chuột / ngón tay mà trang không cuộn (ví dụ đã ở cuối trang) cũng tăng tốc
+  let lastP = null;
+  window.addEventListener('pointerdown', (e) => { lastP = { x: e.clientX, y: e.clientY, t: performance.now() }; }, { passive: true });
+  window.addEventListener('pointermove', (e) => {
+    if (!lastP || !e.buttons) return;
+    const now = performance.now();
+    boost(Math.hypot(e.clientX - lastP.x, e.clientY - lastP.y), now - lastP.t);
+    lastP = { x: e.clientX, y: e.clientY, t: now };
+  }, { passive: true });
+  window.addEventListener('pointerup', () => { lastP = null; }, { passive: true });
+}

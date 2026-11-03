@@ -1,81 +1,93 @@
 @model Khoa?
 @{
-    ViewData["Title"] = "Bài tập – Giảng viên";
-    ViewData["TieuDe"] = "Bài tập";
+    ViewData["Title"] = "Bài tập & nộp bài – Giảng viên";
+    ViewData["TieuDe"] = "Bài tập & nộp bài";
     ViewData["Muc"] = "CauHoi";
-    var dsKhoa = ViewBag.DsKhoa as List<Khoa> ?? [];
-    var soBaiTap = ViewBag.SoBaiTapGiao as Dictionary<int, int> ?? [];
-}
-@if (Model is null)
-{
+    if (Model is null)
+    {
 <p class="ql-trong">Bạn chưa được gán khoá nào. Admin gán khoá ở mục Khoá học.</p>
-    return;
+        return;
+    }
+    var dsKhoa = (List<GvKhoaTomTat>)ViewBag.DsKhoa;
+    var tatCa = (List<GvBaiTapRow>)ViewBag.BaiTap;
+    int soHocVien = ViewBag.SoHocVien;
+    var theoBai = tatCa.ToLookup(b => b.BaiId);
+    var now = DateTime.UtcNow;
+    var loc = Context.Request.Query["loc"].ToString();
+
+    var daGiao = tatCa.Where(b => b.DaGiao).ToList();
+    var canNop = daGiao.Sum(b => b.SoHocVien);
+    var daNop = daGiao.Sum(b => Math.Min(b.SoNop, b.SoHocVien));
+    int? tiLe = canNop == 0 ? null : (int)Math.Round(daNop * 100.0 / canNop);
+    var dsBai = Model.ChuDe.SelectMany(c => c.Bai).ToList();
+    bool CoGiao(Bai b) => theoBai[b.Id].Any(x => x.DaGiao);
+    bool ChoCham(Bai b) => theoBai[b.Id].Any(x => x.ChoCham > 0);
+    bool Hien(Bai b) => loc switch { "da-giao" => CoGiao(b), "chua-giao" => !CoGiao(b), "cho-cham" => ChoCham(b), _ => true };
+    var tabs = new (string Ma, string Ten, int So)[] { ("", "Tất cả bài", dsBai.Count), ("da-giao", "Đã giao", dsBai.Count(CoGiao)), ("chua-giao", "Chưa giao", dsBai.Count(b => !CoGiao(b))), ("cho-cham", "Có bài chờ chấm", dsBai.Count(ChoCham)) };
+    var goc = $"/GiangVien/CauHoi?khoa={Model.Id}";
 }
-@section Actions {
+<form method="get" class="nt-chon">
+<label for="ntKhoa">Khoá</label>
 @if (dsKhoa.Count > 1)
 {
-<form method="get" class="ql-hang-nut"><div class="ql-truong" style="margin: 0"><select name="khoa" onchange="this.form.submit()" aria-label="Chọn khoá">
+<select id="ntKhoa" name="khoa" onchange="this.form.submit()">
 @foreach (var k in dsKhoa)
 {
-<option value="@k.Id" selected="@(k.Id == Model.Id)">@k.Ten</option>
+    var chua = k.SoBai - k.BaiDaGiao;
+<option value="@k.Id" selected="@(k.Id == Model.Id)">@k.Ten  ·  @(chua == 0 ? "đã giao đủ" : $"{chua} bài chưa giao")@(k.ChoCham > 0 ? $" · {k.ChoCham} chờ chấm" : "")</option>
 }
-</select></div></form>
+</select>
 }
-<a href="/Home/LuyenDe/@Model.Id" class="ql-nut phu" target="_blank">Xem như học viên ↗</a>
-}
-
-<div class="ql-them mot" aria-label="Giao bài tập">
-<form method="get" action="/GiangVien/GiaoBai/Tao">
-<h2>+ Giao bài tập</h2>
-<div class="ql-hang-nut">
-<div class="ql-truong" style="flex: 1 1 320px"><select name="bai" aria-label="Giao bài tập cho bài" required>
-<option value="">— Chọn bài cần giao bài tập —</option>
-@foreach (var cd in Model.ChuDe.OrderBy(c => c.ThuTu))
-{
-<optgroup label="@cd.Ten">
-@foreach (var b in cd.Bai.OrderBy(x => x.ThuTu))
-{
-<option value="@b.Id">Bài @b.So. @b.Ten (@b.CauHoi.Count câu)</option>
-}
-</optgroup>
-}
-</select></div>
-<button class="ql-nut">Soạn bài tập →</button>
-</div>
-<p class="ql-phu" style="margin: 0">Giao một bài tập cho buổi học, gồm nhiều câu trắc nghiệm, đúng / sai và tự luận.</p>
+else { <b>@Model.Ten</b> }
 </form>
+<div class="ql-so-lieu so nt-so-lieu">
+<div class="ql-the"><p>Bài học đã giao bài tập</p><b>@tabs[1].So<span class="nt-tren">/@dsBai.Count</span></b><small>@daGiao.Count bài tập đang mở</small></div>
+<div class="ql-the"><p>Tỉ lệ nộp bài</p><b>@(tiLe is int tl ? tl + "%" : "—")</b><small>@daNop/@canNop lượt cần nộp</small></div>
+<div class="ql-the"><p>Chờ chấm</p><b>@daGiao.Sum(b => b.ChoCham)</b><small>bài tự luận</small></div>
+<div class="ql-the"><p>Học viên còn hạn</p><b>@soHocVien</b></div>
 </div>
 
-<section class="ql-khoi" aria-labelledby="cay">
-<div class="ql-khoi-dau"><h2 id="cay">@Model.Ten · bài tập theo chủ đề và bài</h2><p>Bấm vào bài để xem hoặc soạn bài tập.</p></div>
-<ul class="ql-cay">
-@foreach (var cd in Model.ChuDe.OrderBy(c => c.ThuTu))
+<section class="ql-khoi nt">
+<div class="nt-dau">
+<nav class="nt-tab" aria-label="Lọc bài học">
+@foreach (var t in tabs)
 {
-    var tong = cd.Bai.Sum(b => b.CauHoi.Count);
-<li>
-<div class="ql-chude">
-<span>@cd.Ten</span>
-<span class="ql-phu" style="margin: 0">@(tong == 0 ? "Chưa có câu nào" : $"{tong} câu cho cả chủ đề")</span>
+<a href="@goc@(t.Ma == "" ? "" : "&loc=" + t.Ma)" aria-current="@(t.Ma == loc ? "page" : null)">@t.Ten <span>@t.So</span></a>
+}
+</nav>
 </div>
-    @foreach (var b in cd.Bai.OrderBy(x => x.ThuTu))
+@{ var coDong = false; }
+@foreach (var cd in Model.ChuDe)
+{
+    var bai = cd.Bai.Where(Hien).ToList();
+    if (bai.Count == 0) { continue; }
+    coDong = true;
+<div class="nt-chude">@cd.Ten</div>
+    @foreach (var b in bai)
     {
-<div class="ql-bai-dong bt-dong">
-<span class="ql-bai-so">Bài @b.So</span>
-<a href="/GiangVien/CauHoi?bai=@b.Id" class="bt-dong-ten">Bài tập · @b.Ten
-<span class="ql-phu">@b.CauHoi.Count câu luyện tập · @soBaiTap.GetValueOrDefault(b.Id) bài tập theo buổi
-@if (!b.DaXuatBan) {<span class="ql-chip vang">Nháp</span>}
-</span></a>
-<details class="ql-ba-cham">
-<summary aria-label="Thao tác với bài tập bài @b.So" title="Thao tác"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/></svg></summary>
-<ul>
-<li><a href="/GiangVien/CauHoi?bai=@b.Id">Xem bài tập</a></li>
-<li><a href="/GiangVien/GiaoBai/Tao?bai=@b.Id">Giao bài tập</a></li>
-<li><a href="/Home/LamCauHoi/@b.Id" target="_blank">Xem như học viên ↗</a></li>
-</ul>
-</details>
+        var bt = theoBai[b.Id].ToList();
+<div class="nt-bai">
+<div class="nt-bai-dau">
+<span class="nt-so">@b.So</span>
+<div class="nt-ten"><b>@b.Ten</b>
+@if (bt.Count == 0) { <span class="ql-chip">Chưa giao</span> }
+else { <span class="ql-chip xanh">@bt.Count(x => x.DaGiao) đã giao</span> }
+</div>
+<a href="/GiangVien/GiaoBai/Tao?bai=@b.Id&khoa=@Model.Id" class="ql-nut @(bt.Count == 0 ? null : "phu") nho">+ Giao bài tập</a>
+</div>
+@foreach (var x in bt)
+{
+    var pt = x.SoHocVien == 0 ? 0 : Math.Min(100, x.SoNop * 100 / x.SoHocVien);
+<div class="nt-bt">
+<span class="nt-bt-ten">@x.Ten@if (!x.DaGiao) {<span class="ql-chip vang">Nháp</span>}</span>
+<span class="nt-han">@(x.HanNop is DateTime h ? (h < now ? "Hết hạn " : "Hạn ") + h.ToLocalTime().ToString("dd/MM HH:mm") : "Không hạn")</span>
+<span class="nt-nop">@if (x.DaGiao) { <span class="nt-ray"><span style="width:@(x.SoNop > 0 ? Math.Max(pt, 3) : 0)%"></span></span><b>@x.SoNop/@x.SoHocVien</b> } else { <span class="ql-phu">Chưa giao cho học viên</span> }</span>
+<span class="nt-cham">@if (x.ChoCham > 0) { <span class="ql-chip do">@x.ChoCham chờ chấm</span> }</span>
+@if (x.DaGiao) { <a href="/GiangVien/GiaoBai/BaiNop/@x.Id" class="ql-nut phu nho">Bài nộp</a> } else { <a href="/GiangVien/GiaoBai/Sua/@x.Id" class="ql-nut phu nho">Sửa</a> }
+</div>
+}
 </div>
     }
-</li>
 }
-</ul>
+@if (!coDong) { <p class="ql-trong">Không có bài học nào trong mục này.</p> }
 </section>

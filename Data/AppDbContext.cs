@@ -22,6 +22,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
     public DbSet<BaiTapGiao> BaiTapGiao => Set<BaiTapGiao>();
     public DbSet<BaiNopGiao> BaiNopGiao => Set<BaiNopGiao>();
     public DbSet<LuotLamKiemTra> LuotLamKiemTra => Set<LuotLamKiemTra>();
+    public DbSet<GoiBan> GoiBan => Set<GoiBan>();
+    public DbSet<DonHang> DonHang => Set<DonHang>();
 
     protected override void OnModelCreating(ModelBuilder b)
     {
@@ -41,5 +43,10 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
         b.Entity<BaiTapGiao>().HasOne(x => x.BuoiHoc).WithMany().HasForeignKey(x => x.BuoiHocId).OnDelete(DeleteBehavior.SetNull);
         b.Entity<BaiNopGiao>().HasIndex(x => new { x.BaiTapGiaoId, x.NguoiDungId }).IsUnique();
         b.Entity<LuotLamKiemTra>().HasKey(x => new { x.BaiTapGiaoId, x.NguoiDungId });
+        b.Entity<DonHang>().HasIndex(x => x.MaThanhToan).IsUnique();
+        b.Entity<DonHang>().HasIndex(x => new { x.NguoiDungId, x.NgayTao });
+        // Xoá gói không xoá đơn đã bán; đơn giữ tên gói và giá đã chép lại
+        b.Entity<DonHang>().HasOne(x => x.GoiBan).WithMany().HasForeignKey(x => x.GoiBanId).OnDelete(DeleteBehavior.SetNull);
+        b.Entity<DonHang>().HasOne(x => x.NguoiDung).WithMany().HasForeignKey(x => x.NguoiDungId).OnDelete(DeleteBehavior.Restrict);
     }
 }

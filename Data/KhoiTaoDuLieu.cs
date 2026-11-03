@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using SuDia.Web.Services;
@@ -21,7 +22,27 @@ public static class KhoiTaoDuLieu
             if (!await roles.RoleExistsAsync(r)) await roles.CreateAsync(new IdentityRole(r));
 
         if (!await db.Khoa.AnyAsync()) await NapNoiDungMauAsync(db);
+        if (!await db.GoiBan.AnyAsync()) await NapGoiMauAsync(db);
         if (laDev) await TaoTaiKhoanMauAsync(scope.ServiceProvider, db, matKhauMau);
+    }
+
+    // Chuyển các gói đang hiển thị ở trang chủ sang database; giá để trống cho admin nhập.
+    // Gói một môn mở khoá cùng tên, gói trọn bộ mở mọi khoá.
+    private static async Task NapGoiMauAsync(AppDbContext db)
+    {
+        var khoa = await db.Khoa.OrderBy(k => k.ThuTu).Select(k => new { k.Id, k.Ten }).ToListAsync();
+        var mau = new DuLieuMauService(Options.Create(new HocOnlineOptions())).LayTrangChu().GoiHoc;
+        var thuTu = 0;
+        foreach (var g in mau)
+        {
+            var cungTen = khoa.Where(k => k.Ten == g.Ten).Select(k => k.Id).ToList();
+            db.GoiBan.Add(new GoiBan
+            {
+                Ten = g.Ten, Nhan = g.Nhan, MauNhan = g.MauNhan, NoiBat = g.NoiBat, ThuTu = thuTu++, QuyenLoi = g.QuyenLoi.ToList(),
+                KhoaIds = cungTen.Count > 0 ? cungTen : khoa.Select(k => k.Id).ToList(),
+            });
+        }
+        await db.SaveChangesAsync();
     }
 
     // Lấy đúng dữ liệu mẫu đang hiển thị (DuLieuMauService) để chuyển sang database
@@ -30,7 +51,7 @@ public static class KhoiTaoDuLieu
         var thuTuKhoa = 0;
         foreach (var k in DuLieuMauService.DanhMuc)
         {
-            var khoa = new Khoa { Id = k.Id, Ten = k.Ten, KyHieu = k.KyHieu, MoTa = k.MoTa, Anh = k.Anh, ThuTu = thuTuKhoa++ };
+            var khoa = new Khoa { Id = k.Id, Ten = k.Ten, Mon = k.Id.StartsWith("dia-li") ? "Địa lí" : "Lịch sử", KyHieu = k.KyHieu, MoTa = k.MoTa, Anh = k.Anh, ThuTu = thuTuKhoa++ };
             var thuTuChuDe = 0;
             var baiDau = true;
             foreach (var c in k.Chuong)

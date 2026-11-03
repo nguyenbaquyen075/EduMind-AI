@@ -1,0 +1,31 @@
+@model List<AdminGiaoVienRow>
+@{
+    ViewData["TieuDe"] = "Giảng viên"; ViewData["Title"] = "Giảng viên – Quản trị"; ViewData["Muc"] = "GiaoVien";
+    var chuaPc = (List<string>)ViewBag.ChuaPhanCong;
+}
+@section Actions { <a href="/Admin/NguoiDung/Tao?vaiTro=GiangVien" class="ql-nut">+ Thêm giảng viên</a> }
+@if (chuaPc.Count > 0)
+{
+<p class="ql-thong-bao loi" style="margin:0 0 16px">Khoá chưa có giảng viên: <b>@string.Join(", ", chuaPc)</b>. Gán ở <a href="/Admin/KhoaHoc">Khoá học</a>.</p>
+}
+<section class="ql-khoi">
+<div class="ql-khoi-dau"><h2>Danh sách giảng viên</h2><span>@Model.Count người</span></div>
+@if (Model.Count == 0) { <div class="ad-empty"><b>Chưa có giảng viên</b><p>Tạo tài khoản vai trò Giảng viên rồi gán khoá ở mục Khoá học.</p></div> }
+else {
+<div class="ad-table-wrap"><table class="ql-bang">
+<thead><tr><th>Giảng viên</th><th>Khoá phụ trách</th><th class="so">Học viên</th><th class="so">Bài xuất bản</th><th>Hoàn thành bài tập</th><th class="so">Chờ chấm</th><th class="so">Buổi sắp tới</th><th></th></tr></thead>
+<tbody>
+@foreach (var g in Model)
+{
+<tr><td><div class="kh-dong"><span class="gv-avatar" aria-hidden="true">@g.HoTen[..1]</span><div><a href="/Admin/NguoiDung/ChiTiet/@g.Id"><b>@g.HoTen</b></a><span class="ql-phu">@g.Email</span>@if (g.BiKhoa) { <span class="ql-chip do">Đã khoá</span> }</div></div></td>
+<td>@(g.Khoa.Count == 0 ? "—" : string.Join(", ", g.Khoa))</td>
+<td class="so">@g.HocVien</td>
+<td class="so" style="white-space:nowrap">@g.BaiXuatBan <span class="ql-phu" style="display:inline">/ @g.BaiTong bài</span></td>
+<td>@if (g.HoanThanh is int ht) { <div class="gv-tl"><span class="bd-ht-ray"><span class="bd-ht-thanh" style="width:@(Math.Max(ht, 1))%"></span></span><b>@ht%</b></div><span class="ql-phu">@g.BaiTap bài tập đã giao</span> } else { <span class="ql-phu">@(g.BaiTap == 0 ? "Chưa giao bài" : "Chưa có học viên")</span> }</td>
+<td class="so">@if (g.ChoCham > 0) { <span class="ql-chip vang">@g.ChoCham</span> } else { <span>0</span> }</td>
+<td class="so">@g.BuoiSapToi</td>
+<td class="hanh-dong"><span class="ql-hang-nut" style="justify-content:flex-end"><a href="/Admin/BaiTap?gv=@g.Id" class="ql-nut phu nho">Bài tập</a><a href="/Admin/LichDay?gv=@g.Id" class="ql-nut phu nho">Lịch dạy</a></span></td></tr>
+}
+</tbody></table></div>
+}
+</section>

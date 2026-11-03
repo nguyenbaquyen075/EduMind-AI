@@ -23,7 +23,9 @@
     $('gbHan').value = new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
   }
   function renderBuoi(selected) {
-    $('gbBuoi').innerHTML = '<option value="">Bài tập của bài học (không gắn buổi)</option>' + buoi.filter(b => b.baiId === Number($('gbBai').value))
+    const dsBuoi = buoi.filter(b => b.baiId === Number($('gbBai').value));
+    $('gbBuoiBox').hidden = data.laKiemTra || dsBuoi.length === 0;
+    $('gbBuoi').innerHTML = '<option value="">Không gắn buổi</option>' + dsBuoi
       .map(b => `<option value="${b.id}">${b.thoiGian ? esc(new Date(b.thoiGian).toLocaleString('vi-VN')) : `Buổi #${b.id} · chưa đặt giờ`}</option>`).join('');
     $('gbBuoi').value = selected || '';
   }
@@ -161,6 +163,16 @@
   $('gbTiep').addEventListener('click', () => go(Math.min(3, step+1)));
   $('gbTruoc').addEventListener('click', () => go(Math.max(1, step-1)));
   $('gbNhap').addEventListener('click', () => save(false));
+  // Xem trước như học viên: gửi dữ liệu đang soạn vào khung xem trước (_KhungXemTruoc), không lưu
+  $('gbXemTruoc').addEventListener('click', () => {
+    info();
+    const f = document.createElement('form');
+    f.method = 'post'; f.action = '/GiangVien/GiaoBai/XemTruoc'; f.target = 'khungXemTruoc'; f.hidden = true;
+    for (const [name, value] of [['duLieu', JSON.stringify(data)], ['__RequestVerificationToken', $('gbForm').querySelector('[name=__RequestVerificationToken]').value]]) {
+      const i = document.createElement('input'); i.type = 'hidden'; i.name = name; i.value = value; f.append(i);
+    }
+    document.body.append(f); f.submit(); f.remove();
+  });
   $('gbForm').addEventListener('submit', e => { e.preventDefault(); if (step === 3) save(true); else go(step+1); });
   window.addEventListener('beforeunload', e => { if (dirty && !locked) { e.preventDefault(); e.returnValue = ''; } });
   render(); go(1);

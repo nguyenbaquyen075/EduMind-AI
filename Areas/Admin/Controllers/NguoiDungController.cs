@@ -27,7 +27,7 @@ public class NguoiDungController(AppDbContext db, UserManager<NguoiDung> users) 
         return View();
     }
 
-    public IActionResult Tao() => View(new TaoNguoiDungForm());
+    public IActionResult Tao(string? vaiTro) => View(new TaoNguoiDungForm { VaiTro = VaiTro.TatCa.Contains(vaiTro) ? vaiTro! : VaiTro.HocVien });
 
     public async Task<IActionResult> ChiTiet(string id)
     {
@@ -111,5 +111,20 @@ public class NguoiDungController(AppDbContext db, UserManager<NguoiDung> users) 
         if (khoa) await users.UpdateSecurityStampAsync(nd);   // đăng xuất các phiên đang mở
         ThongBao(khoa ? $"Đã khoá {nd.Email}." : $"Đã mở khoá {nd.Email}.");
         return RedirectToAction(nameof(Index));
+    }
+
+    // Học viên quên mật khẩu: tạo mật khẩu tạm, hiện một lần cho admin gửi lại người dùng
+    [HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> DatLaiMatKhau(string id)
+    {
+        var nd = await users.FindByIdAsync(id);
+        if (nd is null) return NotFound();
+        const string kyTu = "abcdefghijkmnpqrstuvwxyz23456789";
+        var tam = new string(Enumerable.Range(0, 10).Select(_ => kyTu[System.Security.Cryptography.RandomNumberGenerator.GetInt32(kyTu.Length)]).ToArray()) + "7";
+        var kq = await users.ResetPasswordAsync(nd, await users.GeneratePasswordResetTokenAsync(nd), tam);
+        if (!kq.Succeeded) { BaoLoi("Không đặt lại được mật khẩu: " + string.Join("; ", kq.Errors.Select(e => e.Description))); return RedirectToAction(nameof(ChiTiet), new { id }); }
+        await users.UpdateSecurityStampAsync(nd);
+        TempData["MatKhauTam"] = tam;
+        return RedirectToAction(nameof(ChiTiet), new { id });
     }
 }

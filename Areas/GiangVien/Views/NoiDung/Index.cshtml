@@ -1,9 +1,9 @@
 @model Khoa?
 @{
-    ViewData["Title"] = "Nội dung bài học – Giảng viên";
-    ViewData["TieuDe"] = "Nội dung bài học";
+    ViewData["Title"] = $"{Model?.Ten} – Khoá học của tôi";
+    ViewData["TieuDe"] = Model?.Ten ?? "Khoá học của tôi";
     ViewData["Muc"] = "NoiDung";
-    var dsKhoa = ViewBag.DsKhoa as List<Khoa> ?? [];
+    ViewData["Crumb"] = "<a href=\"/GiangVien/NoiDung\">Khoá học của tôi</a>";
 }
 @if (Model is null)
 {
@@ -11,17 +11,8 @@
     return;
 }
 @section Actions {
-@if (dsKhoa.Count > 1)
-{
-<form method="get" class="ql-hang-nut"><div class="ql-truong" style="margin: 0"><select name="khoa" onchange="this.form.submit()" aria-label="Chọn khoá">
-@foreach (var k in dsKhoa)
-{
-<option value="@k.Id" selected="@(k.Id == Model.Id)">@k.Ten</option>
-}
-</select></div></form>
-}
-<a href="/Home/KhoaHoc/@Model.Id" class="ql-nut phu" target="_blank">Xem như học viên ↗</a>
-<a href="/GiangVien/NoiDung/TaoChuDe?khoa=@Model.Id" class="ql-nut">+ Tạo chủ đề</a>
+<a href="/GiangVien/NoiDung" class="ql-nut phu">← Các khoá học</a>
+<button type="button" class="ql-nut" data-topic-action="create">+ Tạo chủ đề</button>
 }
 
 <section class="ql-khoi ql-noi-dung-cay" aria-labelledby="cay">
@@ -57,6 +48,19 @@
 }
 </ul>
 </section>
+
+@* Tạo chủ đề chỉ cần tên; bài học thêm sau ở menu ⋮ của chủ đề *@
+<dialog id="taoChuDeDialog" class="ql-topic-dialog" aria-labelledby="taoChuDeTitle">
+<form method="post" asp-action="ThemChuDe" class="ql-form">
+<h2 id="taoChuDeTitle">Tạo chủ đề</h2>
+<input type="hidden" name="khoaId" value="@Model.Id">
+<div class="ql-hang-nut" style="align-items: flex-end">
+<div class="ql-truong" style="flex: 0 0 100px; margin: 0"><label for="soChuDeMoi">Số chủ đề</label><input id="soChuDeMoi" type="number" name="soChuDe" min="1" step="1" value="@ViewBag.SoChuDeGoiY" required></div>
+<div class="ql-truong" style="flex: 1 1 220px; margin: 0"><label for="tenChuDeMoi">Tên chủ đề</label><input id="tenChuDeMoi" type="text" name="ten" placeholder="Ví dụ: Việt Nam từ năm 1986" required></div>
+</div>
+<div class="ql-chan"><button class="ql-nut">Tạo chủ đề</button><button type="button" class="ql-nut phu" data-dong-dialog>Huỷ</button></div>
+</form>
+</dialog>
 
 <dialog id="chuDeDialog" class="ql-topic-dialog" aria-labelledby="chuDeDialogTitle">
 <form method="post" asp-action="SuaChuDe" class="ql-form" id="chuDeDialogForm">

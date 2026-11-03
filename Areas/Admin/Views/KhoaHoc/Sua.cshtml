@@ -5,18 +5,111 @@
     ViewData["TieuDe"] = tao ? "Tạo khoá học" : $"Sửa khoá · {Model.Ten}";
     ViewData["Muc"] = "KhoaHoc";
     ViewData["Crumb"] = "<a href=\"/Admin/KhoaHoc\">Khoá học & ghi danh</a>";
+    var dsMon = (List<string>)ViewBag.DsMon;
 }
-<form method="post" class="ql-form ql-khoi ql-khoi-than" style="max-width: 680px">
-@if (tao) {
-<div class="ql-truong"><label asp-for="Id">Mã khoá học</label><input asp-for="Id" type="text" maxlength="80" placeholder="vi-du: lich-su-11"><small>Dùng trên đường dẫn, không trùng mã khoá khác.</small><span asp-validation-for="Id" class="ql-loi"></span></div>
-} else { <input type="hidden" asp-for="Id"> }
+<form method="post" enctype="multipart/form-data" class="ql-form kh-form" style="max-width: 820px" data-khoa-form="@(tao ? "tao" : "sua")">
 <div asp-validation-summary="ModelOnly" class="ql-tong-loi"></div>
+
+<section class="ql-khoi" aria-labelledby="kh-chung">
+<div class="ql-khoi-dau"><h2 id="kh-chung">Thông tin chung</h2></div>
+<div class="ql-khoi-than ql-form">
 <div class="ql-2cot">
-<div class="ql-truong"><label asp-for="Ten">Tên khoá</label><input asp-for="Ten" type="text"><span asp-validation-for="Ten" class="ql-loi"></span></div>
-<div class="ql-truong"><label asp-for="KyHieu">Ký hiệu (1–3 chữ)</label><input asp-for="KyHieu" type="text" maxlength="3"><span asp-validation-for="KyHieu" class="ql-loi"></span></div>
+<div class="ql-truong"><label asp-for="Ten">Tên khoá</label><input asp-for="Ten" type="text" maxlength="120" placeholder="Ví dụ: Lịch sử 11" data-kh-ten><span asp-validation-for="Ten" class="ql-loi"></span></div>
+<div class="ql-truong"><label asp-for="Mon">Môn</label><input asp-for="Mon" type="text" maxlength="40" list="dsMon" placeholder="Chọn hoặc nhập môn" data-kh-mon>
+<datalist id="dsMon">@foreach (var m in dsMon) { <option value="@m"></option> }</datalist><span asp-validation-for="Mon" class="ql-loi"></span></div>
 </div>
-<div class="ql-truong"><label asp-for="MoTa">Mô tả</label><textarea asp-for="MoTa" rows="3"></textarea></div>
-<div class="ql-truong"><label asp-for="Anh">Ảnh bìa</label><input asp-for="Anh" type="text"><small>Đường dẫn trong wwwroot, ví dụ /images/khoa/lich-su-12.jpg</small></div>
+@if (tao)
+{
+<div class="ql-truong"><label asp-for="Id">Mã khoá học</label><input asp-for="Id" type="text" maxlength="80" placeholder="lich-su-11" data-kh-ma><span asp-validation-for="Id" class="ql-loi"></span></div>
+}
+else
+{
+<input type="hidden" asp-for="Id">
+}
+<div class="ql-truong" style="max-width: 240px"><label asp-for="KyHieu">Ký hiệu (1–3 chữ)</label><input asp-for="KyHieu" type="text" maxlength="3" placeholder="S" data-kh-ky-hieu><span asp-validation-for="KyHieu" class="ql-loi"></span></div>
+<div class="ql-truong"><label for="AnhTai">Ảnh bìa</label>
+<div class="kh-anh">
+<div class="kh-anh-xem" data-kh-xem>@if (!string.IsNullOrEmpty(Model.Anh)) { <img src="@Model.Anh" alt="Ảnh bìa hiện tại"> } else { <span>Chưa có ảnh</span> }</div>
+<div class="kh-anh-chon">
+<input asp-for="AnhTai" type="file" accept="image/jpeg,image/png,image/webp" data-kh-anh>
+<small>JPG, PNG, WebP · tối đa 5 MB</small>
+@if (!tao && !string.IsNullOrEmpty(Model.Anh))
+{
+<label class="ql-check"><input type="checkbox" name="boAnh" value="true"> Bỏ ảnh bìa</label>
+}
+<span asp-validation-for="AnhTai" class="ql-loi"></span>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<section class="ql-khoi" aria-labelledby="kh-gioi-thieu">
+<div class="ql-khoi-dau"><h2 id="kh-gioi-thieu">Giới thiệu khoá</h2></div>
+<div class="ql-khoi-than ql-form">
+<div class="ql-truong"><label asp-for="MoTa">Mô tả</label><textarea asp-for="MoTa" rows="2" maxlength="600" ></textarea><span asp-validation-for="MoTa" class="ql-loi"></span></div>
+<div class="ql-truong"><label asp-for="MucTieu">Học xong đạt được</label><textarea asp-for="MucTieu" rows="4" maxlength="2000" placeholder="Mỗi dòng một ý"></textarea><span asp-validation-for="MucTieu" class="ql-loi"></span></div>
+<div class="ql-truong"><label asp-for="DoiTuong">Dành cho ai</label><textarea asp-for="DoiTuong" rows="2" maxlength="600" ></textarea><span asp-validation-for="DoiTuong" class="ql-loi"></span></div>
+</div>
+</section>
+
+<section class="ql-khoi" aria-labelledby="kh-gia">
+<div class="ql-khoi-dau"><h2 id="kh-gia">Giá & bán khoá</h2></div>
+<div class="ql-khoi-than ql-form">
+<div class="ql-2cot">
+<div class="ql-truong"><label asp-for="Gia">Giá bán (đồng)</label><input asp-for="Gia" type="number" min="1000" step="1000" placeholder="Để trống = chưa bán" data-kh-gia><small data-kh-gia-chu>@(Model.Gia is int g ? g.ToString("N0", new System.Globalization.CultureInfo("vi-VN")) + " đ" : "")</small><span asp-validation-for="Gia" class="ql-loi"></span></div>
+<div class="ql-truong"><label asp-for="SoThang">Thời hạn học (tháng)</label><input asp-for="SoThang" type="number" min="1" max="60"><span asp-validation-for="SoThang" class="ql-loi"></span></div>
+</div>
+<label class="ql-check"><input asp-for="DangBan" type="checkbox"> Đang mở bán</label>
+</div>
+</section>
+
+<section class="ql-khoi" aria-labelledby="kh-van-hanh">
+<div class="ql-khoi-dau"><h2 id="kh-van-hanh">Vận hành</h2></div>
+<div class="ql-khoi-than ql-form">
+<div class="ql-2cot">
 <div class="ql-truong"><label asp-for="GiangVienId">Giảng viên phụ trách</label><select asp-for="GiangVienId" asp-items="(List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>)ViewBag.DsGiangVien"><option value="">— Chưa gán —</option></select><span asp-validation-for="GiangVienId" class="ql-loi"></span></div>
-<div class="ql-chan"><button class="ql-nut">Lưu</button><a href="/Admin/KhoaHoc" class="ql-nut phu">Huỷ</a></div>
+<div class="ql-truong"><label asp-for="ThuTu">Thứ tự hiển thị</label><input asp-for="ThuTu" type="number" min="1" max="999" step="1"><span asp-validation-for="ThuTu" class="ql-loi"></span></div>
+</div>
+<label class="ql-check"><input asp-for="HienThi" type="checkbox"> Hiện khoá cho học viên</label>
+</div>
+</section>
+
+<div class="ql-chan"><button class="ql-nut">@(tao ? "Tạo khoá" : "Lưu")</button><a href="/Admin/KhoaHoc" class="ql-nut phu">Huỷ</a></div>
 </form>
+@section Scripts {
+<script>
+(() => {
+    const form = document.querySelector('[data-khoa-form]');
+    const ten = form.querySelector('[data-kh-ten]'), ma = form.querySelector('[data-kh-ma]');
+    const mon = form.querySelector('[data-kh-mon]'), kyHieu = form.querySelector('[data-kh-ky-hieu]');
+    const anh = form.querySelector('[data-kh-anh]'), xem = form.querySelector('[data-kh-xem]');
+    const gia = form.querySelector('[data-kh-gia]'), giaChu = form.querySelector('[data-kh-gia-chu]');
+    const khongDau = s => s.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/đ/gi, 'd');
+
+    // Mã khoá theo tên cho đến khi người dùng tự sửa mã
+    if (ma) {
+        let tuSua = ma.value !== '';
+        ma.addEventListener('input', () => { tuSua = ma.value !== ''; });
+        ten.addEventListener('input', () => {
+            if (!tuSua) ma.value = khongDau(ten.value).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 80);
+        });
+    }
+    mon.addEventListener('change', () => {
+        if (kyHieu.value === '' && mon.value.trim()) kyHieu.value = mon.value.trim()[0].toUpperCase();
+    });
+    gia.addEventListener('input', () => {
+        const n = Number(gia.value);
+        giaChu.textContent = gia.value === '' ? '' : n.toLocaleString('vi-VN') + ' đ';
+    });
+    anh.addEventListener('change', () => {
+        const tep = anh.files[0];
+        if (!tep) return;
+        const img = document.createElement('img');
+        img.alt = 'Ảnh bìa mới';
+        img.src = URL.createObjectURL(tep);
+        xem.replaceChildren(img);
+    });
+})();
+</script>
+}

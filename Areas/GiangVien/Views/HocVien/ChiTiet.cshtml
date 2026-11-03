@@ -1,17 +1,53 @@
 @{
     var nd = (NguoiDung)ViewBag.NguoiDung;
     var khoa = (Khoa)ViewBag.Khoa;
-    ViewData["Title"] = $"{nd.HoTen} – Học viên";
+    var tt = (GvHocVienRow)ViewBag.TomTat;
+    var diemBt = (List<GvDiemBaiTap>)ViewBag.DiemBaiTap;
+    ViewData["Title"] = $"{nd.HoTen} – Lớp học";
     ViewData["TieuDe"] = nd.HoTen;
     ViewData["Muc"] = "HocVien";
-    ViewData["Crumb"] = $"<a href=\"/GiangVien/HocVien?khoa={khoa.Id}\">Học viên · {khoa.Ten}</a> · {nd.Email}";
+    ViewData["Crumb"] = $"<a href=\"/GiangVien/HocVien?khoa={khoa.Id}\">Lớp học · {khoa.Ten}</a> · {nd.Email}";
+    var vi = new System.Globalization.CultureInfo("vi-VN");
+    string Diem(decimal? d) => d is decimal x ? x.ToString("0.#", vi) : "—";
+    string Mau(decimal? d) => d is null ? "" : d >= 8 ? "xanh" : d >= 5 ? "vang" : "do";
+    var now = DateTime.UtcNow;
 }
+@section Actions { <a href="/GiangVien/HocVien?khoa=@khoa.Id" class="ql-nut phu">← Lớp học</a> }
+<div class="ql-so-lieu so nt-so-lieu">
+<div class="ql-the"><p>Tiến độ học</p><b>@tt.PhanTramHoc%</b><small>@tt.DaHoc/@tt.TongBai bài đã học</small></div>
+<div class="ql-the"><p>Điểm bài tập TB</p><b>@Diem(tt.DiemBaiTap)<span class="nt-tren">/10</span></b><small>đã nộp @tt.DaNop/@tt.BaiTapGiao bài</small></div>
+<div class="ql-the"><p>Điểm thi thử TB</p><b>@Diem(tt.DiemThi)<span class="nt-tren">/10</span></b></div>
+<div class="ql-the"><p>Luyện tập đúng</p><b>@(tt.TiLeDung is int tl ? tl + "%" : "—")</b><small>Hạn học: @(tt.HanDen is DateTime h ? h.ToLocalTime().ToString("dd/MM/yyyy") : "không giới hạn")</small></div>
+</div>
+
+<section class="ql-khoi">
+<div class="ql-khoi-dau"><h2>Điểm bài tập</h2><span>@diemBt.Count bài đã giao</span></div>
+@if (diemBt.Count == 0)
+{
+<p class="ql-trong">Khoá chưa giao bài tập nào.</p>
+}
+else
+{
+<div class="lh-bang"><table class="ql-bang">
+<thead><tr><th>Bài tập</th><th>Hạn nộp</th><th>Nộp lúc</th><th class="so">Điểm</th></tr></thead>
+<tbody>
+@foreach (var b in diemBt)
+{
+<tr><td><b>@b.Ten</b><span class="ql-phu" style="display:block">@b.Bai</span></td>
+<td>@(b.HanNop is DateTime hn ? hn.ToLocalTime().ToString("dd/MM HH:mm") : "Không hạn")</td>
+<td>@if (b.NopLuc is DateTime nl) { @nl.ToLocalTime().ToString("dd/MM HH:mm") @if (b.HanNop is DateTime h2 && nl > h2) {<span class="ql-chip vang" style="margin-left:6px">Trễ hạn</span>} } else if (b.HanNop is DateTime h3 && h3 < now) {<span class="ql-chip do">Không nộp</span>} else {<span class="ql-phu">Chưa nộp</span>}</td>
+<td class="so">@if (b.ChoCham) {<a href="/GiangVien/GiaoBai/BaiNop/@b.Id" class="ql-chip nhan">Chờ chấm</a>} else if (b.Diem is null) {<span class="ql-phu">—</span>} else {<span class="ql-chip @Mau(b.Diem)">@Diem(b.Diem)</span>}</td></tr>
+}
+</tbody></table></div>
+}
+</section>
+
 <div class="ql-luoi">
 <section class="ql-khoi">
-<div class="ql-khoi-dau"><h2>Bài đã nộp</h2></div>
+<div class="ql-khoi-dau"><h2>Luyện tập & thi thử</h2><span>@ViewBag.BaiLam.Count lượt</span></div>
 @if (ViewBag.BaiLam.Count == 0)
 {
-<p class="ql-trong">Chưa nộp bài nào.</p>
+<p class="ql-trong">Chưa làm bài nào.</p>
 }
 else
 {
@@ -19,7 +55,7 @@ else
 <tbody>
 @foreach (var b in ViewBag.BaiLam)
 {
-<tr><td>@b.TenDe<span class="ql-phu">@(((DateTime)b.NopLuc).ToLocalTime().ToString("HH:mm dd/MM/yyyy"))</span>
+<tr><td>@b.TenDe @if (b.LaDeThi) {<span class="ql-chip nhan">Thi thử</span>}<span class="ql-phu" style="display:block">@(((DateTime)b.NopLuc).ToLocalTime().ToString("HH:mm dd/MM/yyyy"))</span>
 @if (b.CauSai.Count > 0)
 {
 <details style="margin-top: 6px"><summary class="ql-nut-chu" style="cursor: pointer">@b.CauSai.Count câu sai</summary>
@@ -37,13 +73,13 @@ else
 }
 </section>
 <section class="ql-khoi">
-<div class="ql-khoi-dau"><h2>Tiến độ từng bài</h2></div>
+<div class="ql-khoi-dau"><h2>Tiến độ từng bài</h2><span>@tt.DaHoc/@tt.TongBai</span></div>
 <table class="ql-bang">
 <tbody>
 @foreach (var t in ViewBag.TienDo)
 {
-    TrangThaiHoc? tt = t.TrangThai;
-<tr><td>Bài @t.So. @t.Ten</td><td class="so">@if (tt == TrangThaiHoc.DaHoc) {<span class="ql-chip xanh">Đã học</span>} else if (tt == TrangThaiHoc.DangHoc) {<span class="ql-chip nhan">Đang học</span>} else {<span class="ql-chip">Chưa học</span>}</td></tr>
+    TrangThaiHoc? st = t.TrangThai;
+<tr><td>Bài @t.So. @t.Ten</td><td class="so">@if (st == TrangThaiHoc.DaHoc) {<span class="ql-chip xanh">Đã học</span>} else if (st == TrangThaiHoc.DangHoc) {<span class="ql-chip nhan">Đang học</span>} else {<span class="ql-chip">Chưa học</span>}</td></tr>
 }
 </tbody>
 </table>

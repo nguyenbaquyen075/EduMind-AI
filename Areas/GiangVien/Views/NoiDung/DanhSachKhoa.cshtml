@@ -1,0 +1,33 @@
+@{
+    ViewData["Title"] = "Khoá học của tôi – Giảng viên";
+    ViewData["TieuDe"] = "Khoá học của tôi";
+    ViewData["Muc"] = "NoiDung";
+    var dsKhoa = (List<TheKhoaGiangVien>)ViewBag.DsKhoa;
+}
+@if (dsKhoa.Count == 0)
+{
+<p class="ql-trong">Bạn chưa được gán khoá nào. Admin gán khoá ở mục Khoá học.</p>
+    return;
+}
+<ul class="ql-ds-khoa">
+@foreach (var k in dsKhoa)
+{
+    var tong = k.SoBaiXuatBan + k.SoBaiNhap;
+    var phanTram = tong == 0 ? 0 : k.SoBaiXuatBan * 100 / tong;
+<li class="ql-the-khoa">
+<div class="ql-the-khoa-anh">@if (!string.IsNullOrEmpty(k.Anh)) { <img src="@k.Anh" alt="" loading="lazy"> }</div>
+<div class="ql-the-khoa-than">
+<h2><a href="/GiangVien/NoiDung?khoa=@k.Id">@k.Ten</a>@if (!k.HienThi) { <span class="ql-chip vang" title="Admin đang ẩn khoá với học viên chưa ghi danh">Đang ẩn</span> }</h2>
+@if (!string.IsNullOrWhiteSpace(k.MoTa)) { <p class="ql-the-khoa-mota">@k.MoTa</p> }
+<div class="ql-the-khoa-tien-do">
+<div class="ql-the-khoa-tien-do-chu"><span>Đã xuất bản</span><b>@k.SoBaiXuatBan/@tong bài</b></div>
+<div class="ql-the-khoa-thanh" role="progressbar" aria-label="Bài đã xuất bản khoá @k.Ten" aria-valuemin="0" aria-valuemax="100" aria-valuenow="@phanTram"><span style="width: @(phanTram)%"></span></div>
+</div>
+<p class="ql-the-khoa-phu">@k.SoChuDe chủ đề<span aria-hidden="true">·</span>@k.SoBaiNhap bài nháp<span aria-hidden="true">·</span>@k.SoHocVien học viên</p>
+<div class="ql-the-khoa-nut">
+<span class="ql-nut nho" aria-hidden="true">Soạn nội dung →</span>
+</div>
+</div>
+</li>
+}
+</ul>

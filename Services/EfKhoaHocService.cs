@@ -38,10 +38,13 @@ public class EfKhoaHocService : IKhoaHocService
     {
         if (_danhMuc is not null) return _danhMuc;
 
-        var khoa = _db.Khoa.AsNoTracking().OrderBy(k => k.ThuTu)
+        var ghiDanh = _db.GhiDanh.AsNoTracking().Where(g => g.NguoiDungId == _userId).ToDictionary(g => g.KhoaId, g => g.HanDen);
+        // Khoá đang ẩn: chỉ nhân viên và học viên đã ghi danh còn thấy
+        var khoa = _db.Khoa.AsNoTracking().Where(k => k.HienThi || _laNhanVien || ghiDanh.Keys.Contains(k.Id)).OrderBy(k => k.ThuTu)
             .Include(k => k.ChuDe.OrderBy(c => c.ThuTu)).ThenInclude(c => c.Bai.Where(b => b.DaXuatBan).OrderBy(b => b.ThuTu))
             .ToList();
-        var ghiDanh = _db.GhiDanh.AsNoTracking().Where(g => g.NguoiDungId == _userId).ToDictionary(g => g.KhoaId, g => g.HanDen);
+        var giaLe = _db.GoiBan.AsNoTracking().Where(g => g.DangBan && g.Gia != null).OrderBy(g => g.ThuTu).ToList()
+            .Where(g => g.KhoaIds.Count == 1).GroupBy(g => g.KhoaIds[0]).ToDictionary(n => n.Key, n => n.First());
         var tienDo = _db.TienDoBai.AsNoTracking().Where(t => t.NguoiDungId == _userId).ToDictionary(t => t.BaiId, t => t.TrangThai);
 
         _danhMuc = khoa.Select(k =>
@@ -57,7 +60,9 @@ public class EfKhoaHocService : IKhoaHocService
                         TrangThaiHoc.DangHoc => TrangThaiBai.DangHoc,
                         _ => TrangThaiBai.ChuaHoc,
                     },
-                    !daMo && !b.HocThu, b.SoMuc, b.SoPhut)).ToList())).ToList());
+                    !daMo && !b.HocThu, b.SoMuc, b.SoPhut)).ToList())).ToList(),
+                new GioiThieuKhoa(k.Mon, k.MucTieu.Split('\n', StringSplitOptions.RemoveEmptyEntries), k.DoiTuong,
+                    giaLe.GetValueOrDefault(k.Id)?.Id, giaLe.GetValueOrDefault(k.Id)?.Gia, giaLe.GetValueOrDefault(k.Id)?.SoThang ?? 12));
         }).ToList();
         return _danhMuc;
     }
@@ -66,7 +71,18 @@ public class EfKhoaHocService : IKhoaHocService
 
     // ======================================================= Các trang
 
-    public TrangChuViewModel LayTrangChu() => _mau.LayTrangChu();
+    // Nội dung giới thiệu vẫn là dữ liệu mẫu; gói học lấy từ database để admin sửa giá
+    public TrangChuViewModel LayTrangChu()
+    {
+        var mau = _mau.LayTrangChu();
+        var goi = _db.GoiBan.AsNoTracking().Where(g => g.DangBan).OrderBy(g => g.ThuTu).ToList()
+            .Select(g => new GoiHoc(g.Nhan, g.Ten, g.Gia, g.MauNhan, g.NoiBat, g.QuyenLoi, g.Id, g.SoThang)).ToList();
+        return new TrangChuViewModel
+        {
+            CauHoiGoiY = mau.CauHoiGoiY, BuocHoc = mau.BuocHoc, MonHoc = mau.MonHoc, SoSanh = mau.SoSanh,
+            GoiHoc = goi,
+        };
+    }
 
     public TongQuanViewModel LayTongQuan()
     {
@@ -97,7 +113,7 @@ public class EfKhoaHocService : IKhoaHocService
             NgayHomNay = DateTime.Today,
             LuotHoiDaDung = 0,
             LuotHoiToiDa = LuotHoiToiDa,
-            TiepTuc = new TiepTucHoc(khoaChinh.Ten, tiep is null ? "Đã học hết các bài" : $"Bài {tiep.So}. {tiep.Ten}",
+            TiepTuc = new TiepTucHoc(khoaChinh.Ten, tiep is not null ? $"Bài {tiep.So}. {tiep.Ten}" : khoaChinh.TongBai == 0 ? "Khoá chưa có bài" : "Bạn đã học hết các bài",
                 tiep is null ? "" : $"{tiep.SoMuc} mục", khoaChinh.TienDoPhanTram),
             ThongKe = new ThongKeTuan(
                 danhMuc.Sum(k => k.BaiDaHoc), cauTuan,
@@ -144,11 +160,13 @@ public class EfKhoaHocService : IKhoaHocService
         return kq;
     }
 
-    public BaiHocViewModel LayBaiHoc(int? id)
+    public BaiHocViewModel? LayBaiHoc(int? id)
     {
-        var danhMuc = DanhMuc();
+        // Không tìm thấy bài thì mở bài tiếp theo của khoá đang học; bỏ qua khoá chưa có bài nào hiển thị
+        var danhMuc = DanhMuc().Where(k => k.TatCaBai.Any()).ToList();
         var khoa = danhMuc.FirstOrDefault(k => k.TatCaBai.Any(b => b.Id == id))
-                   ?? danhMuc.FirstOrDefault(k => k.DaMo) ?? danhMuc.First();
+                   ?? danhMuc.FirstOrDefault(k => k.DaMo) ?? danhMuc.FirstOrDefault();
+        if (khoa is null) return null;
         var bai = khoa.TatCaBai.FirstOrDefault(b => b.Id == id) ?? khoa.BaiHocTiep ?? khoa.TatCaBai.First();
         var chuong = khoa.Chuong.First(c => c.Bai.Contains(bai));
 
@@ -228,9 +246,8 @@ public class EfKhoaHocService : IKhoaHocService
         var danhMuc = DanhMuc();
         var de = ma >= 1000 ? _db.DeThi.AsNoTracking().FirstOrDefault(d => d.Id == ma) : null;
 
-        if (de is not null)
+        if (de is not null && danhMuc.FirstOrDefault(k => k.Id == de.KhoaId) is { } khoa)
         {
-            var khoa = danhMuc.First(k => k.Id == de.KhoaId);
             var cau = !khoa.DaMo ? [] : _db.DeThiCau.AsNoTracking().Where(x => x.DeThiId == ma).OrderBy(x => x.ThuTu)
                 .Select(x => x.CauHoi!).ToList().Select(Doi).ToList();
             return new LamDeViewModel { Id = ma, KhoaId = khoa.Id, TenDe = de.Ten, LaDeThi = true, SoPhut = de.SoPhut, CauHoi = cau, DaChon = daChon };

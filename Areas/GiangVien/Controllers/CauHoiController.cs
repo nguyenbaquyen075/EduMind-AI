@@ -29,13 +29,26 @@ public class CauHoiController(AppDbContext db) : GiangVienControllerBase(db)
         var dsKhoa = await KhoaCuaToi().AsNoTracking().OrderBy(k => k.ThuTu).ToListAsync();
         if (dsKhoa.Count == 0) return View(model: null);
         var chon = dsKhoa.FirstOrDefault(k => k.Id == khoa) ?? dsKhoa[0];
-        ViewBag.DsKhoa = dsKhoa;
-        ViewBag.SoBaiTapGiao = await Db.BaiTapGiao.AsNoTracking().Where(x => x.Bai!.ChuDe!.KhoaId == chon.Id && x.DeThi == null)
-            .GroupBy(x => x.BaiId).Select(g => new { BaiId = g.Key, So = g.Count() }).ToDictionaryAsync(x => x.BaiId, x => x.So);
-        var kh = await Db.Khoa.AsNoTracking().Where(x => x.Id == chon.Id)
-            .Include(x => x.ChuDe.OrderBy(c => c.ThuTu)).ThenInclude(c => c.Bai.OrderBy(b => b.ThuTu)).ThenInclude(b => b.CauHoi)
-            .FirstAsync();
-        return View(kh);
+        ViewBag.Khoa = chon;
+        // Mỗi khoá kèm số bài chưa giao / bài chờ chấm để giảng viên dạy nhiều khoá biết khoá nào cần xử lý
+        var ids = dsKhoa.Select(k => k.Id).ToList();
+        ViewBag.DsKhoa = await Db.Khoa.AsNoTracking().Where(k => ids.Contains(k.Id)).OrderBy(k => k.ThuTu)
+            .Select(k => new GvKhoaTomTat(k.Id, k.Ten, k.ChuDe.SelectMany(c => c.Bai).Count(),
+                k.ChuDe.SelectMany(c => c.Bai).Count(b => Db.BaiTapGiao.Any(t => t.BaiId == b.Id && t.DaGiao && t.DeThi == null)),
+                Db.BaiNopGiao.Count(n => n.DiemTuLuan == null && n.BaiTapGiao!.DaGiao && n.BaiTapGiao.DeThi == null && n.BaiTapGiao.Bai!.ChuDe!.KhoaId == k.Id)))
+            .ToListAsync();
+        var now = DateTime.UtcNow;
+        var soHocVien = await Db.GhiDanh.CountAsync(g => g.KhoaId == chon.Id && (g.HanDen == null || g.HanDen >= now));
+        // Mọi bài tập (kể cả nháp) của khoá, gom theo bài học để biết bài nào đã giao, bài nào chưa
+        ViewBag.BaiTap = await Db.BaiTapGiao.AsNoTracking().Where(b => b.DeThi == null && b.Bai!.ChuDe!.KhoaId == chon.Id)
+            .OrderByDescending(b => b.NgayTao).ThenByDescending(b => b.Id)
+            .Select(b => new GvBaiTapRow(b.Id, b.BaiId, b.Ten, b.HanNop, b.DaGiao,
+                Db.BaiNopGiao.Count(n => n.BaiTapGiaoId == b.Id), soHocVien,
+                Db.BaiNopGiao.Count(n => n.BaiTapGiaoId == b.Id && n.DiemTuLuan == null))).ToListAsync();
+        ViewBag.SoHocVien = soHocVien;
+        var ds = await Db.Khoa.AsNoTracking().Where(k => k.Id == chon.Id)
+            .Include(k => k.ChuDe.OrderBy(c => c.ThuTu)).ThenInclude(c => c.Bai.OrderBy(b => b.ThuTu)).FirstAsync();
+        return View(ds);
     }
 
     public async Task<IActionResult> Tao(int? bai, string? viTri)

@@ -1,0 +1,68 @@
+@model AdminDoanhThuViewModel
+@{
+    ViewData["TieuDe"] = "Doanh thu & đơn hàng"; ViewData["Title"] = "Doanh thu – Quản trị"; ViewData["Muc"] = "DoanhThu";
+    var loc = Model.TrangThai;
+    var maxNgay = Math.Max(1, Model.Ngay.Max(n => n.SoTien));
+    var maxGoi = Math.Max(1, Model.TheoGoi.Select(g => g.SoTien).DefaultIfEmpty().Max());
+    string Tien(long t) => DinhDang.Gia(t);
+    string Gon(long t) => t >= 1_000_000 ? (t / 1_000_000d).ToString("0.#", new System.Globalization.CultureInfo("vi-VN")) + " tr" : t >= 1000 ? (t / 1000) + "k" : t.ToString();
+}
+@section Actions { <a href="/Admin/GoiHoc" class="ql-nut phu">Gói học & giá</a> }
+@if (!Model.DaCauHinh)
+{
+<p class="ql-thong-bao loi" style="margin:0 0 16px">Chưa cấu hình khoá PayOS: học viên chưa thanh toán được. Chạy <code>zsh scripts/cau-hinh-payos.zsh</code> trên máy chủ rồi khởi động lại web.</p>
+}
+<form method="get" class="ad-filters"><div class="ql-truong"><label for="tu">Từ ngày</label><input type="date" id="tu" name="tu" value="@Model.Tu.ToString("yyyy-MM-dd")"></div><div class="ql-truong"><label for="den">Đến ngày</label><input type="date" id="den" name="den" value="@Model.Den.ToString("yyyy-MM-dd")"></div><button class="ql-nut phu">Xem</button></form>
+<div class="ad-stats">
+<article class="ad-stat"><p>Doanh thu trong kỳ</p><strong class="so">@Tien(Model.DoanhThuKy)</strong><small>@Model.Tu.ToString("dd/MM") – @Model.Den.ToString("dd/MM/yyyy")</small></article>
+<article class="ad-stat"><p>Đơn đã thanh toán</p><strong class="so">@Model.SoDonKy</strong><small>Trong kỳ</small></article>
+<article class="ad-stat"><p>Giá trị trung bình đơn</p><strong class="so">@(Model.SoDonKy == 0 ? "—" : Tien(Model.DoanhThuKy / Model.SoDonKy))</strong><small>Trong kỳ</small></article>
+<article class="ad-stat"><p>Tổng doanh thu</p><strong class="so">@Tien(Model.TongTuTruoc)</strong><small>@Model.DonCho đơn đang chờ thanh toán</small></article>
+</div>
+<div class="ad-grid dt-grid">
+<section class="ql-khoi"><div class="ql-khoi-dau"><h2>Doanh thu theo ngày</h2><span>Ngày thanh toán, giờ Việt Nam</span></div>
+<div class="dt-cot" role="list" aria-label="Doanh thu theo ngày">
+@foreach (var n in Model.Ngay)
+{
+    var moTa = $"{n.Ngay:dd/MM}: {Tien(n.SoTien)} · {n.SoDon} đơn";
+<div class="dt-ngay" role="listitem" tabindex="0" aria-label="@moTa" data-tip="@moTa"><span class="dt-thanh" style="height:@(n.SoTien == 0 ? 0 : Math.Max(2, n.SoTien * 100 / maxNgay))%"></span></div>
+}
+</div>
+<div class="dt-truc"><span>@Model.Tu.ToString("dd/MM")</span><span>Cao nhất @Gon(maxNgay == 1 ? 0 : maxNgay)</span><span>@Model.Den.ToString("dd/MM")</span></div>
+</section>
+<section class="ql-khoi"><div class="ql-khoi-dau"><h2>Theo gói</h2><span>Trong kỳ</span></div>
+@if (Model.TheoGoi.Count == 0) { <p class="ql-trong">Chưa có đơn thanh toán trong kỳ.</p> }
+else {
+<ul class="bd-ht-ds dt-goi">
+@foreach (var g in Model.TheoGoi)
+{
+<li class="bd-ht-dong"><span class="bd-ht-ten">@g.TenGoi</span><span class="bd-ht-ray"><span class="bd-ht-thanh" style="width:@(Math.Max(1, g.SoTien * 100 / maxGoi))%"></span></span><span class="bd-ht-so"><b>@Gon(g.SoTien)</b><small>@g.SoDon đơn</small></span></li>
+}
+</ul>
+}
+</section>
+</div>
+<section class="ql-khoi">
+<div class="ql-khoi-dau"><h2>Đơn hàng</h2><span>100 đơn mới nhất</span></div>
+<nav class="gd-tab dt-loc" aria-label="Lọc đơn">
+@foreach (var (ma, ten) in new (string?, string)[] { (null, "Tất cả"), (TrangThaiDon.DaThanhToan, "Đã thanh toán"), (TrangThaiDon.ChoThanhToan, "Chờ thanh toán"), (TrangThaiDon.DaHuy, "Đã huỷ") })
+{
+<a href="/Admin/DoanhThu?tu=@Model.Tu.ToString("yyyy-MM-dd")&den=@Model.Den.ToString("yyyy-MM-dd")@(ma is null ? "" : "&trangThai=" + ma)" aria-current="@(ma == loc ? "page" : null)">@ten</a>
+}
+</nav>
+<div class="ad-table-wrap"><table class="ql-bang">
+<thead><tr><th>Mã đơn</th><th>Học viên</th><th>Gói</th><th class="so">Số tiền</th><th>Trạng thái</th><th>Thời gian</th><th></th></tr></thead>
+<tbody>
+@foreach (var d in Model.Don)
+{
+    var (chip, ten) = d.TrangThai switch { TrangThaiDon.DaThanhToan => ("xanh", "Đã thanh toán"), TrangThaiDon.DaHuy => ("", "Đã huỷ"), _ => ("vang", "Chờ thanh toán") };
+<tr><td>@d.MaThanhToan @if (d.MaGiaoDich is string gd) { <span class="ql-phu">GD @gd</span> }</td>
+<td><a href="/Admin/NguoiDung/ChiTiet/@d.NguoiDungId">@(d.NguoiDung?.HoTen is { Length: > 0 } ht ? ht : d.NguoiDung?.Email)</a><span class="ql-phu">@d.NguoiDung?.Email</span></td>
+<td>@d.TenGoi<span class="ql-phu">@d.SoThang tháng</span></td><td class="so">@Tien(d.SoTien)</td>
+<td><span class="ql-chip @chip">@ten</span></td>
+<td>@DinhDang.GioNgay(d.NgayTao.ToLocalTime())@if (d.NgayThanhToan is DateTime tra) { <span class="ql-phu">Trả @DinhDang.GioNgay(tra.ToLocalTime())</span> }</td>
+<td class="hanh-dong">@if (d.TrangThai == TrangThaiDon.ChoThanhToan) { <form method="post" asp-action="KiemTraDon"><input type="hidden" name="id" value="@d.Id"><button class="ql-nut phu nho" title="Hỏi lại PayOS trạng thái đơn">Kiểm tra PayOS</button></form> }</td></tr>
+}
+@if (Model.Don.Count == 0) { <tr><td colspan="7" class="ql-trong">Chưa có đơn hàng.</td></tr> }
+</tbody></table></div>
+</section>

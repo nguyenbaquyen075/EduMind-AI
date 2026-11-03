@@ -1,45 +1,85 @@
+@model List<GvHocVienRow>
 @{
-    ViewData["Title"] = "Học viên – Giảng viên";
-    ViewData["TieuDe"] = "Học viên";
+    ViewData["Title"] = "Lớp học – Giảng viên";
+    ViewData["TieuDe"] = "Lớp học";
     ViewData["Muc"] = "HocVien";
-    var dsKhoa = (List<Khoa>)ViewBag.DsKhoa;
+    var dsKhoa = (Dictionary<string, string>)ViewBag.DsKhoa;
     var chon = ViewBag.Chon as Khoa;
+    if (chon is null)
+    {
+<p class="ql-trong">Bạn chưa được gán khoá nào. Admin gán khoá ở mục Khoá học.</p>
+        return;
+    }
+    var tatCa = (List<GvHocVienRow>)ViewBag.TatCa;
+    string? q = ViewBag.Q; string? sx = ViewBag.Sx;
+    var now = DateTime.UtcNow;
+    var conHan = tatCa.Where(h => h.ConHan).ToList();
+    int? tienDoTb = conHan.Count == 0 ? null : (int)Math.Round(conHan.Average(h => h.PhanTramHoc));
+    var coDiem = conHan.Where(h => h.DiemBaiTap is not null).ToList();
+    decimal? diemTb = coDiem.Count == 0 ? null : Math.Round(coDiem.Average(h => h.DiemBaiTap!.Value), 1);
+    var canChu = conHan.Count(h => h.LanCuoi is null || h.LanCuoi < now.AddDays(-7));
+    string Diem(decimal? d) => d is decimal x ? x.ToString("0.#", new System.Globalization.CultureInfo("vi-VN")) : "—";
+    string Mau(decimal? d) => d is null ? "" : d >= 8 ? "xanh" : d >= 5 ? "vang" : "do";
+    string HoatDong(DateTime? t)
+    {
+        if (t is null) return "Chưa hoạt động";
+        var ngay = (now.ToLocalTime().Date - t.Value.ToLocalTime().Date).Days;
+        return ngay <= 0 ? "Hôm nay" : ngay == 1 ? "Hôm qua" : $"{ngay} ngày trước";
+    }
 }
-@if (chon is null)
+<form method="get" class="nt-chon">
+<label for="lhKhoa">Khoá</label>
+@if (dsKhoa.Count > 1)
 {
-<p class="ql-trong">Bạn chưa được gán khoá nào.</p>
-    return;
+<select id="lhKhoa" name="khoa" onchange="this.form.submit()">
+@foreach (var k in dsKhoa) { <option value="@k.Key" selected="@(k.Key == chon.Id)">@k.Value</option> }
+</select>
 }
-<form method="get" class="ql-bo-loc"><div class="ql-truong"><label for="khoa">Khoá</label>
-<select id="khoa" name="khoa" onchange="this.form.submit()">
-@foreach (var k in dsKhoa)
-{
-<option value="@k.Id" selected="@(k.Id == chon.Id)">@k.Ten</option>
-}
-</select></div></form>
+else { <b>@chon.Ten</b> }
+</form>
+
+<div class="ql-so-lieu so nt-so-lieu">
+<div class="ql-the"><p>Học viên còn hạn</p><b>@conHan.Count<span class="nt-tren">/@tatCa.Count</span></b><small>đã ghi danh khoá này</small></div>
+<div class="ql-the"><p>Tiến độ trung bình</p><b>@(tienDoTb is int td ? td + "%" : "—")</b><small>bài đã học / bài đã xuất bản</small></div>
+<div class="ql-the"><p>Điểm bài tập trung bình</p><b>@Diem(diemTb)<span class="nt-tren">/10</span></b><small>@coDiem.Count học viên có điểm</small></div>
+<div class="ql-the"><p>Cần chú ý</p><b>@canChu</b><small>không hoạt động 7 ngày</small></div>
+</div>
+
 <section class="ql-khoi">
-<div class="ql-khoi-dau"><h2>Học viên ghi danh · @chon.Ten</h2><p>@ViewBag.HocVien.Count học viên</p></div>
-@if (ViewBag.HocVien.Count == 0)
+<form method="get" class="lh-loc">
+<input type="hidden" name="khoa" value="@chon.Id">
+<input type="search" name="q" value="@q" placeholder="Tìm học viên theo tên hoặc email" aria-label="Tìm học viên">
+<select name="sx" onchange="this.form.submit()" aria-label="Sắp xếp">
+<option value="" selected="@(string.IsNullOrEmpty(sx))">Sắp xếp: Tên A–Z</option>
+<option value="tien-do" selected="@(sx == "tien-do")">Tiến độ thấp trước</option>
+<option value="diem" selected="@(sx == "diem")">Điểm thấp trước</option>
+<option value="hoat-dong" selected="@(sx == "hoat-dong")">Lâu không hoạt động trước</option>
+</select>
+</form>
+@if (Model.Count == 0)
 {
-<p class="ql-trong">Chưa có học viên ghi danh. Admin ghi danh ở mục Khoá học & ghi danh.</p>
+<p class="ql-trong">@(tatCa.Count == 0 ? "Chưa có học viên ghi danh khoá này." : "Không tìm thấy học viên phù hợp.")</p>
 }
 else
 {
-<table class="ql-bang so">
-<thead><tr><th>Học viên</th><th>Tiến độ</th><th class="so">Bài nộp</th><th class="so">Tỉ lệ đúng</th><th>Lần cuối</th><th></th></tr></thead>
+<div class="lh-bang"><table class="ql-bang">
+<thead><tr><th>Học viên</th><th>Tiến độ học</th><th>Bài tập đã nộp</th><th class="so">Điểm bài tập</th><th class="so">Thi thử</th><th class="so">Luyện tập đúng</th><th>Hoạt động</th><th></th></tr></thead>
 <tbody>
-@foreach (var h in ViewBag.HocVien)
+@foreach (var h in Model)
 {
-    int tong = ViewBag.TongBai;
-    var pt = tong == 0 ? 0 : (int)Math.Round(h.DaHoc * 100.0 / tong);
-    DateTime? lanCuoi = h.LanCuoi;
-<tr><td>@h.Ten<span class="ql-phu">@h.Email</span></td>
-<td><span class="ql-phu">@h.DaHoc/@tong bài</span><div class="ql-thanh"><span style="width: @(pt)%"></span></div></td>
-<td class="so">@h.SoBaiLam</td><td class="so">@(h.Cau == 0 ? "—" : $"{Math.Round(h.Dung * 100.0 / h.Cau)}%")</td>
-<td>@(lanCuoi is null ? "—" : lanCuoi.Value.ToLocalTime().ToString("dd/MM/yyyy"))</td>
-<td class="hanh-dong"><a href="/GiangVien/HocVien/ChiTiet/@h.NguoiDungId?khoa=@chon.Id" class="ql-nut phu nho">Xem chi tiết</a></td></tr>
+    var lau = h.ConHan && (h.LanCuoi is null || h.LanCuoi < now.AddDays(-7));
+<tr>
+<td><b>@h.Ten</b>@if (!h.ConHan) {<span class="ql-chip" style="margin-left:6px">Hết hạn</span>}<span class="ql-phu" style="display:block">@h.Email</span></td>
+<td><div class="gv-tl"><span class="bd-ht-ray"><span class="bd-ht-thanh" style="width:@(h.DaHoc > 0 ? Math.Max(h.PhanTramHoc, 3) : 0)%"></span></span><b>@h.DaHoc/@h.TongBai</b></div></td>
+<td>@(h.BaiTapGiao == 0 ? "—" : $"{h.DaNop}/{h.BaiTapGiao}")</td>
+<td class="so">@if (h.DiemBaiTap is null) {<span class="ql-phu">—</span>} else {<span class="ql-chip @Mau(h.DiemBaiTap)">@Diem(h.DiemBaiTap)</span>}</td>
+<td class="so">@if (h.DiemThi is null) {<span class="ql-phu">—</span>} else {<span class="ql-chip @Mau(h.DiemThi)">@Diem(h.DiemThi)</span>}</td>
+<td class="so">@(h.TiLeDung is int tl ? tl + "%" : "—")</td>
+<td><span class="@(lau ? "lh-lau" : "ql-phu")">@HoatDong(h.LanCuoi)</span></td>
+<td class="hanh-dong"><a href="/GiangVien/HocVien/ChiTiet/@h.Id?khoa=@chon.Id" class="ql-nut phu nho">Chi tiết</a></td>
+</tr>
 }
-</tbody>
-</table>
+</tbody></table></div>
+<p class="lh-chu-thich">Điểm thang 10. Bài có tự luận chỉ tính điểm khi đã chấm.</p>
 }
 </section>

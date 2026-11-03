@@ -1,5 +1,5 @@
 @model AdminBaoCaoViewModel
-@{ ViewData["TieuDe"] = "Báo cáo học tập"; ViewData["Title"] = "Báo cáo – Quản trị"; ViewData["Muc"] = "BaoCao"; }
+@{ ViewData["TieuDe"] = "Báo cáo hoạt động"; ViewData["Title"] = "Báo cáo – Quản trị"; ViewData["Muc"] = "BaoCao"; }
 @section Actions { <a asp-action="Xuat" asp-route-tu="@Model.Tu.ToString("yyyy-MM-dd")" asp-route-den="@Model.Den.ToString("yyyy-MM-dd")" asp-route-khoa="@Model.KhoaId" class="ql-nut phu">↓ Xuất CSV</a> }
 <div asp-validation-summary="All" class="ql-tong-loi" style="margin-bottom:16px"></div>
 <form method="get" class="ad-filters"><div class="ql-truong"><label for="tu">Từ ngày</label><input type="date" id="tu" name="tu" value="@Model.Tu.ToString("yyyy-MM-dd")" required></div><div class="ql-truong"><label for="den">Đến ngày</label><input type="date" id="den" name="den" value="@Model.Den.ToString("yyyy-MM-dd")" required></div><div class="ql-truong"><label for="khoa">Khoá học</label><select id="khoa" name="khoa"><option value="">Toàn hệ thống</option>@foreach(var k in Model.DsKhoa) { <option value="@k.Id" selected="@(k.Id == Model.KhoaId)">@k.Ten</option> }</select></div><button class="ql-nut">Xem báo cáo</button></form>

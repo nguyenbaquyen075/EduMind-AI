@@ -1,0 +1,90 @@
+@model DiemCuaToiViewModel
+@{
+    ViewData["Title"] = "Điểm của tôi · Sử Địa";
+    var vi = new System.Globalization.CultureInfo("vi-VN");
+    string D(decimal? d) => d is decimal x ? x.ToString("0.#", vi) : "—";
+    string Mau(decimal? d) => d is null ? "" : d >= 8 ? "xanh" : d >= 5 ? "vang" : "do";
+    var now = DateTime.UtcNow;
+    var daNop = Model.BaiTap.Count(b => b.NopLuc is not null);
+}
+@section Head {
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500;1,600&display=swap">
+<link rel="stylesheet" href="~/css/hoc-vien.css" asp-append-version="true">
+}
+<div class="hv-trang">
+<partial name="_MenuTaiKhoan" model="Model.Menu" />
+<main class="hv-main">
+<h1>Điểm của tôi</h1>
+<p class="hv-mo-ta">Thang điểm 10. Bài có tự luận chỉ có điểm sau khi giảng viên chấm.</p>
+
+<div class="hv-so">
+<div><p>Điểm bài tập TB</p><b>@D(Model.DiemBaiTapTb)<small>/10</small></b></div>
+<div><p>Điểm thi thử TB</p><b>@D(Model.DiemThiTb)<small>/10</small></b></div>
+<div><p>Bài tập đã nộp</p><b>@daNop<small>/@Model.BaiTap.Count</small></b></div>
+<div><p>Luyện tập đúng</p><b>@(Model.TiLeDungLuyenTap is int t ? t + "%" : "—")</b></div>
+</div>
+
+<section class="hv-khoi">
+<div class="hv-khoi-dau"><h2>Bài tập & bài kiểm tra</h2><span>@Model.BaiTap.Count bài được giao</span></div>
+@if (Model.BaiTap.Count == 0)
+{
+<p class="hv-trong">Chưa có bài tập nào.</p>
+}
+else
+{
+<div class="hv-bang-boc"><table class="hv-bang">
+<thead><tr><th>Bài</th><th>Hạn nộp</th><th>Trạng thái</th><th class="so">Điểm</th></tr></thead>
+<tbody>
+@foreach (var b in Model.BaiTap)
+{
+    var hetHan = b.HanNop is DateTime hn && hn < now;
+<tr>
+<td><b>@b.Ten</b>@if (b.LaKiemTra) {<span class="hv-chip tim" style="margin-left:6px">Kiểm tra</span>}<small>@b.Khoa · @b.Bai</small></td>
+<td class="hv-nowrap">@(b.HanNop is DateTime h ? h.ToLocalTime().ToString("HH:mm dd/MM") : "Không hạn")</td>
+<td>@if (b.NopLuc is DateTime nl)
+{
+    <span class="hv-nowrap">Nộp @nl.ToLocalTime().ToString("dd/MM")</span>
+    @if (b.HanNop is DateTime h2 && nl > h2) {<span class="hv-chip vang" style="margin-left:6px">Trễ hạn</span>}
+}
+else if (hetHan) {<span class="hv-chip do">Không nộp</span>}
+else {<a href="/BaiTap/Lam/@b.Id" class="hv-nut" style="min-height:32px;padding:0 12px">Làm bài</a>}</td>
+<td class="so">@if (b.ChoCham) {<span class="hv-chip tim">Chờ chấm</span>} else if (b.Diem is null) {<span class="hv-phu">—</span>} else {<a href="/BaiTap/Lam/@b.Id" class="hv-chip @Mau(b.Diem)" style="text-decoration:none">@D(b.Diem)</a>}</td>
+</tr>
+}
+</tbody></table></div>
+}
+</section>
+
+<section class="hv-khoi">
+<div class="hv-khoi-dau"><h2>Thi thử & luyện tập</h2><span>30 lượt gần nhất</span></div>
+@if (Model.LuotLam.Count == 0)
+{
+<p class="hv-trong">Chưa làm đề nào. <a asp-controller="Home" asp-action="LuyenDe" asp-route-id="">Vào Luyện đề</a></p>
+}
+else
+{
+<div class="hv-bang-boc"><table class="hv-bang">
+<thead><tr><th>Đề / bài</th><th>Ngày làm</th><th class="so">Đúng</th><th class="so">Điểm</th></tr></thead>
+<tbody>
+@foreach (var l in Model.LuotLam)
+{
+<tr><td><b>@l.Ten</b>@if (l.LaDeThi) {<span class="hv-chip tim" style="margin-left:6px">Thi thử</span>}<small>@l.Khoa</small></td>
+<td class="hv-nowrap">@l.NopLuc.ToLocalTime().ToString("dd/MM/yyyy")</td>
+<td class="so hv-nowrap">@l.SoDung/@l.SoCau</td>
+<td class="so"><span class="hv-chip @Mau(l.Diem10)">@D(l.Diem10)</span></td></tr>
+}
+</tbody></table></div>
+}
+</section>
+
+<section class="hv-khoi">
+<div class="hv-khoi-dau"><h2>Thành tích</h2><span>@Model.HuyHieu.Count(h => h.DatDuoc)/@Model.HuyHieu.Count đã đạt</span></div>
+<div class="hv-huy">
+@foreach (var h in Model.HuyHieu)
+{
+<div class="@(h.DatDuoc ? "dat" : null)"><span aria-hidden="true">@if (h.DatDuoc) {<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>} else {<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>}</span><b>@h.Ten</b><small>@h.MoTa</small></div>
+}
+</div>
+</section>
+</main>
+</div>

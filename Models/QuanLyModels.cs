@@ -45,6 +45,24 @@ public class BanNhapNoiDungAiForm
     public List<MucForm> Muc { get; set; } = [];
 }
 
+/// <summary>Bản nháp tách từ tài liệu cấp chủ đề: một chủ đề gồm nhiều bài, mỗi bài nhiều mục.</summary>
+public class BanNhapChuDe
+{
+    public string KhoaId { get; set; } = "";
+    public int? ChuDeId { get; set; }                 // thêm bài vào chủ đề có sẵn
+    public string TenChuDe { get; set; } = "";
+    public int? SoChuDe { get; set; }
+    public List<BaiNhapChuDe> Bai { get; set; } = [];
+}
+
+public class BaiNhapChuDe
+{
+    public int So { get; set; }
+    public string Ten { get; set; } = "";
+    public bool Chon { get; set; } = true;
+    public List<MucForm> Muc { get; set; } = [];
+}
+
 public class CauHoiForm
 {
     public int Id { get; set; }
@@ -88,11 +106,57 @@ public class TaoNguoiDungForm
 public class KhoaForm
 {
     [Required] public string Id { get; set; } = "";
-    [Required(ErrorMessage = "Nhập tên khoá")] public string Ten { get; set; } = "";
+    [Required(ErrorMessage = "Nhập tên khoá")] [StringLength(120)] public string Ten { get; set; } = "";
+    [Required(ErrorMessage = "Chọn hoặc nhập môn")] [StringLength(40)] public string Mon { get; set; } = "";
     [Required(ErrorMessage = "Nhập ký hiệu")] [StringLength(3)] public string KyHieu { get; set; } = "";
-    public string? MoTa { get; set; }
+    [StringLength(600)] public string? MoTa { get; set; }
     public string? Anh { get; set; }
+    public IFormFile? AnhTai { get; set; }
     public string? GiangVienId { get; set; }
+    [Range(1, 999, ErrorMessage = "Thứ tự từ 1 đến 999")] public int? ThuTu { get; set; }
+    public bool HienThi { get; set; } = true;
+    [StringLength(2000)] public string? MucTieu { get; set; }
+    [StringLength(600)] public string? DoiTuong { get; set; }
+    // Bán lẻ: lưu vào gói chỉ chứa khoá này (Admin › Gói học), thanh toán qua PayOS
+    [Range(1000, 100_000_000, ErrorMessage = "Giá từ 1.000 đến 100.000.000 đồng")] public int? Gia { get; set; }
+    [Range(1, 60, ErrorMessage = "Thời hạn từ 1 đến 60 tháng")] public int SoThang { get; set; } = 12;
+    public bool DangBan { get; set; } = true;
+}
+
+/// <summary>Trang xem trước nội dung bài như học viên trong khu giảng viên.</summary>
+public record XemTruocBaiModel(string Nhan, string TieuDe, IReadOnlyList<MucNoiDung> Muc, string? GhiChu);
+
+/// <summary>Một bài tập đã giao ở trang thống kê nộp bài của giảng viên.</summary>
+public record GvBaiTapRow(int Id, int BaiId, string Ten, DateTime? HanNop, bool DaGiao, int SoNop, int SoHocVien, int ChoCham);
+
+/// <summary>Khoá trong thanh chọn khoá ở trang Bài tập & nộp bài.</summary>
+public record GvKhoaTomTat(string Id, string Ten, int SoBai, int BaiDaGiao, int ChoCham);
+
+/// <summary>Một học viên trong bảng Lớp học của giảng viên (điểm thang 10).</summary>
+public record GvHocVienRow(string Id, string Ten, string Email, DateTime? HanDen, bool ConHan, int DaHoc, int TongBai,
+    int DaNop, int BaiTapGiao, decimal? DiemBaiTap, decimal? DiemThi, int? TiLeDung, DateTime? LanCuoi)
+{
+    public int PhanTramHoc => TongBai == 0 ? 0 : DaHoc * 100 / TongBai;
+}
+
+/// <summary>Điểm một bài tập đã giao của một học viên.</summary>
+public record GvDiemBaiTap(int Id, string Ten, string Bai, DateTime? HanNop, DateTime? NopLuc, decimal? Diem, bool ChoCham);
+
+/// <summary>Thẻ khoá ở trang "Khoá học của tôi" của giảng viên.</summary>
+public record TheKhoaGiangVien(string Id, string Ten, string MoTa, string Anh, int SoChuDe, int SoBaiXuatBan, int SoBaiNhap, int SoHocVien, bool HienThi = true);
+
+public class GoiBanForm
+{
+    public int Id { get; set; }
+    [Required(ErrorMessage = "Nhập tên gói")] [StringLength(100)] public string Ten { get; set; } = "";
+    [StringLength(40)] public string? Nhan { get; set; }
+    [RegularExpression("^#[0-9A-Fa-f]{6}$", ErrorMessage = "Màu dạng #RRGGBB")] public string MauNhan { get; set; } = "#C8A15A";
+    [Range(1000, 100_000_000, ErrorMessage = "Giá từ 1.000 đến 100.000.000 đ")] public int? Gia { get; set; } // để trống: chưa mở bán
+    [Range(1, 60, ErrorMessage = "Thời hạn từ 1 đến 60 tháng")] public int SoThang { get; set; } = 12;
+    public bool NoiBat { get; set; }
+    public bool DangBan { get; set; } = true;
+    public string? QuyenLoi { get; set; }                 // mỗi dòng một quyền lợi
+    public List<string> KhoaIds { get; set; } = [];
 }
 
 public class SuaNguoiDungForm
