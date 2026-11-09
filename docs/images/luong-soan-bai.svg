@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 520" width="1100" height="520" role="img" aria-label="Giảng viên soạn bài từ văn bản hoặc Word/PowerPoint" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif">
+<defs><filter id="g" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="3"/></filter><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#64748B"/></marker><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0F172A"/><stop offset="1" stop-color="#1E1B4B"/></linearGradient></defs>
+<rect width="1100" height="520" rx="16" fill="url(#bg)"/>
+<text x="550.0" y="38" text-anchor="middle" fill="#F1F5F9" font-size="20" font-weight="700">Giảng viên soạn bài từ văn bản hoặc Word/PowerPoint</text>
+<path d="M428.2 99.0 L494.2 99.0" fill="none" stroke="#475569" stroke-width="2" stroke-dasharray="7 6" marker-end="url(#ar)"><animate attributeName="stroke-dashoffset" from="26" to="0" dur="1s" repeatCount="indefinite"/></path>
+<path d="M651.4 99.0 L717.4 99.0" fill="none" stroke="#475569" stroke-width="2" stroke-dasharray="7 6" marker-end="url(#ar)"><animate attributeName="stroke-dashoffset" from="26" to="0" dur="1s" repeatCount="indefinite"/></path>
+<path d="M790.6 128.0 L790.6 171.5 L404.5 171.5 L404.5 215.0" fill="none" stroke="#475569" stroke-width="2" stroke-dasharray="7 6" marker-end="url(#ar)"><animate attributeName="stroke-dashoffset" from="26" to="0" dur="1s" repeatCount="indefinite"/></path>
+<path d="M790.6 128.0 L790.6 171.5 L658.9 171.5 L658.9 215.0" fill="none" stroke="#475569" stroke-width="2" stroke-dasharray="7 6" marker-end="url(#ar)"><animate attributeName="stroke-dashoffset" from="26" to="0" dur="1s" repeatCount="indefinite"/></path>
+<path d="M480.4 244.0 L546.4 244.0" fill="none" stroke="#475569" stroke-width="2" stroke-dasharray="3 7" marker-end="url(#ar)"><animate attributeName="stroke-dashoffset" from="26" to="0" dur="1s" repeatCount="indefinite"/></path>
+<path d="M404.5 273.0 L404.5 316.5 L163.8 316.5 L163.8 360.0" fill="none" stroke="#475569" stroke-width="2" stroke-dasharray="7 6" marker-end="url(#ar)"><animate attributeName="stroke-dashoffset" from="26" to="0" dur="1s" repeatCount="indefinite"/></path>
+<path d="M658.9 273.0 L658.9 316.5 L163.8 316.5 L163.8 360.0" fill="none" stroke="#475569" stroke-width="2" stroke-dasharray="7 6" marker-end="url(#ar)"><animate attributeName="stroke-dashoffset" from="26" to="0" dur="1s" repeatCount="indefinite"/></path>
+<path d="M243.3 389.0 L276.3 389.0 L276.3 382.0 L309.3 382.0" fill="none" stroke="#475569" stroke-width="2" stroke-dasharray="7 6" marker-end="url(#ar)"><animate attributeName="stroke-dashoffset" from="26" to="0" dur="1s" repeatCount="indefinite"/></path>
+<path d="M520.6 382.0 L586.6 382.0" fill="none" stroke="#475569" stroke-width="2" stroke-dasharray="7 6" marker-end="url(#ar)"><animate attributeName="stroke-dashoffset" from="26" to="0" dur="1s" repeatCount="indefinite"/></path>
+<path d="M754.1 382.0 L820.1 382.0" fill="none" stroke="#475569" stroke-width="2" stroke-dasharray="7 6" marker-end="url(#ar)"><animate attributeName="stroke-dashoffset" from="26" to="0" dur="1s" repeatCount="indefinite"/></path>
+<g>
+<rect x="233.3" y="67.0" width="197.9" height="64.0" rx="14" fill="#38BDF8" opacity="0" filter="url(#g)"><animate attributeName="opacity" dur="13.6s" repeatCount="indefinite" keyTimes="0;0.0001;0.1324;1" values="0;1;0;0"/></rect>
+<rect x="236.3" y="70.0" width="191.9" height="58" rx="11" fill="#1E293B" stroke="#38BDF8" stroke-width="2"/>
+<text x="332.2" y="94" text-anchor="middle" fill="#F8FAFC" font-size="14" font-weight="600">Nhập tên + số bài</text>
+<text x="332.2" y="113" text-anchor="middle" fill="#94A3B8" font-size="12">Dán văn bản hoặc tải file</text>
+</g>
+<g>
+<rect x="491.2" y="67.0" width="163.2" height="64.0" rx="14" fill="#A78BFA" opacity="0" filter="url(#g)"><animate attributeName="opacity" dur="13.6s" repeatCount="indefinite" keyTimes="0;0.0956;0.1103;0.2426;1" values="0;0;1;0;0"/></rect>
+<rect x="494.2" y="70.0" width="157.2" height="58" rx="11" fill="#1E293B" stroke="#A78BFA" stroke-width="2"/>
+<text x="572.8" y="94" text-anchor="middle" fill="#F8FAFC" font-size="14" font-weight="600">Đọc .docx / .pptx</text>
+<text x="572.8" y="113" text-anchor="middle" fill="#94A3B8" font-size="12">ZIP/XML · ≤ 20 MB</text>
+</g>
+<g>
+<rect x="714.4" y="67.0" width="152.3" height="64.0" rx="14" fill="#34D399" opacity="0" filter="url(#g)"><animate attributeName="opacity" dur="13.6s" repeatCount="indefinite" keyTimes="0;0.2059;0.2206;0.3529;1" values="0;0;1;0;0"/></rect>
+<rect x="717.4" y="70.0" width="146.3" height="58" rx="11" fill="#1E293B" stroke="#34D399" stroke-width="2"/>
+<text x="790.6" y="94" text-anchor="middle" fill="#F8FAFC" font-size="14" font-weight="600">Văn bản thuần</text>
+<text x="790.6" y="113" text-anchor="middle" fill="#94A3B8" font-size="12">30 – 30.000 ký tự</text>
+</g>
+<g>
+<rect x="325.5" y="212.0" width="157.9" height="64.0" rx="14" fill="#F472B6" opacity="0" filter="url(#g)"><animate attributeName="opacity" dur="13.6s" repeatCount="indefinite" keyTimes="0;0.3162;0.3309;0.4632;1" values="0;0;1;0;0"/></rect>
+<rect x="328.5" y="215.0" width="151.9" height="58" rx="11" fill="#1E293B" stroke="#F472B6" stroke-width="2"/>
+<text x="404.5" y="239" text-anchor="middle" fill="#F8FAFC" font-size="14" font-weight="600">Chia mục bằng AI</text>
+<text x="404.5" y="258" text-anchor="middle" fill="#94A3B8" font-size="12">Gemini</text>
+</g>
+<g>
+<rect x="543.4" y="212.0" width="231.0" height="64.0" rx="14" fill="#A78BFA" opacity="0" filter="url(#g)"><animate attributeName="opacity" dur="13.6s" repeatCount="indefinite" keyTimes="0;0.3162;0.3309;0.4632;1" values="0;0;1;0;0"/></rect>
+<rect x="546.4" y="215.0" width="225.0" height="58" rx="11" fill="#1E293B" stroke="#A78BFA" stroke-width="2"/>
+<text x="658.9" y="239" text-anchor="middle" fill="#F8FAFC" font-size="14" font-weight="600">Chia theo đề mục</text>
+<text x="658.9" y="258" text-anchor="middle" fill="#94A3B8" font-size="12">#, I., 1.1., a)  ·  ngoại tuyến</text>
+</g>
+<g>
+<rect x="81.3" y="357.0" width="165.0" height="64.0" rx="14" fill="#34D399" opacity="0" filter="url(#g)"><animate attributeName="opacity" dur="13.6s" repeatCount="indefinite" keyTimes="0;0.5368;0.5515;0.6838;1" values="0;0;1;0;0"/></rect>
+<rect x="84.3" y="360.0" width="159.0" height="58" rx="11" fill="#1E293B" stroke="#34D399" stroke-width="2"/>
+<text x="163.8" y="384" text-anchor="middle" fill="#F8FAFC" font-size="14" font-weight="600">Bản xem thử</text>
+<text x="163.8" y="403" text-anchor="middle" fill="#94A3B8" font-size="12">IMemoryCache · 2 giờ</text>
+</g>
+<g>
+<rect x="306.3" y="357.0" width="217.2" height="50.0" rx="14" fill="#38BDF8" opacity="0" filter="url(#g)"><animate attributeName="opacity" dur="13.6s" repeatCount="indefinite" keyTimes="0;0.6471;0.6618;0.7941;1" values="0;0;1;0;0"/></rect>
+<rect x="309.3" y="360.0" width="211.2" height="44" rx="11" fill="#1E293B" stroke="#38BDF8" stroke-width="2"/>
+<text x="415.0" y="387" text-anchor="middle" fill="#F8FAFC" font-size="14" font-weight="600">Giảng viên rà soát &amp; sửa</text>
+</g>
+<g>
+<rect x="583.6" y="357.0" width="173.6" height="50.0" rx="14" fill="#34D399" opacity="0" filter="url(#g)"><animate attributeName="opacity" dur="13.6s" repeatCount="indefinite" keyTimes="0;0.7574;0.7721;0.9044;1" values="0;0;1;0;0"/></rect>
+<rect x="586.6" y="360.0" width="167.6" height="44" rx="11" fill="#1E293B" stroke="#34D399" stroke-width="2"/>
+<text x="670.4" y="387" text-anchor="middle" fill="#F8FAFC" font-size="14" font-weight="600">Lưu vào PostgreSQL</text>
+</g>
+<g>
+<rect x="817.1" y="357.0" width="201.6" height="50.0" rx="14" fill="#4ADE80" opacity="0" filter="url(#g)"><animate attributeName="opacity" dur="13.6s" repeatCount="indefinite" keyTimes="0;0.8676;0.8824;1" values="0;0;1;0"/></rect>
+<rect x="820.1" y="360.0" width="195.6" height="44" rx="11" fill="#1E293B" stroke="#4ADE80" stroke-width="2"/>
+<text x="917.9" y="387" text-anchor="middle" fill="#F8FAFC" font-size="14" font-weight="600">Xuất bản / cho học thử</text>
+</g>
+<rect x="377.6" y="184.2" width="53.8" height="18" rx="9" fill="#0F172A" stroke="#334155"/>
+<text x="404.5" y="197.2" text-anchor="middle" fill="#CBD5E1" font-size="11">Chọn AI</text>
+<rect x="619.7" y="184.2" width="78.4" height="18" rx="9" fill="#0F172A" stroke="#334155"/>
+<text x="658.9" y="197.2" text-anchor="middle" fill="#CBD5E1" font-size="11">Chọn đề mục</text>
+<rect x="484.1" y="235.0" width="58.6" height="18" rx="9" fill="#0F172A" stroke="#334155"/>
+<text x="513.4" y="248.0" text-anchor="middle" fill="#CBD5E1" font-size="11">dự phòng</text>
+<circle r="6" fill="#FDE68A" filter="url(#g)" opacity="0"><animateMotion dur="13.6s" repeatCount="indefinite" calcMode="linear" keyPoints="0;0;1;1" keyTimes="0;0.0001;0.1098;1" path="M428.2 99.0 L494.2 99.0"/><animate attributeName="opacity" dur="13.6s" repeatCount="indefinite" keyTimes="0;0.0001;0.1098;0.1103;1" values="0;1;1;0;0"/></circle>
+<circle r="3.5" fill="#FFFBEB" opacity="0"><animateMotion dur="13.6s" repeatCount="indefinite" calcMode="linear" keyPoints="0;0;1;1" keyTimes="0;0.0001;0.1098;1" path="M428.2 99.0 L494.2 99.0"/><animate attributeName="opacity" dur="13.6s" repeatCount="indefinite" keyTimes="0;0.0001;0.1098;0.1103;1" values="0;1;1;0;0"/></circle>
+<circle r="6" fill="#FDE68A" filter="url(#g)" opacity="0"><animateMotion dur="13.6s" repeatCount="indefinite" calcMode="linear" keyPoints="0;0;1;1" keyTimes="0;0.1103;0.2201;1" path="M651.4 99.0 L717.4 99.0"/><animate attributeName="opacity" dur="13.6s" repeatCount="indefinite" keyTimes="0;0.1103;0.2201;0.2206;1" values="0;1;1;0;0"/></circle>
+<circle r="3.5" fill="#FFFBEB" opacity="0"><animateMotion dur="13.6s" repeatCount="indefinite" calcMode="linear" keyPoints="0;0;1;1" keyTimes="0;0.1103;0.2201;1" path="M651.4 99.0 L717.4 99.0"/><animate attributeName="opacity" dur="13.6s" repeatCount="indefinite" keyTimes="0;0.1103;0.2201;0.2206;1" values="0;1;1;0;0"/></circle>
+<circle r="6" fill="#FDE68A" filter="url(#g)" opacity="0"><animateMotion dur="13.6s" repeatCount="indefinite" calcMode="linear" keyPoints="0;0;1;1" keyTimes="0;0.2206;0.3304;1" path="M790.6 128.0 L790.6 171.5 L404.5 171.5 L404.5 215.0"/><animate attributeName="opacity" dur="13.6s" repeatCount="indefinite" keyTimes="0;0.2206;0.3304;0.3309;1" values="0;1;1;0;0"/></circle>
+<circle r="3.5" fill="#FFFBEB" opacity="0"><animateMotion dur="13.6s" repeatCount="indefinite" calcMode="linear" keyPoints="0;0;1;1" keyTimes="0;0.2206;0.3304;1" path="M790.6 128.0 L790.6 171.5 L404.5 171.5 L404.5 215.0"/><animate attributeName="opacity" dur="13.6s" repeatCount="indefinite" keyTimes="0;0.2206;0.3304;0.3309;1" values="0;1;1;0;0"/></circle>
+<circle r="6" fill="#FDE68A" filter="url(#g)" opacity="0"><animateMotion dur="13.6s" repeatCount="indefinite" calcMode="linear" keyPoints="0;0;1;1" keyTimes="0;0.2206;0.3304;1" path="M790.6 128.0 L790.6 171.5 L658.9 171.5 L658.9 215.0"/><animate attributeName="opacity" dur="13.6s" repeatCount="indefinite" keyTimes="0;0.2206;0.3304;0.3309;1" values="0;1;1;0;0"/></circle>
+<circle r="3.5" fill="#FFFBEB" opacity="0"><animateMotion dur="13.6s" repeatCount="indefinite" calcMode="linear" keyPoints="0;0;1;1" keyTimes="0;0.2206;0.3304;1" path="M790.6 128.0 L790.6 171.5 L658.9 171.5 L658.9 215.0"/><animate attributeName="opacity" dur="13.6s" repeatCount="indefinite" keyTimes="0;0.2206;0.3304;0.3309;1" values="0;1;1;0;0"/></circle>
+<circle r="6" fill="#FDE68A" filter="url(#g)" opacity="0"><animateMotion dur="13.6s" repeatCount="indefinite" calcMode="linear" keyPoints="0;0;1;1" keyTimes="0;0.3309;0.4407;1" path="M480.4 244.0 L546.4 244.0"/><animate attributeName="opacity" dur="13.6s" repeatCount="indefinite" keyTimes="0;0.3309;0.4407;0.4412;1" values="0;1;1;0;0"/></circle>
+<circle r="3.5" fill="#FFFBEB" opacity="0"><animateMotion dur="13.6s" repeatCount="indefinite" calcMode="linear" keyPoints="0;0;1;1" keyTimes="0;0.3309;0.4407;1" path="M480.4 244.0 L546.4 244.0"/><animate attributeName="opacity" dur="13.6s" repeatCount="indefinite" keyTimes="0;0.3309;0.4407;0.4412;1" values="0;1;1;0;0"/></circle>
+<circle r="6" fill="#FDE68A" filter="url(#g)" opacity="0"><animateMotion dur="13.6s" repeatCount="indefinite" calcMode="linear" keyPoints="0;0;1;1" keyTimes="0;0.4412;0.5510;1" path="M404.5 273.0 L404.5 316.5 L163.8 316.5 L163.8 360.0"/><animate attributeName="opacity" dur="13.6s" repeatCount="indefinite" keyTimes="0;0.4412;0.5510;0.5515;1" values="0;1;1;0;0"/></circle>
+<circle r="3.5" fill="#FFFBEB" opacity="0"><animateMotion dur="13.6s" repeatCount="indefinite" calcMode="linear" keyPoints="0;0;1;1" keyTimes="0;0.4412;0.5510;1" path="M404.5 273.0 L404.5 316.5 L163.8 316.5 L163.8 360.0"/><animate attributeName="opacity" dur="13.6s" repeatCount="indefinite" keyTimes="0;0.4412;0.5510;0.5515;1" values="0;1;1;0;0"/></circle>
+<circle r="6" fill="#FDE68A" filter="url(#g)" opacity="0"><animateMotion dur="13.6s" repeatCount="indefinite" calcMode="linear" keyPoints="0;0;1;1" keyTimes="0;0.4412;0.5510;1" path="M658.9 273.0 L658.9 316.5 L163.8 316.5 L163.8 360.0"/><animate attributeName="opacity" dur="13.6s" repeatCount="indefinite" keyTimes="0;0.4412;0.5510;0.5515;1" values="0;1;1;0;0"/></circle>
+<circle r="3.5" fill="#FFFBEB" opacity="0"><animateMotion dur="13.6s" repeatCount="indefinite" calcMode="linear" keyPoints="0;0;1;1" keyTimes="0;0.4412;0.5510;1" path="M658.9 273.0 L658.9 316.5 L163.8 316.5 L163.8 360.0"/><animate attributeName="opacity" dur="13.6s" repeatCount="indefinite" keyTimes="0;0.4412;0.5510;0.5515;1" values="0;1;1;0;0"/></circle>
+<circle r="6" fill="#FDE68A" filter="url(#g)" opacity="0"><animateMotion dur="13.6s" repeatCount="indefinite" calcMode="linear" keyPoints="0;0;1;1" keyTimes="0;0.5515;0.6613;1" path="M243.3 389.0 L276.3 389.0 L276.3 382.0 L309.3 382.0"/><animate attributeName="opacity" dur="13.6s" repeatCount="indefinite" keyTimes="0;0.5515;0.6613;0.6618;1" values="0;1;1;0;0"/></circle>
+<circle r="3.5" fill="#FFFBEB" opacity="0"><animateMotion dur="13.6s" repeatCount="indefinite" calcMode="linear" keyPoints="0;0;1;1" keyTimes="0;0.5515;0.6613;1" path="M243.3 389.0 L276.3 389.0 L276.3 382.0 L309.3 382.0"/><animate attributeName="opacity" dur="13.6s" repeatCount="indefinite" keyTimes="0;0.5515;0.6613;0.6618;1" values="0;1;1;0;0"/></circle>
+<circle r="6" fill="#FDE68A" filter="url(#g)" opacity="0"><animateMotion dur="13.6s" repeatCount="indefinite" calcMode="linear" keyPoints="0;0;1;1" keyTimes="0;0.6618;0.7716;1" path="M520.6 382.0 L586.6 382.0"/><animate attributeName="opacity" dur="13.6s" repeatCount="indefinite" keyTimes="0;0.6618;0.7716;0.7721;1" values="0;1;1;0;0"/></circle>
+<circle r="3.5" fill="#FFFBEB" opacity="0"><animateMotion dur="13.6s" repeatCount="indefinite" calcMode="linear" keyPoints="0;0;1;1" keyTimes="0;0.6618;0.7716;1" path="M520.6 382.0 L586.6 382.0"/><animate attributeName="opacity" dur="13.6s" repeatCount="indefinite" keyTimes="0;0.6618;0.7716;0.7721;1" values="0;1;1;0;0"/></circle>
+<circle r="6" fill="#FDE68A" filter="url(#g)" opacity="0"><animateMotion dur="13.6s" repeatCount="indefinite" calcMode="linear" keyPoints="0;0;1;1" keyTimes="0;0.7721;0.8819;1" path="M754.1 382.0 L820.1 382.0"/><animate attributeName="opacity" dur="13.6s" repeatCount="indefinite" keyTimes="0;0.7721;0.8819;0.8824;1" values="0;1;1;0;0"/></circle>
+<circle r="3.5" fill="#FFFBEB" opacity="0"><animateMotion dur="13.6s" repeatCount="indefinite" calcMode="linear" keyPoints="0;0;1;1" keyTimes="0;0.7721;0.8819;1" path="M754.1 382.0 L820.1 382.0"/><animate attributeName="opacity" dur="13.6s" repeatCount="indefinite" keyTimes="0;0.7721;0.8819;0.8824;1" values="0;1;1;0;0"/></circle>
+</svg>
