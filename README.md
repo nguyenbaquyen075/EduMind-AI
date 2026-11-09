@@ -85,37 +85,11 @@ Hai chức năng AI hoạt động độc lập:
 
 ## 4. Kiến trúc hệ thống
 
+> Các sơ đồ luồng bên dưới là ảnh SVG động: chấm sáng chạy dọc mũi tên theo từng bước, node được tô sáng khi dữ liệu tới. Mã nguồn sơ đồ nằm ở [docs/images/](docs/images/).
+
 Mô hình **ASP.NET Core MVC** một máy chủ ứng dụng, dữ liệu trong PostgreSQL, AI gọi qua HTTP.
 
-```mermaid
-flowchart LR
-    subgraph Client["Trình duyệt"]
-        UI["Razor HTML + CSS + JS"]
-    end
-
-    subgraph App["Máy chủ ASP.NET Core 8"]
-        MW["Middleware<br/>Identity · Anti-forgery · Rate limit"]
-        CTRL["Controllers / Areas<br/>Home · GiangVien · Admin"]
-        SVC["Services<br/>Học tập · Soạn bài · Trợ lý · Thanh toán"]
-        EF["EF Core<br/>AppDbContext"]
-        CACHE[("IMemoryCache<br/>bản xem thử")]
-        KB[("TaiLieu/*.md<br/>Prompts/")]
-    end
-
-    DB[("PostgreSQL")]
-    GEM["Google Gemini API"]
-    CLA["Anthropic Claude API"]
-    PAY["PayOS"]
-
-    UI -->|HTTPS| MW --> CTRL --> SVC
-    SVC --> EF --> DB
-    SVC --> CACHE
-    SVC -->|BM25 tìm đoạn| KB
-    SVC -->|soạn bài| GEM
-    SVC -->|hỏi đáp| CLA
-    SVC <-->|đơn hàng · webhook| PAY
-    CTRL -->|Razor View| UI
-```
+<p align="center"><img src="docs/images/kien-truc.svg" alt="Kiến trúc hệ thống" width="100%"></p>
 
 Luồng trang web thông thường: **Trình duyệt → Controller → Service/DbContext → ViewModel → Razor HTML**. Các API tương tác (trợ lý, bắt đầu làm bài, xem thử) trả JSON cho JavaScript.
 
@@ -123,101 +97,29 @@ Luồng trang web thông thường: **Trình duyệt → Controller → Service/
 
 ### 5.1. Học viên: từ đăng ký đến làm bài
 
-```mermaid
-flowchart TD
-    A([Đăng ký tài khoản]) --> B[Vai trò Học viên]
-    B --> C[Xem danh sách khoá]
-    C --> D{Đã ghi danh<br/>còn hạn?}
-    D -- Chưa --> E[Học thử bài đầu / mua gói qua PayOS]
-    E --> F[Admin hoặc webhook mở ghi danh]
-    D -- Rồi --> G[Đọc bài theo mục lục]
-    F --> G
-    G --> H[Ghi nhận tiến độ]
-    G --> I[Làm bài tập / kiểm tra]
-    I --> J[Nộp bài]
-    J --> K[Máy chủ chấm trắc nghiệm + đúng/sai]
-    K --> L[Hiện điểm, đáp án, lời giải]
-    J --> M[Tự luận chờ giảng viên chấm]
-    G --> N[Hỏi AI về nội dung khoá]
-```
+<p align="center"><img src="docs/images/luong-hoc-vien.svg" alt="Luồng học viên" width="100%"></p>
 
 ### 5.2. Làm bài kiểm tra có đồng hồ
 
-```mermaid
-sequenceDiagram
-    actor HV as Học viên
-    participant W as Trình duyệt
-    participant S as Máy chủ
-    participant DB as PostgreSQL
-
-    HV->>W: Bấm "Bắt đầu làm bài"
-    W->>S: POST bắt đầu
-    S->>DB: Lưu LuotLamKiemTra (giờ bắt đầu)
-    S-->>W: Hiện câu hỏi + giờ hết hạn
-    Note over W: Tải lại trang không reset đồng hồ<br/>(giờ do máy chủ lưu)
-    HV->>W: Làm bài, hoặc hết giờ thì tự nộp
-    W->>S: POST nộp bài
-    S->>DB: Kiểm tra có lượt bắt đầu, chưa nộp, chưa quá hạn
-    alt Trong hạn (+10 giây đệm)
-        S->>DB: Lưu BaiNopGiao + điểm tự động
-    else Quá hạn
-        S->>DB: Ghi bài rỗng, không nhận đáp án muộn
-    end
-    S-->>W: Kết quả
-```
+<p align="center"><img src="docs/images/luong-kiem-tra.svg" alt="Luồng làm bài kiểm tra có đồng hồ" width="100%"></p>
 
 Mỗi học viên chỉ có **một bài nộp** cho mỗi bài tập (ràng buộc duy nhất `bài tập – học viên`).
 
 ### 5.3. Giảng viên: soạn bài từ tài liệu
 
-```mermaid
-flowchart TD
-    A([Chọn khoá / chủ đề, nhập tên + số bài]) --> B{Nguồn nội dung}
-    B -->|Dán văn bản| D
-    B -->|Tải .docx / .pptx| C[Đọc ZIP/XML trên máy chủ<br/>tối đa 20 MB, 30.000 ký tự]
-    C --> D[Nội dung văn bản]
-    D --> E{Cách chia mục}
-    E -->|AI| F[Gemini nhận diện cấu trúc]
-    E -->|Theo đề mục| G[Tách bằng #, I., 1.1., a ...]
-    F -. lỗi / hết hạn mức .-> G
-    F --> H
-    G --> H[Bản xem thử<br/>IMemoryCache, tối đa 2 giờ]
-    H --> I[Giảng viên rà soát và sửa]
-    I --> J[Xác nhận lưu vào PostgreSQL]
-    J --> K[Bài ở trạng thái nháp<br/>→ bật xuất bản / học thử]
-```
+<p align="center"><img src="docs/images/luong-soan-bai.svg" alt="Luồng soạn bài" width="100%"></p>
 
 Việc đọc Word/PowerPoint **không gọi AI**; văn bản chỉ được gửi sang Gemini khi giảng viên chủ động chọn nút AI. Không chạy macro, không cần cài Office.
 
 ### 5.4. Giao bài và chấm điểm
 
-```mermaid
-flowchart LR
-    A[Thông tin chung<br/>tên · bài học · hạn · thời lượng] --> B[Soạn câu hỏi<br/>TN · Đúng/Sai · Tự luận]
-    B --> C[Xem lại tổng điểm]
-    C --> D{Lưu}
-    D -->|Nháp| E[(BaiTapGiao)]
-    D -->|Xuất bản| E
-    E --> F[Học viên nộp]
-    F --> G[Chấm tự động]
-    G --> H[Giảng viên chấm tự luận]
-    H --> I[Điểm cuối + báo cáo]
-```
+<p align="center"><img src="docs/images/luong-giao-bai.svg" alt="Luồng giao bài và chấm điểm" width="100%"></p>
 
 Bài tập đã có bài nộp, hoặc đề đã có lượt làm, sẽ **bị khoá sửa/xoá** để bảo toàn kết quả.
 
 ### 5.5. Trợ lý hỏi đáp (RAG)
 
-```mermaid
-flowchart TD
-    Q([Câu hỏi của học viên]) --> R[Viết lại câu hỏi nối tiếp<br/>dùng tối đa 3 lượt gần nhất]
-    R --> S[Tìm đoạn liên quan<br/>BM25 trên văn bản bỏ dấu]
-    S --> T[(TaiLieu/*.md<br/>cắt theo mục)]
-    T --> U[Gọi Claude với prompt hệ thống + đoạn tìm được]
-    U --> V[Kiểm tra số liệu trong câu trả lời]
-    V --> W[AI chấm độ bám nguồn]
-    W --> X([Trả lời kèm nguồn])
-```
+<p align="center"><img src="docs/images/luong-tro-ly-rag.svg" alt="Luồng trợ lý RAG" width="100%"></p>
 
 - API `POST /api/tro-ly/hoi` có chống CSRF và giới hạn **10 câu/phút**.
 - Nguồn hiện là file Markdown trong `TaiLieu/`; nội dung bài soạn trong database **chưa tự đồng bộ** thành nguồn cho trợ lý.
