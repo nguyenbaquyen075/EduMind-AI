@@ -81,6 +81,7 @@ else
 }
 
 @* ---------------------------------------------------------------- Các câu hỏi *@
+<p class="ld-loi-nop" id="loiNop" role="alert" @(ViewBag.LoiNop is null ? "hidden" : "")>@ViewBag.LoiNop</p>
 <form asp-controller="Home" asp-action="LamCauHoi" asp-route-id="@Model.Id" method="post" id="formDe">
 <ol class="ld-ds">
 @for (var i = 1; i <= tong; i++)
@@ -239,9 +240,19 @@ else
   capNhat();
 
   let tuNop = false;
+  // Còn câu bỏ trống thì không cho nộp (trừ khi đề thi hết giờ tự nộp)
+  const loi = document.getElementById('loiNop');
   form.addEventListener('submit', (e) => {
-    const trong = tong - daLam();
-    if (!tuNop && trong > 0 && !confirm(`Còn ${trong} câu chưa làm. Vẫn nộp bài?`)) e.preventDefault();
+    if (tuNop) return;
+    const thieu = [];
+    for (let i = 1; i <= tong; i++) if (!form.querySelector(`input[name="cau-${i}"]:checked`)) thieu.push(i);
+    form.querySelectorAll('.ld-cau.thieu').forEach((li) => li.classList.remove('thieu'));
+    if (thieu.length === 0) return;
+    e.preventDefault();
+    thieu.forEach((i) => document.getElementById(`cau-${i}`)?.classList.add('thieu'));
+    loi.textContent = `Còn ${thieu.length} câu chưa làm (câu ${thieu.slice(0, 8).join(', ')}${thieu.length > 8 ? '…' : ''}). Hãy làm hết rồi nộp bài.`;
+    loi.hidden = false;
+    document.getElementById(`cau-${thieu[0]}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
   });
 
   const dongHo = document.getElementById('dongHo');
