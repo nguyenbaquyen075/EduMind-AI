@@ -100,4 +100,16 @@ app.MapControllerRoute(name: "default", pattern: "{controller=Home}/{action=Inde
 await KhoiTaoDuLieu.ChayAsync(app.Services, app.Environment.IsDevelopment(),
     builder.Configuration["TaiKhoanMau:MatKhau"] ?? "SuDia@2026");
 
+// dotnet run -- --du-lieu-mau --xac-nhan-xoa-du-lieu-mau:
+// làm mới toàn bộ dữ liệu mẫu (chỉ Development) rồi thoát
+if (args.Contains("--du-lieu-mau"))
+{
+    if (!app.Environment.IsDevelopment()) throw new InvalidOperationException("Chỉ tạo dữ liệu mẫu ở Development.");
+    if (!args.Contains("--xac-nhan-xoa-du-lieu-mau"))
+        throw new InvalidOperationException("Lệnh này xoá dữ liệu Development. Chạy lại với --xac-nhan-xoa-du-lieu-mau nếu anh chắc chắn.");
+    await DuLieuMauDayDu.TaoAsync(app.Services, builder.Configuration["TaiKhoanMau:MatKhau"] ?? "SuDia@2026");
+    Console.WriteLine("Đã tạo dữ liệu mẫu.");
+    return;
+}
+
 await app.RunAsync();

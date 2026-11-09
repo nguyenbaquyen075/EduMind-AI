@@ -14,7 +14,7 @@ a:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-of
 
 /* ------------------------------------------------ Khung trang */
 .kh-shell{min-height:100vh;display:flex;flex-wrap:wrap}
-.kh-main{flex:999 1 640px;min-width:0;box-sizing:border-box;padding:40px 48px 64px}
+.kh-main{flex:999 1 640px;min-width:0;box-sizing:border-box;padding:104px 48px 64px}
 .kh-inner{max-width:1120px}
 .kh-eyebrow{margin:0 0 6px;font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text-3)}
 .kh-title{margin:0 0 6px;font-size:28px;font-weight:600;line-height:1.25;letter-spacing:-.02em}

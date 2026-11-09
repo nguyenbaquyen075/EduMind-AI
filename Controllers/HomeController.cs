@@ -111,6 +111,13 @@ public class HomeController : Controller
         foreach (var (key, value) in form)
             if (key.StartsWith("cau-") && int.TryParse(key[4..], out var so) && value.ToString() is "A" or "B" or "C" or "D")
                 daChon[so] = value.ToString();
+        // Luyện tập theo bài phải làm hết mới nộp được; đề thi thử có đồng hồ tự nộp nên được để trống khi hết giờ
+        var deTrong = _svc.LayDe(id, null);
+        if (!deTrong.LaDeThi && daChon.Count < deTrong.CauHoi.Count)
+        {
+            ViewBag.LoiNop = "Bạn cần trả lời tất cả các câu trước khi nộp bài.";
+            return View(deTrong);
+        }
         var daNop = _svc.LayDe(id, daChon);
         _svc.LuuBaiLam(daNop);
         return View(daNop);

@@ -14,7 +14,7 @@
 <h1>Tài khoản</h1>
 @if (TempData["ThongBao"] is string tb) { <p class="hv-tb" role="status">@tb</p> }
 
-<section class="hv-khoi">
+<section class="hv-khoi" id="thong-tin-ca-nhan">
 <h2>Thông tin cá nhân</h2>
 <form asp-action="HoSo" method="post" class="hv-form">
 <div><label asp-for="HoTen">Họ tên</label><input asp-for="HoTen" maxlength="80" autocomplete="name"><span asp-validation-for="HoTen" class="hv-loi"></span></div>

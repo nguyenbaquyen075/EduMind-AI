@@ -65,12 +65,14 @@ public class BaiTapController(AppDbContext db) : Controller
         if (!NhanVien && bt.DeThi is null && bt.HanNop < DateTime.UtcNow) { TempData["LoiBaiTap"] = "Bài tập đã hết hạn nộp."; return RedirectToAction(nameof(Lam), new { id }); }
         if (!NhanVien && await db.BaiNopGiao.AnyAsync(n => n.BaiTapGiaoId == id && n.NguoiDungId == Uid)) return RedirectToAction(nameof(Lam), new { id });
         var hetGio = false;
+        var ganHetGio = false;
         if (!NhanVien && bt.DeThi is not null)
         {
             var luot = await db.LuotLamKiemTra.AsNoTracking().FirstOrDefaultAsync(x => x.BaiTapGiaoId == id && x.NguoiDungId == Uid);
             if (luot is null) { TempData["LoiBaiTap"] = "Anh/chị cần bấm Bắt đầu làm bài trước khi nộp."; return RedirectToAction(nameof(Lam), new { id }); }
             // Cho phép vài giây truyền bài tự nộp; thời gian bắt đầu luôn do server lưu.
             hetGio = DateTime.UtcNow > HetGioKiemTra(bt, luot).AddSeconds(10);
+            ganHetGio = DateTime.UtcNow > HetGioKiemTra(bt, luot).AddSeconds(-15);   // đồng hồ tự nộp: cho phép còn câu trống
         }
         var cau = NoiDungBaiTap.Doc(bt.NoiDungJson);
         if (NoiDungBaiTap.KiemTra(cau, true) is string loiNhap) return BadRequest($"Hoàn thiện bài tập trước khi làm thử: {loiNhap}");
@@ -92,6 +94,14 @@ public class BaiTapController(AppDbContext db) : Controller
                 if (c.Kieu == "TL" || value is "0" or "1" or "2" or "3") traLoi[c.Id] = value;
             }
         }
+        // Phải trả lời đủ mọi câu mới được nộp (trừ khi hết giờ làm bài kiểm tra)
+        if (!NhanVien && !ganHetGio && cau.Any(c => c.Kieu switch
+            {
+                "TL" => string.IsNullOrWhiteSpace(traLoi.GetValueOrDefault(c.Id)),
+                "DS" => Enumerable.Range(0, c.Y.Count).Any(j => !traLoi.ContainsKey($"{c.Id}-{j}")),
+                _ => !traLoi.ContainsKey(c.Id),
+            }))
+        { TempData["LoiBaiTap"] = "Bạn cần trả lời tất cả các câu trước khi nộp bài."; return RedirectToAction(nameof(Lam), new { id }); }
         var nop = new BaiNopGiao { BaiTapGiaoId = id, NguoiDungId = Uid, TraLoiJson = NoiDungBaiTap.Viet(traLoi),
             DiemTuDong = NoiDungBaiTap.Cham(cau, traLoi), DiemTuLuan = !hetGio && cau.Any(c => c.Kieu == "TL") ? null : 0 };
         if (hetGio) TempData["LoiBaiTap"] = "Bài đã quá thời gian làm. Đáp án gửi muộn không được ghi nhận.";
