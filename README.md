@@ -26,12 +26,13 @@ Quản lý khoá học · Soạn bài bằng AI · Giao bài & chấm điểm ·
 6. [Công nghệ sử dụng](#6-công-nghệ-sử-dụng)
 7. [Mô hình dữ liệu](#7-mô-hình-dữ-liệu)
 8. [Cấu trúc thư mục](#8-cấu-trúc-thư-mục)
-9. [Cài đặt và chạy](#9-cài-đặt-và-chạy)
-10. [Cấu hình AI và thanh toán](#10-cấu-hình-ai-và-thanh-toán)
-11. [Bảo mật](#11-bảo-mật)
-12. [Kiểm thử](#12-kiểm-thử)
-13. [Quy trình Git](#13-quy-trình-git)
-14. [Hạn chế và hướng phát triển](#14-hạn-chế-và-hướng-phát-triển)
+9. [Bản đồ đường dẫn](#9-bản-đồ-đường-dẫn)
+10. [Cài đặt và chạy](#10-cài-đặt-và-chạy)
+11. [Cấu hình AI và thanh toán](#11-cấu-hình-ai-và-thanh-toán)
+12. [Bảo mật](#12-bảo-mật)
+13. [Kiểm thử](#13-kiểm-thử)
+14. [Quy trình Git](#14-quy-trình-git)
+15. [Hạn chế và hướng phát triển](#15-hạn-chế-và-hướng-phát-triển)
 
 ---
 
@@ -83,6 +84,23 @@ Hai chức năng AI hoạt động độc lập:
 
 Đăng ký mới luôn tạo tài khoản **học viên** và không tự mở khoá học.
 
+**Module quản trị (`/Admin`):**
+
+| Module | Công việc |
+| --- | --- |
+| Tổng quan | Chỉ số, hoạt động gần đây, lịch dạy, việc cần xử lý |
+| Người dùng · Học viên · Giáo viên | Tạo/sửa tài khoản, vai trò, khoá/mở tài khoản, hồ sơ học tập |
+| Khoá học | Tạo/sửa khoá, phân công giảng viên |
+| Gói học | Gói bán, giá, số tháng, các khoá đi kèm |
+| Ghi danh | Mở quyền học, đặt hạn, lọc còn hạn / hết hạn |
+| Bài tập | Theo dõi bài giao, nháp, bài chờ chấm |
+| Lịch dạy | Buổi học toàn hệ thống kèm link Meet |
+| Doanh thu | Đơn hàng và doanh thu theo thời gian |
+| Báo cáo | Lọc theo ngày/khoá, xuất CSV |
+| Trợ lý AI | Trạng thái cấu hình, tài liệu nguồn, chạy bộ kiểm thử |
+
+**Tài khoản:** đăng ký, đăng nhập, đăng xuất, hồ sơ cá nhân, đổi mật khẩu, trang quên mật khẩu; truy cập sai vai trò chuyển về trang *Không có quyền*.
+
 ## 4. Kiến trúc hệ thống
 
 > Các sơ đồ luồng bên dưới là ảnh SVG động: chấm sáng chạy dọc mũi tên theo từng bước, node được tô sáng khi dữ liệu tới. Mã nguồn sơ đồ nằm ở [docs/images/](docs/images/).
@@ -125,6 +143,17 @@ Bài tập đã có bài nộp, hoặc đề đã có lượt làm, sẽ **bị 
 - Nguồn hiện là file Markdown trong `TaiLieu/`; nội dung bài soạn trong database **chưa tự đồng bộ** thành nguồn cho trợ lý.
 - Lịch sử chat chưa lưu bền, chỉ gửi kèm ngữ cảnh gần nhất từ trình duyệt.
 
+### 5.6. Mua gói học và thanh toán
+
+<p align="center"><img src="docs/images/luong-thanh-toan.svg" alt="Luồng mua gói học và thanh toán PayOS" width="100%"></p>
+
+- Chỉ tài khoản **học viên** mua được; gói phải đang bán, có giá và gắn ít nhất một khoá.
+- Link thanh toán PayOS hết hạn sau **15 phút** (`PayOS:PhutHetHanLink`).
+- Hệ thống **không tin tham số trên URL**: trang kết quả hỏi lại PayOS, còn webhook được xác minh bằng chữ ký và kiểm tra số tiền không nhỏ hơn giá gói.
+- Xác nhận đơn dùng `UPDATE` có điều kiện trong giao dịch, nên webhook và trang kết quả đến cùng lúc cũng **không cộng hạn học hai lần**.
+- Ghi danh còn hạn thì cộng nối tiếp `SoThang` tháng; hết hạn thì tính từ hôm nay; ghi danh không giới hạn được giữ nguyên.
+- Ở Development, nếu chưa có khoá PayOS, hệ thống **giả lập thanh toán** để thử trọn luồng. Môi trường thật không có chế độ này.
+
 ## 6. Công nghệ sử dụng
 
 | Lớp | Công nghệ |
@@ -159,6 +188,7 @@ erDiagram
     NguoiDung ||--o{ BaiNopGiao : "nộp"
     BaiTapGiao ||--o{ LuotLamKiemTra : "bắt đầu"
     NguoiDung ||--o{ DonHang : "mua"
+    GoiBan ||--o{ DonHang : "tạo từ"
 ```
 
 | Nhóm | Bảng |
@@ -169,7 +199,7 @@ erDiagram
 | Tiến độ | `TienDoBai` |
 | Bài tập & đề mới | `BaiTapGiao` (câu hỏi lưu dạng JSON), `BaiNopGiao`, `LuotLamKiemTra` |
 | Luyện tập cũ | `CauHoi`, `DeThiCau`, `BaiLam`, `CauTraLoi` |
-| Lịch & bán hàng | `BuoiHoc`, `GoiHoc`, `DonHang` |
+| Lịch & bán hàng | `BuoiHoc`, `GoiBan`, `DonHang` |
 
 ## 8. Cấu trúc thư mục
 
@@ -197,7 +227,34 @@ SuDia.Web/
 └── docs/                      # Tài liệu chi tiết dự án
 ```
 
-## 9. Cài đặt và chạy
+## 9. Bản đồ đường dẫn
+
+Định tuyến mặc định `{controller=Home}/{action=Index}/{id?}` và `{area}/{controller=TongQuan}/{action=Index}/{id?}`.
+
+| Khu vực | Đường dẫn | Chức năng |
+| --- | --- | --- |
+| Công khai | `/` | Trang chủ |
+| | `/TaiKhoan/DangNhap` · `DangKy` · `QuenMatKhau` | Xác thực |
+| Học viên | `/Home/TongQuan` | Tổng quan việc cần làm, lớp sắp tới |
+| | `/Home/KhoaHoc/{mã khoá}` | Chi tiết khoá, bài theo chủ đề |
+| | `/Home/BaiHoc/{id}` | Đọc bài theo mục lục |
+| | `/Home/LuyenDe/{mã khoá}` · `/Home/OnTap` · `/Home/ThiThu` | Luyện tập, ôn tập, thi thử |
+| | `/Home/LamCauHoi/{id}` | Làm câu hỏi (GET hiện đề, POST chấm ở máy chủ) |
+| | `/Home/Diem` | Điểm số |
+| | `/Home/HoiAi` | Chat với trợ lý AI |
+| | `/BaiTap/Lam/{id}` · `/BaiTap/BatDau/{id}` | Làm bài tập / kiểm tra được giao |
+| | `/TaiKhoan/HoSo` | Hồ sơ, đổi mật khẩu |
+| | `/ThanhToan` · `/ThanhToan/Mua/{id}` · `/ThanhToan/KetQua?ma=` | Đơn hàng, mua gói, kết quả |
+| Giảng viên | `/GiangVien` | Tổng quan |
+| | `/GiangVien/NoiDung` | Chủ đề, bài, mục; nhập Word/PowerPoint; soạn bằng AI |
+| | `/GiangVien/GiaoBai` · `/GiangVien/DeThi` · `/GiangVien/CauHoi` | Giao bài, đề thi, ngân hàng câu hỏi |
+| | `/GiangVien/HocVien` · `/GiangVien/LichDay` | Theo dõi học viên, lịch dạy |
+| Admin | `/Admin/{NguoiDung, HocVien, GiaoVien, KhoaHoc, GoiHoc, GhiDanh, BaiTap, LichDay, DoanhThu, BaoCao, TroLy}` | Các module quản trị |
+| API | `POST /api/tro-ly/hoi` | Hỏi trợ lý (chống CSRF, 10 câu/phút) |
+| | `GET /api/tro-ly/kiem-thu` | Chạy bộ kiểm thử trợ lý — chỉ Development |
+| | `POST /api/payos/webhook` | PayOS báo thanh toán (xác minh chữ ký) |
+
+## 10. Cài đặt và chạy
 
 **Yêu cầu:** .NET 8 SDK, PostgreSQL, Git. (Tuỳ chọn: Python 3 + `psql` để chạy kiểm thử.)
 
@@ -231,7 +288,20 @@ dotnet run -- --du-lieu-mau --xac-nhan-xoa-du-lieu-mau
 
 Lệnh chỉ chạy ở Development và bắt buộc có cờ xác nhận.
 
-## 10. Cấu hình AI và thanh toán
+### Xử lý sự cố
+
+| Triệu chứng | Nguyên nhân thường gặp | Cách xử lý |
+| --- | --- | --- |
+| Lỗi kết nối khi khởi động | Chưa có database hoặc sai `ConnectionStrings:SuDia` | Chạy `createdb sudia_dev`; kiểm tra user/mật khẩu/cổng PostgreSQL |
+| Trình duyệt báo chứng chỉ không tin cậy | Chưa tin cậy chứng chỉ dev | `dotnet dev-certs https --trust` |
+| Cổng 7180 / 5180 đang bị chiếm | Tiến trình `dotnet` cũ còn chạy | Tắt tiến trình cũ hoặc đổi `applicationUrl` trong `Properties/launchSettings.json` |
+| Trợ lý trả lời kiểu xem thử | Chưa có `ANTHROPIC_API_KEY` | Đặt khoá bằng user-secrets rồi khởi động lại |
+| AI soạn bài lỗi hoặc báo chưa kết nối | Thiếu `GEMINI_API_KEY`, hết hạn mức hoặc quá thời gian chờ | Cấu hình khoá; hoặc dùng **Chia theo đề mục văn bản** (không cần AI) |
+| Thanh toán báo chưa cấu hình | Chưa có khoá PayOS (ngoài Development) | Chạy `scripts/cau-hinh-payos.zsh`, khai báo webhook trên PayOS |
+| Đăng nhập tài khoản mẫu không được | Sai mật khẩu hoặc bị khoá sau 5 lần sai | Kiểm tra `TaiKhoanMau:MatKhau`; chờ hết thời gian khoá |
+| Nhập Word/PowerPoint bị từ chối | File `.doc`/`.ppt`, quá 20 MB hoặc ngoài 30–30.000 ký tự | Lưu lại thành `.docx`/`.pptx`; chia nhỏ file theo bài |
+
+## 11. Cấu hình AI và thanh toán
 
 Khoá bí mật **không** nằm trong mã nguồn. Dùng .NET user-secrets (Development) hoặc biến môi trường (triển khai).
 
@@ -248,7 +318,24 @@ zsh scripts/cau-hinh-payos.zsh   # PayOS
 
 Gemini và Claude cấu hình **riêng**. Khoá API có hạn mức và chi phí theo tài khoản nhà cung cấp.
 
-## 11. Bảo mật
+**Các mục trong `appsettings.json`:**
+
+| Mục | Khoá | Giá trị mặc định | Ý nghĩa |
+| --- | --- | --- | --- |
+| `TroLy` | `ModelTraLoi` | `claude-opus-5-5` | Model trả lời câu hỏi |
+| | `ModelPhu` | `claude-haiku-5-5` | Model phụ |
+| | `SoDoan` | `6` | Số đoạn tài liệu đưa vào ngữ cảnh |
+| | `SoLuotLichSu` | `3` | Số lượt hội thoại gần nhất được dùng |
+| | `MaxTokens` | `4000` | Giới hạn độ dài câu trả lời |
+| | `BatAiCham` | `true` | Bật bước AI chấm độ bám nguồn |
+| | `ThuMucTaiLieu`, `FilePrompt` | `TaiLieu`, `Prompts/prompt-he-thong-tro-ly.md` | Nguồn tri thức và prompt hệ thống |
+| `GeminiSoanBai` | `Model`, `TimeoutSeconds` | `gemini-3.8-flash`, `30` | Model và thời gian chờ khi AI chia mục |
+| `HocOnline` | `LinkChung`, `TheoBai` | rỗng | Link Google Meet chung hoặc theo từng bài |
+| `PayOS` | `ClientId`, `ApiKey`, `ChecksumKey` | rỗng | Khoá PayOS (user-secrets / biến môi trường) |
+| | `PhutHetHanLink` | `15` | Số phút link thanh toán còn hiệu lực |
+| `TaiKhoanMau` | `MatKhau` | — | Mật khẩu tài khoản mẫu (Development) |
+
+## 12. Bảo mật
 
 - Chống CSRF (anti-forgery) cho form và API; giới hạn tần suất API trợ lý.
 - Khoá tài khoản sau 5 lần đăng nhập sai.
@@ -258,7 +345,7 @@ Gemini và Claude cấu hình **riêng**. Khoá API có hạn mức và chi phí
 - Đọc Office giới hạn dung lượng và dữ liệu giải nén, không thực thi macro.
 - Khoá API, cấu hình cá nhân (`appsettings.Development.json`, user-secrets) bị loại khỏi Git.
 
-## 12. Kiểm thử
+## 13. Kiểm thử
 
 ```sh
 dotnet build
@@ -270,7 +357,7 @@ SUDIA_TEST_URL=https://localhost:7180 python3 KiemThu/kiem-tra-nhap-office.py
 
 Các script dùng tài khoản demo, tạo dữ liệu có mã riêng và dọn lại sau khi chạy; **chỉ dùng ở Development**. Chúng bao quát: lưu nháp/xuất bản, ba loại câu hỏi, chấm tự động và tự luận, đồng hồ kiểm tra, khoá sửa đề đã có người làm, ẩn đáp án trước khi nộp, đọc Word/PowerPoint, chặn file sai định dạng. `KiemThu/bo-cau-hoi.json` là bộ câu hỏi kiểm thử chất lượng trợ lý.
 
-## 13. Quy trình Git
+## 14. Quy trình Git
 
 ```text
 feat/… · fix/… · style/… · chore/… · docs/…   (tách từ dev)
@@ -282,7 +369,7 @@ feat/… · fix/… · style/… · chore/… · docs/…   (tách từ dev)
        main
 ```
 
-## 14. Hạn chế và hướng phát triển
+## 15. Hạn chế và hướng phát triển
 
 | Hiện trạng | Hướng xử lý |
 | --- | --- |
