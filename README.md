@@ -1,176 +1,401 @@
-# SuDia.Web — giao diện ASP.NET Core MVC
+<div align="center">
 
-## Chạy
-1. Mở thư mục `SuDia.Web` bằng JetBrains Rider (hoặc `dotnet run` trong thư mục này).
-2. Mở https://localhost:7180
+# 🎓 EduMind-AI — Sử Địa
 
-Cần .NET 8 SDK trở lên. Muốn dùng .NET 10 thì đổi `TargetFramework` trong `SuDia.Web.csproj` thành `net10.0`.
+**Nền tảng học trực tuyến có trợ lý AI cho môn Lịch sử và Địa lí**
 
-## Cấu trúc (chuẩn MVC)
-| Đường dẫn | Nội dung |
-| --- | --- |
-| `Models/ViewModels.cs` | ViewModel cho 4 trang + record con (BuocHoc, MonHoc, GoiHoc, KhoaCuaToi, PhuongAn…) và lớp `DinhDang` (giá vi-VN, ngày, số La Mã) |
-| `Services/IKhoaHocService.cs` | Giao diện lấy dữ liệu các trang |
-| `Services/EfKhoaHocService.cs` | Dữ liệu trang học viên đọc từ database theo người đăng nhập (tiến độ, ghi danh, bài làm) |
-| `Services/DuLieuMauService.cs` | Dữ liệu mẫu — nguồn nạp database lần đầu, nội dung trang chủ |
-| `Data/` | `ThucThe.cs` (bảng), `AppDbContext.cs`, `KhoiTaoDuLieu.cs` (migration + nạp mẫu + tài khoản dùng thử), `Migrations/` |
-| `Controllers/TaiKhoanController.cs` | Đăng nhập / đăng ký / đăng xuất, đưa về trang theo vai trò |
-| `Areas/GiangVien`, `Areas/Admin` | Trang giảng viên (`/GiangVien`) và quản trị (`/Admin`) |
-| `Controllers/HomeController.cs` | Index, TongQuan, KhoaHoc(id), BaiHoc(id), LamCauHoi(id) [GET] và LamCauHoi(id, dapAn) [POST, chấm ở server] |
-| `Views/Shared/_MenuTaiKhoan.cshtml` | Menu trái dùng chung cho các trang tài khoản (Tổng quan, Khoá của tôi) |
-| `Controllers/TroLyController.cs` | API `POST /api/tro-ly/hoi` cho khung "Học cùng AI" (chống CSRF, giới hạn 10 câu/phút) |
-| `Views/Home/HoiAi.cshtml`, `wwwroot/js/hoi-ai.js`, `wwwroot/css/hoi-ai.css` | Trang chat riêng `/Home/HoiAi` từ menu học viên; chọn môn, gửi câu hỏi, nguồn, 3 lượt hội thoại gần nhất, thử lại và chat mới |
-| `Services/IAiService.cs`, `DemoAiService.cs` | Giao diện trợ lý + bản xem thử (dùng khi chưa có khoá API) |
-| `Services/RagAiService.cs` | Trợ lý thật: viết lại câu hỏi nối tiếp → tìm đoạn → gọi Claude → kiểm tra số liệu → AI chấm |
-| `Services/TroLy/` | `KhoTaiLieu` (cắt đoạn theo Mục, tìm kiếm không dấu), `PromptTroLy` (đọc prompt từ file .md), `KiemTraCauTraLoi`, `BoKiemThu`, `TroLyOptions` |
-| `TaiLieu/*.md` | Tài liệu khoá (hiện là tài liệu mẫu) — soạn theo Phần 5 của file prompt |
-| `KiemThu/bo-cau-hoi.json` | Bộ câu hỏi kiểm thử (Phần 6) |
-| `Views/Home/*.cshtml` | View Razor: `@model`, `@foreach`, `@if` sinh giao diện từ Model |
-| `Views/Shared/_Layout.cshtml` | Khung chung (section Head/Scripts) |
-| `wwwroot/css/*.css` | CSS riêng từng trang (hiệu ứng mở trang, nền sao, đung đưa…) |
-| `wwwroot/js/trang-chu.js` | Khung chat trang chủ, gọi API trợ lý |
-| `wwwroot/images/hero.jpg` | Ảnh nền đầu trang |
-| `Prompts/prompt-he-thong-tro-ly.md` | Prompt hệ thống cho AI |
+Quản lý khoá học · Soạn bài bằng AI · Giao bài & chấm điểm · Hỏi đáp theo tài liệu (RAG)
 
-## Luồng học của học sinh
-`/Home/KhoaHoc` (chỉ các ô khoá, có ảnh bìa) → bấm khoá → `/Home/KhoaHoc/lich-su-12` (trang chi tiết khoá: ảnh, thông tin, tiến độ, bài theo chủ đề) → **Chi tiết** → `/Home/BaiHoc/{mã bài}`.
-Làm đề: `/Home/LamCauHoi/{mã bài | mã đề}` hiện toàn bộ câu, chưa có đáp án; bấm **Nộp bài** → server chấm, mới hiện điểm, đáp án, lời giải và link về mục lý thuyết. Đề thi thử có đồng hồ, hết giờ tự nộp. Câu hỏi mẫu: `NganHangMau` trong `DuLieuMauService` (Bài 6, Bài 7).
-Luyện đề: `/Home/LuyenDe` (ô khoá) → `/Home/LuyenDe/lich-su-12` (đề thi thử + bài tập theo chủ đề, mỗi bài có nút Ôn lý thuyết → `/Home/BaiHoc/{mã bài}`) → `/Home/LamCauHoi/{mã bài | mã đề}`. Trang khoá có nút Luyện đề sang đúng khoá; trang làm câu hỏi quay về luyện đề của khoá.
-Ảnh bìa khoá: `wwwroot/images/khoa/{mã khoá}.jpg` (16:9, khuyên dùng 960×540) — thay ảnh thật cùng tên là xong.
-Mã bài không trùng giữa các khoá (mẫu: Lịch sử = số bài, Địa lí = 100 + số bài). Khoá chưa mua chỉ học thử bài đầu, các bài khác hiện khoá.
+![.NET](https://img.shields.io/badge/.NET-8.0-512BD4?logo=dotnet&logoColor=white)
+![ASP.NET Core](https://img.shields.io/badge/ASP.NET_Core-MVC-5C2D91)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-EF_Core_8-4169E1?logo=postgresql&logoColor=white)
+![Claude](https://img.shields.io/badge/Claude-RAG_Q%26A-D97757)
+![Gemini](https://img.shields.io/badge/Gemini-Soạn_bài-4285F4)
 
-## Luồng dữ liệu
-Trình duyệt → `HomeController` → `IKhoaHocService` trả ViewModel → View Razor vẽ HTML.
-Đổi nguồn dữ liệu (database) chỉ cần viết service mới và đổi một dòng đăng ký trong `Program.cs`; View giữ nguyên.
+</div>
 
-## Database & tài khoản
-- PostgreSQL. Chuỗi kết nối `ConnectionStrings:SuDia` (dev: `appsettings.Development.json` → database `sudia_dev` trên máy).
-  Sao chép `appsettings.Development.example.json` thành `appsettings.Development.json`, thay `YOUR_POSTGRES_USER` bằng tài khoản PostgreSQL của bạn. Cấu hình Development cá nhân không đưa lên Git.
-  Tạo database lần đầu: `createdb sudia_dev`. Khi chạy, web tự cập nhật bảng (migration) và nạp nội dung mẫu nếu database trống.
-- Thêm bảng / sửa mô hình: sửa `Data/ThucThe.cs` rồi `dotnet ef migrations add <Ten> -o Data/Migrations`.
-- Vai trò: Học viên, Giảng viên, Admin (ASP.NET Core Identity). Đăng ký mới là học viên, chưa ghi danh (học thử bài đầu).
-- Tài khoản dùng thử (chỉ tạo khi chạy Development), mật khẩu ở `TaiKhoanMau:MatKhau`:
-  `admin@sudia.vn` → `/Admin` · `giangvien@sudia.vn` → `/GiangVien` · `hocvien@sudia.vn` → trang học viên (đã ghi danh Lịch sử 12).
-- Kế hoạch trang giảng viên và admin: `docs/ke-hoach-giang-vien-admin.md`.
+---
 
-## Trang Giảng viên (`/GiangVien`) — soạn cho học viên
-| Trang | Làm gì |
-| --- | --- |
-| Bàn làm việc | Việc cần làm (bài chưa có nội dung / câu hỏi), buổi dạy sắp tới, bài vừa nộp, câu hay sai |
-| Nội dung bài học | Thêm chủ đề, bài (nháp → xuất bản, học thử); soạn mục và phần: đoạn văn, mốc thời gian, ghi nhớ |
-| Ngân hàng câu hỏi | Thêm / sửa / xoá câu: 4 phương án, đáp án, giải thích, gắn bài · mục; xem tỉ lệ học viên làm đúng |
-| Đề thi thử | Chọn câu từ ngân hàng, đặt phút, mở / đóng đề |
-| Lịch dạy online | Buổi học theo bài: link Google Meet + giờ (học viên mở ở menu ⋮ "Học online") |
-| Học viên | Tiến độ, tỉ lệ đúng, bài đã nộp và câu làm sai của từng học viên |
+## Mục lục
 
-Giảng viên chỉ thấy và sửa khoá được gán; Admin sửa mọi khoá. "Xem như học viên" mở toàn bộ bài, không ghi tiến độ.
+1. [Giới thiệu](#1-giới-thiệu)
+2. [Tính năng nổi bật](#2-tính-năng-nổi-bật)
+3. [Vai trò người dùng](#3-vai-trò-người-dùng)
+4. [Kiến trúc hệ thống](#4-kiến-trúc-hệ-thống)
+5. [Các luồng hoạt động](#5-các-luồng-hoạt-động)
+6. [Công nghệ sử dụng](#6-công-nghệ-sử-dụng)
+7. [Mô hình dữ liệu](#7-mô-hình-dữ-liệu)
+8. [Cấu trúc thư mục](#8-cấu-trúc-thư-mục)
+9. [Cài đặt và chạy](#9-cài-đặt-và-chạy)
+10. [Cấu hình AI và thanh toán](#10-cấu-hình-ai-và-thanh-toán)
+11. [Bảo mật](#11-bảo-mật)
+12. [Kiểm thử](#12-kiểm-thử)
+13. [Quy trình Git](#13-quy-trình-git)
+14. [Hạn chế và hướng phát triển](#14-hạn-chế-và-hướng-phát-triển)
 
-Giao bài tập theo buổi: **Bài tập → menu ⋮ của bài → Giao bài tập**. Khung soạn gồm
-3 bước: thông tin chung (tên bài tập, bài học, buổi online nếu có, hạn nộp), soạn câu hỏi,
-xem lại & xuất bản. Một bài tập có nhiều câu **trắc nghiệm**, **đúng / sai** (4 ý, điểm từng ý),
-**tự luận**, có nút thêm / xoá / đổi thứ tự câu và tính tổng điểm. Lưu nháp để soạn tiếp;
-giao bài xong học viên mở ở menu ⋮ của bài học → **Bài tập được giao theo buổi**.
-Trắc nghiệm và đúng / sai chấm tự động; tự luận chấm tại **Bài nộp** của giảng viên.
-Bài đã có học viên nộp được giữ nguyên nội dung. Học viên chỉ thấy đáp án và lời giải sau khi nộp.
+---
 
-**Bài tập và kiểm tra dùng chung form 3 bước**: Thông tin chung → Soạn câu hỏi → Xem lại & xuất bản.
-Cả hai đều có Trắc nghiệm, Đúng/Sai và Tự luận; có thể thêm, xoá và sắp xếp câu trong form.
-Đã bỏ menu riêng **Thêm câu hỏi**; các đường dẫn thêm câu cũ chuyển về form soạn bài tập.
-Kiểm tra có thời gian 5–240 phút, chỉ bắt đầu khi học viên bấm **Bắt đầu làm bài**; thời gian bắt đầu lưu ở server,
-tải lại không đặt lại đồng hồ. Hết giờ trang tự nộp; server không nhận đáp án gửi quá thời gian kèm 10 giây truyền bài.
-Trắc nghiệm/Đúng-Sai chấm tự động, Tự luận chấm tại **Bài nộp & chấm điểm**.
-Đề cũ đã có bài làm và đề mới đã có lượt bắt đầu được giữ nguyên nội dung. Đề cũ chưa có bài làm mở bằng form chung;
-khi lưu sẽ tạo bộ câu riêng, không sửa câu ngân hàng đang dùng ở nơi khác.
+## 1. Giới thiệu
 
-Kiểm tra luồng giao bài (web Development đang chạy, PostgreSQL có dữ liệu mẫu, Python 3 và `psql`):
-`python3 KiemThu/kiem-tra-giao-bai-theo-buoi.py`. Mặc định dùng `http://localhost:5280`,
-database `sudia_dev`; có thể đặt `SUDIA_TEST_URL`, `SUDIA_TEST_DATABASE`, `SUDIA_TEST_PASSWORD`.
-Script tạo bài tập có mã riêng, thử nộp / chấm rồi xoá đúng dữ liệu thử đó.
+**Sử Địa** là ứng dụng web hỗ trợ dạy và học, hiện có nội dung mẫu cho **Lịch sử 12** và **Địa lí 12**. Hệ thống phục vụ trọn vòng đời của một khoá học:
 
-## Trang Admin (`/Admin`) — vận hành
-| Trang | Làm gì |
-| --- | --- |
-| Tổng quan | 8 chỉ số, biểu đồ 7 ngày, việc cần xử lý, tình hình khoá, bài nộp gần đây và lịch sắp tới |
-| Người dùng | Tạo / sửa thông tin, chi tiết hồ sơ và kết quả học, lọc vai trò / chưa ghi danh, khoá / mở và đổi vai trò |
-| Khoá học | Tạo / sửa khoá, kiểm tra mã trùng và gán giảng viên hợp lệ |
-| Ghi danh & hạn học | Tất cả ghi danh, lọc học viên / khoá / còn hạn / sắp hết / đã hết, phân trang, mở khoá và quản lý hạn học |
-| Nội dung bài học | Xem mọi khoá, lọc nháp / xuất bản / thiếu nội dung, mở công cụ soạn bài và câu hỏi |
-| Bài tập & bài nộp | Lọc bài đã giao / nháp / chờ chấm, xem và chấm bài nộp, quản lý đề thi thử |
-| Lịch dạy toàn hệ thống | Các buổi của mọi khoá, lọc thời gian, tạo / sửa lịch, vào lớp và giao bài |
-| Báo cáo học tập | Lọc ngày / khoá, số liệu và biểu đồ bài nộp, tỉ lệ đúng, bảng theo ngày và xuất CSV |
-| Trợ lý AI & tài liệu | Xem trạng thái, cấu hình hiện tại, tài liệu nguồn, bộ kiểm thử và mở chat |
+- **Giảng viên** soạn bài (nhập văn bản, Word, PowerPoint; AI hỗ trợ chia mục), giao bài tập, tạo đề kiểm tra có đồng hồ, chấm tự luận và theo dõi tiến độ học viên.
+- **Học viên** đọc bài theo mục lục, làm bài tập/kiểm tra, xem điểm, đáp án, lời giải và đặt câu hỏi cho trợ lý AI.
+- **Quản trị viên** quản lý người dùng, khoá học, ghi danh, lịch dạy, báo cáo và doanh thu.
 
-Chi tiết phạm vi và kiểm tra: `docs/nang-cap-admin.md`. Các công cụ soạn / chấm / lịch dùng lại
-khu giảng viên với quyền Admin trên mọi khoá. Báo cáo tính theo giờ Việt Nam.
-Kiểm tra với web Development cục bộ: `python3 KiemThu/kiem-tra-admin.py` (cần Python 3 và `psql`).
+Hai chức năng AI hoạt động độc lập:
 
+| Chức năng | Nhà cung cấp | Mục đích |
+| --- | --- | --- |
+| Soạn bài | Google Gemini | Chia văn bản thành các mục, phần của bài học để giảng viên rà soát |
+| Hỏi đáp | Anthropic Claude + RAG | Trả lời câu hỏi của học viên **dựa trên tài liệu khoá**, kèm nguồn |
 
-## AI soạn bài cho giảng viên (Gemini)
+> Dự án gọi AI qua API, **không** huấn luyện mô hình riêng. Khi chưa có khoá API, trợ lý chạy ở chế độ xem thử.
 
-Nút **Chia theo đề mục văn bản** là lựa chọn ngoại tuyến, không gọi API: nhận diện các tiêu đề Markdown,
-số La Mã, số thứ tự, số phân cấp và chữ cái; giữ nguyên đoạn văn và mở bản xem thử có thể sửa.
-Không có ký hiệu tiêu đề thì giữ chung nội dung, không tự đoán cấu trúc theo ngữ nghĩa như AI.
-Nút có ở trang tạo chủ đề và trang soạn bài, dùng được khi Gemini hết hạn mức hoặc không phản hồi.
+## 2. Tính năng nổi bật
 
-**Nội dung bài học → Tạo chủ đề** dùng Gemini, độc lập với trợ lý hỏi đáp Claude.
-Lấy khóa từ https://aistudio.google.com/apikey và chọn dự án **Free tier chưa bật Billing** nếu muốn chỉ dùng hạn mức miễn phí.
-Chạy `zsh scripts/cau-hinh-ai.zsh` rồi khởi động lại web. Script lưu `GEMINI_API_KEY` bằng .NET user-secrets, không đưa khóa vào Git.
-Model cấu hình tại `GeminiSoanBai:Model` trong `appsettings.json`.
-`GeminiSoanBai:TimeoutSeconds` mặc định 30 giây: hết thời gian chờ thì giữ lại văn bản và báo để dùng nút chia theo đề mục.
-Trong khi chờ, form hiển thị số giây đã chờ, chặn bấm AI lặp lại và vẫn cho chuyển sang chia đề mục văn bản.
-Trang xem thử có URL GET riêng sau khi gửi form, nên tải lại/quay lại không cần gửi lại yêu cầu AI.
-Bản nháp tạm riêng theo tài khoản được giữ trong bộ nhớ máy chủ tối đa 2 giờ; hết hạn hoặc khởi động lại web sẽ đưa về trang nội dung kèm thông báo.
-Khi nhập sai hoặc AI lỗi, các ô đã nhập được giữ tạm và mở lại trên trang GET để tránh lưu trang POST trong lịch sử.
-Hết hạn mức trả thông báo chờ/thử lại, không tự chuyển sang Claude. Chi phí thực tế phụ thuộc dự án Google gắn với khóa;
-ứng dụng không kiểm tra hay thay đổi Billing của tài khoản Google. Hạn mức miễn phí có thể thay đổi.
-Ở gói miễn phí, Google có thể sử dụng nội dung đầu vào/đầu ra để cải thiện sản phẩm:
-https://ai.google.dev/gemini-api/docs/pricing.
+**Học tập**
+- Duyệt khoá → chủ đề → bài; đọc theo mục lục, theo dõi tiến độ.
+- Học thử bài đầu; nội dung đầy đủ theo ghi danh còn hạn.
+- Ba loại câu hỏi: trắc nghiệm 4 phương án, đúng/sai 4 ý, tự luận.
+- Chấm tự động trên máy chủ; đáp án và lời giải chỉ hiện **sau khi nộp**.
+- Bắt buộc trả lời đủ câu mới được nộp (đề có đồng hồ vẫn tự nộp khi hết giờ).
+- Đề kiểm tra có **đồng hồ do máy chủ giữ**: tải lại trang không đặt lại thời gian.
 
-## Gói học & thanh toán (PayOS)
+**Giảng dạy**
+- Soạn bài từ văn bản, `.docx`, `.pptx` với bản xem thử để sửa trước khi lưu.
+- Hai cách chia mục: **AI (Gemini)** hoặc **theo ký hiệu đề mục** (`#`, `I.`, `1.1.`, `a)`…) hoạt động offline.
+- Form giao bài/kiểm tra 3 bước: thông tin chung → soạn câu hỏi → xem lại & xuất bản.
+- Chấm tự luận, xem bài nộp, theo dõi điểm từng học viên; lịch dạy kèm link Google Meet.
 
-Gói học ở trang chủ lấy từ database. Admin sửa tên, giá, thời hạn (tháng), khoá được mở, quyền lợi và ẩn/hiện tại
-**Admin → Gói học & thanh toán**. Gói chưa có giá hiện "Sắp mở bán" và chưa mua được.
+**Quản trị & kinh doanh**
+- Người dùng, vai trò, khoá/mở tài khoản; phân công giảng viên cho khoá.
+- Ghi danh có hạn học; gói học và đơn hàng, tích hợp cổng thanh toán PayOS.
+- Báo cáo theo ngày/khoá, xuất CSV.
 
-Luồng mua: **Chọn gói** → `/ThanhToan/Mua/{id}` (cần đăng nhập, chỉ tài khoản học viên) → trang PayOS quét VietQR
-→ PayOS chuyển về `/ThanhToan/KetQua`. Trang kết quả **hỏi lại PayOS** trạng thái đơn, không tin tham số trên URL.
-Đã trả thì ghi danh vào các khoá của gói; còn hạn thì cộng nối tiếp, ghi danh không giới hạn giữ nguyên.
-Webhook `POST /api/payos/webhook` xác minh chữ ký HMAC-SHA256; webhook và trang kết quả đến cùng lúc chỉ cộng hạn một lần.
-Đơn giữ lại giá, thời hạn và khoá lúc mua, nên sửa gói sau đó không ảnh hưởng đơn cũ. Gói đã có đơn thì chỉ ngừng bán, không xoá.
+## 3. Vai trò người dùng
 
-Cấu hình: chạy `zsh scripts/cau-hinh-payos.zsh` (Client ID, API Key, Checksum Key lấy tại my.payos.vn → Kênh thanh toán),
-rồi khởi động lại web. Môi trường thật đặt biến `PayOS__ClientId`, `PayOS__ApiKey`, `PayOS__ChecksumKey`.
-Khai báo webhook trên PayOS: `https://<tên-miền>/api/payos/webhook` (localhost không nhận được webhook; trang kết quả
-và nút **Kiểm tra PayOS** ở trang admin vẫn xác nhận được đơn). Chưa có khoá thì máy **Development** hiện nút
-giả lập thanh toán để thử luồng mở khoá; môi trường khác báo chưa cấu hình.
+| Vai trò | Khu vực | Quyền chính |
+| --- | --- | --- |
+| Học viên | `/Home`, `/BaiTap` | Học, làm bài, xem điểm, hỏi AI trong phạm vi đã ghi danh |
+| Giảng viên | `/GiangVien` | Soạn bài, giao bài, tạo đề, chấm điểm — **chỉ khoá được phân công** |
+| Admin | `/Admin` | Toàn bộ khoá học, người dùng, ghi danh, báo cáo, cấu hình trợ lý |
 
-## Trợ lý AI
-Menu học viên **Hỏi AI** mở trực tiếp `/Home/HoiAi`, không mở trang bài học.
-Ô **Hỏi nhanh AI** ở Tổng quan cũng chuyển sang chat và gửi câu hỏi đã nhập.
-Trang dùng API trợ lý hiện có, hiển thị rõ khi đang ở bản xem thử (chỉ trả lời các câu gợi ý).
-Đoạn chat mới hoặc đổi môn sẽ xoá cuộc trò chuyện hiện tại; lịch sử chưa lưu vào database.
+Đăng ký mới luôn tạo tài khoản **học viên** và không tự mở khoá học.
 
-1. Đặt khoá API (không ghi vào appsettings.json):
-   `dotnet user-secrets init && dotnet user-secrets set ANTHROPIC_API_KEY sk-ant-...`
-   (hoặc biến môi trường `ANTHROPIC_API_KEY`). Chưa có khoá thì web tự dùng bản xem thử.
-2. Tài liệu khoá: thả file `.md` vào `TaiLieu/` theo cấu trúc `#` Chương / `##` Bài / `###` Mục, đầu file có `khoa:` và `mon:`. Mỗi `###` là một đoạn để tìm kiếm và ghi nguồn.
-3. Prompt: sửa trong `Prompts/prompt-he-thong-tro-ly.md` (Phần 1 và Phần 4 được đọc trực tiếp), khởi động lại web.
-4. Cấu hình ở mục `TroLy` trong `appsettings.json`: model trả lời (`claude-opus-5-5`), model phụ cho viết lại câu hỏi + AI chấm (`claude-haiku-5-5`), số đoạn, mức suy nghĩ, bật/tắt AI chấm.
-5. Kiểm thử: chạy ở môi trường Development rồi mở `GET /api/tro-ly/kiem-thu` (mỗi lần chạy tốn lượt gọi API). Mục tiêu: trả lời đúng ≥ 90%, từ chối đúng ≥ 95%.
-6. Câu trả lời không qua kiểm tra bị thay bằng "Nội dung này chưa có trong tài liệu khoá học." và ghi log cảnh báo `Trợ lý KHONG_DAT` để Admin xem.
+## 4. Kiến trúc hệ thống
 
-## Học online (Google Meet)
-Menu ⋮ ở mỗi bài (trang chi tiết khoá) có mục **Học online**, mở link Meet ở tab mới. Dán link vào `appsettings.json`:
-```json
-"HocOnline": {
-  "LinkChung": "https://meet.google.com/abc-defg-hij",
-  "TheoBai": {
-    "7": { "Link": "https://meet.google.com/xyz-abcd-efg", "ThoiGian": "2026-10-28T19:30:00" }
-  }
-}
+Mô hình **ASP.NET Core MVC** một máy chủ ứng dụng, dữ liệu trong PostgreSQL, AI gọi qua HTTP.
+
+```mermaid
+flowchart LR
+    subgraph Client["Trình duyệt"]
+        UI["Razor HTML + CSS + JS"]
+    end
+
+    subgraph App["Máy chủ ASP.NET Core 8"]
+        MW["Middleware<br/>Identity · Anti-forgery · Rate limit"]
+        CTRL["Controllers / Areas<br/>Home · GiangVien · Admin"]
+        SVC["Services<br/>Học tập · Soạn bài · Trợ lý · Thanh toán"]
+        EF["EF Core<br/>AppDbContext"]
+        CACHE[("IMemoryCache<br/>bản xem thử")]
+        KB[("TaiLieu/*.md<br/>Prompts/")]
+    end
+
+    DB[("PostgreSQL")]
+    GEM["Google Gemini API"]
+    CLA["Anthropic Claude API"]
+    PAY["PayOS"]
+
+    UI -->|HTTPS| MW --> CTRL --> SVC
+    SVC --> EF --> DB
+    SVC --> CACHE
+    SVC -->|BM25 tìm đoạn| KB
+    SVC -->|soạn bài| GEM
+    SVC -->|hỏi đáp| CLA
+    SVC <-->|đơn hàng · webhook| PAY
+    CTRL -->|Razor View| UI
 ```
-`LinkChung` dùng cho mọi buổi; `TheoBai` (khoá = mã bài) ghi đè link và thêm giờ học (hiện khi rê chuột). Chỉ nhận link `https`. Bài chưa có link thì mục hiện mờ.
 
-## Ghi chú
-- Trong file `.cshtml`, ký tự `@` thường phải viết `@@` (Razor). CSS/JS đã tách ra `wwwroot` nên không bị ảnh hưởng.
-- Trang Tổng quan, Bài học, Làm câu hỏi vẫn theo phong cách cũ (xanh ngọc); trang chủ theo phong cách mới (đen ấm, đồng).
-- Bước tiếp theo: Identity + phân quyền theo gói, database; chuyển `KhoTaiLieu` sang pgvector + full-text khi tài liệu nhiều; nối khung trợ lý ở trang Bài học vào API.
+Luồng trang web thông thường: **Trình duyệt → Controller → Service/DbContext → ViewModel → Razor HTML**. Các API tương tác (trợ lý, bắt đầu làm bài, xem thử) trả JSON cho JavaScript.
+
+## 5. Các luồng hoạt động
+
+### 5.1. Học viên: từ đăng ký đến làm bài
+
+```mermaid
+flowchart TD
+    A([Đăng ký tài khoản]) --> B[Vai trò Học viên]
+    B --> C[Xem danh sách khoá]
+    C --> D{Đã ghi danh<br/>còn hạn?}
+    D -- Chưa --> E[Học thử bài đầu / mua gói qua PayOS]
+    E --> F[Admin hoặc webhook mở ghi danh]
+    D -- Rồi --> G[Đọc bài theo mục lục]
+    F --> G
+    G --> H[Ghi nhận tiến độ]
+    G --> I[Làm bài tập / kiểm tra]
+    I --> J[Nộp bài]
+    J --> K[Máy chủ chấm trắc nghiệm + đúng/sai]
+    K --> L[Hiện điểm, đáp án, lời giải]
+    J --> M[Tự luận chờ giảng viên chấm]
+    G --> N[Hỏi AI về nội dung khoá]
+```
+
+### 5.2. Làm bài kiểm tra có đồng hồ
+
+```mermaid
+sequenceDiagram
+    actor HV as Học viên
+    participant W as Trình duyệt
+    participant S as Máy chủ
+    participant DB as PostgreSQL
+
+    HV->>W: Bấm "Bắt đầu làm bài"
+    W->>S: POST bắt đầu
+    S->>DB: Lưu LuotLamKiemTra (giờ bắt đầu)
+    S-->>W: Hiện câu hỏi + giờ hết hạn
+    Note over W: Tải lại trang không reset đồng hồ<br/>(giờ do máy chủ lưu)
+    HV->>W: Làm bài, hoặc hết giờ thì tự nộp
+    W->>S: POST nộp bài
+    S->>DB: Kiểm tra có lượt bắt đầu, chưa nộp, chưa quá hạn
+    alt Trong hạn (+10 giây đệm)
+        S->>DB: Lưu BaiNopGiao + điểm tự động
+    else Quá hạn
+        S->>DB: Ghi bài rỗng, không nhận đáp án muộn
+    end
+    S-->>W: Kết quả
+```
+
+Mỗi học viên chỉ có **một bài nộp** cho mỗi bài tập (ràng buộc duy nhất `bài tập – học viên`).
+
+### 5.3. Giảng viên: soạn bài từ tài liệu
+
+```mermaid
+flowchart TD
+    A([Chọn khoá / chủ đề, nhập tên + số bài]) --> B{Nguồn nội dung}
+    B -->|Dán văn bản| D
+    B -->|Tải .docx / .pptx| C[Đọc ZIP/XML trên máy chủ<br/>tối đa 20 MB, 30.000 ký tự]
+    C --> D[Nội dung văn bản]
+    D --> E{Cách chia mục}
+    E -->|AI| F[Gemini nhận diện cấu trúc]
+    E -->|Theo đề mục| G[Tách bằng #, I., 1.1., a ...]
+    F -. lỗi / hết hạn mức .-> G
+    F --> H
+    G --> H[Bản xem thử<br/>IMemoryCache, tối đa 2 giờ]
+    H --> I[Giảng viên rà soát và sửa]
+    I --> J[Xác nhận lưu vào PostgreSQL]
+    J --> K[Bài ở trạng thái nháp<br/>→ bật xuất bản / học thử]
+```
+
+Việc đọc Word/PowerPoint **không gọi AI**; văn bản chỉ được gửi sang Gemini khi giảng viên chủ động chọn nút AI. Không chạy macro, không cần cài Office.
+
+### 5.4. Giao bài và chấm điểm
+
+```mermaid
+flowchart LR
+    A[Thông tin chung<br/>tên · bài học · hạn · thời lượng] --> B[Soạn câu hỏi<br/>TN · Đúng/Sai · Tự luận]
+    B --> C[Xem lại tổng điểm]
+    C --> D{Lưu}
+    D -->|Nháp| E[(BaiTapGiao)]
+    D -->|Xuất bản| E
+    E --> F[Học viên nộp]
+    F --> G[Chấm tự động]
+    G --> H[Giảng viên chấm tự luận]
+    H --> I[Điểm cuối + báo cáo]
+```
+
+Bài tập đã có bài nộp, hoặc đề đã có lượt làm, sẽ **bị khoá sửa/xoá** để bảo toàn kết quả.
+
+### 5.5. Trợ lý hỏi đáp (RAG)
+
+```mermaid
+flowchart TD
+    Q([Câu hỏi của học viên]) --> R[Viết lại câu hỏi nối tiếp<br/>dùng tối đa 3 lượt gần nhất]
+    R --> S[Tìm đoạn liên quan<br/>BM25 trên văn bản bỏ dấu]
+    S --> T[(TaiLieu/*.md<br/>cắt theo mục)]
+    T --> U[Gọi Claude với prompt hệ thống + đoạn tìm được]
+    U --> V[Kiểm tra số liệu trong câu trả lời]
+    V --> W[AI chấm độ bám nguồn]
+    W --> X([Trả lời kèm nguồn])
+```
+
+- API `POST /api/tro-ly/hoi` có chống CSRF và giới hạn **10 câu/phút**.
+- Nguồn hiện là file Markdown trong `TaiLieu/`; nội dung bài soạn trong database **chưa tự đồng bộ** thành nguồn cho trợ lý.
+- Lịch sử chat chưa lưu bền, chỉ gửi kèm ngữ cảnh gần nhất từ trình duyệt.
+
+## 6. Công nghệ sử dụng
+
+| Lớp | Công nghệ |
+| --- | --- |
+| Ngôn ngữ / nền tảng | C#, .NET 8 |
+| Web | ASP.NET Core MVC, Areas, Razor Views |
+| Giao diện | HTML, CSS thuần theo từng trang, JavaScript thuần (không framework) |
+| Xác thực & phân quyền | ASP.NET Core Identity, cookie, phân quyền theo vai trò, khoá tài khoản sau 5 lần sai |
+| Cơ sở dữ liệu | PostgreSQL 14+, Entity Framework Core 8, Npgsql, migrations |
+| AI soạn bài | Google Gemini API (`HttpClient`) |
+| AI hỏi đáp | Anthropic SDK (Claude) + BM25 tự cài đặt |
+| Nhập tài liệu | `ZipArchive` + XML parser (`.docx`, `.pptx`) |
+| Thanh toán | PayOS (tạo đơn, webhook) |
+| Bộ nhớ đệm | `IMemoryCache` cho bản xem thử theo tài khoản |
+| Kiểm thử | Script Python (HTTP + `psql`), Node.js kiểm tra cú pháp JS |
+
+## 7. Mô hình dữ liệu
+
+```mermaid
+erDiagram
+    NguoiDung ||--o{ GhiDanh : "có"
+    Khoa ||--o{ GhiDanh : "mở cho"
+    Khoa ||--o{ ChuDe : "gồm"
+    ChuDe ||--o{ Bai : "gồm"
+    Bai ||--o{ Muc : "gồm"
+    Muc ||--o{ Phan : "gồm"
+    Bai ||--o{ BuoiHoc : "lịch dạy"
+    NguoiDung ||--o{ TienDoBai : "theo dõi"
+    Bai ||--o{ TienDoBai : ""
+    Bai ||--o{ BaiTapGiao : "giao"
+    BaiTapGiao ||--o{ BaiNopGiao : "nhận"
+    NguoiDung ||--o{ BaiNopGiao : "nộp"
+    BaiTapGiao ||--o{ LuotLamKiemTra : "bắt đầu"
+    NguoiDung ||--o{ DonHang : "mua"
+```
+
+| Nhóm | Bảng |
+| --- | --- |
+| Tài khoản | `NguoiDung` + các bảng Identity |
+| Nội dung | `Khoa → ChuDe → Bai → Muc → Phan → MocThoiGian` |
+| Quyền học | `GhiDanh` (có hạn hoặc không giới hạn) |
+| Tiến độ | `TienDoBai` |
+| Bài tập & đề mới | `BaiTapGiao` (câu hỏi lưu dạng JSON), `BaiNopGiao`, `LuotLamKiemTra` |
+| Luyện tập cũ | `CauHoi`, `DeThiCau`, `BaiLam`, `CauTraLoi` |
+| Lịch & bán hàng | `BuoiHoc`, `GoiHoc`, `DonHang` |
+
+## 8. Cấu trúc thư mục
+
+```text
+SuDia.Web/
+├── Program.cs                 # DI, Identity, DB, routing, rate limit, nạp dữ liệu đầu
+├── Controllers/               # Trang học viên, tài khoản, làm bài, thanh toán, API trợ lý
+├── Areas/
+│   ├── GiangVien/             # Soạn nội dung, giao bài, đề thi, chấm điểm, lịch dạy
+│   └── Admin/                 # Người dùng, khoá, ghi danh, báo cáo, doanh thu
+├── Data/                      # Thực thể, AppDbContext, khởi tạo, dữ liệu mẫu, Migrations/
+├── Models/                    # ViewModel, biểu mẫu, mô hình câu hỏi
+├── Services/
+│   ├── TroLy/                 # Kho tài liệu (BM25), prompt, kiểm tra câu trả lời
+│   ├── RagAiService.cs        # Trợ lý Claude
+│   ├── GeminiSoanNoiDungAiService.cs
+│   ├── DocTaiLieuOffice.cs    # Đọc .docx/.pptx
+│   ├── ChiaDeMucVanBan.cs     # Chia mục ngoại tuyến
+│   └── PayOSService.cs, DonHangService.cs
+├── Views/  wwwroot/           # Razor, CSS, JS, ảnh
+├── TaiLieu/                   # Nguồn tri thức cho trợ lý (Markdown)
+├── Prompts/                   # Prompt hệ thống
+├── KiemThu/                   # Script kiểm thử + bộ câu hỏi AI
+├── scripts/                   # Cấu hình khoá AI/PayOS (zsh)
+└── docs/                      # Tài liệu chi tiết dự án
+```
+
+## 9. Cài đặt và chạy
+
+**Yêu cầu:** .NET 8 SDK, PostgreSQL, Git. (Tuỳ chọn: Python 3 + `psql` để chạy kiểm thử.)
+
+```sh
+git clone https://github.com/nguyenbaquyen075/EduMind-AI.git
+cd EduMind-AI
+cp appsettings.Development.example.json appsettings.Development.json
+# sửa ConnectionStrings:SuDia trong appsettings.Development.json
+
+createdb sudia_dev
+dotnet restore
+dotnet dev-certs https --trust
+dotnet run --launch-profile SuDia.Web
+```
+
+Mở **https://localhost:7180**. Lần đầu, ứng dụng tự chạy migration, tạo vai trò và nạp nội dung mẫu. Ở môi trường Development có sẵn ba tài khoản thử:
+
+| Email | Vai trò |
+| --- | --- |
+| `admin@sudia.vn` | Admin |
+| `giangvien@sudia.vn` | Giảng viên |
+| `hocvien@sudia.vn` | Học viên |
+
+Mật khẩu đặt qua `TaiKhoanMau:MatKhau` (mặc định chỉ dùng cho Development).
+
+**Tạo lại toàn bộ dữ liệu mẫu đầy đủ** (xoá dữ liệu Development hiện có):
+
+```sh
+dotnet run -- --du-lieu-mau --xac-nhan-xoa-du-lieu-mau
+```
+
+Lệnh chỉ chạy ở Development và bắt buộc có cờ xác nhận.
+
+## 10. Cấu hình AI và thanh toán
+
+Khoá bí mật **không** nằm trong mã nguồn. Dùng .NET user-secrets (Development) hoặc biến môi trường (triển khai).
+
+```sh
+zsh scripts/cau-hinh-ai.zsh      # Gemini (hỏi khoá bằng ô nhập ẩn)
+zsh scripts/cau-hinh-payos.zsh   # PayOS
+```
+
+| Dịch vụ | Biến môi trường | Mục cấu hình |
+| --- | --- | --- |
+| Gemini (soạn bài) | `GEMINI_API_KEY` | `GeminiSoanBai` |
+| Claude (hỏi đáp) | `ANTHROPIC_API_KEY` | `TroLy` |
+| PayOS | `PayOS__ClientId`… | `PayOS` |
+
+Gemini và Claude cấu hình **riêng**. Khoá API có hạn mức và chi phí theo tài khoản nhà cung cấp.
+
+## 11. Bảo mật
+
+- Chống CSRF (anti-forgery) cho form và API; giới hạn tần suất API trợ lý.
+- Khoá tài khoản sau 5 lần đăng nhập sai.
+- Chấm điểm, kiểm tra hạn nộp và giờ làm bài **ở máy chủ**; không tin dữ liệu từ trình duyệt.
+- Đáp án/lời giải không xuất hiện trong trang làm bài trước khi nộp.
+- Giảng viên chỉ thao tác trên khoá được phân công.
+- Đọc Office giới hạn dung lượng và dữ liệu giải nén, không thực thi macro.
+- Khoá API, cấu hình cá nhân (`appsettings.Development.json`, user-secrets) bị loại khỏi Git.
+
+## 12. Kiểm thử
+
+```sh
+dotnet build
+
+SUDIA_TEST_URL=https://localhost:7180 python3 KiemThu/kiem-tra-giao-bai-theo-buoi.py
+SUDIA_TEST_URL=https://localhost:7180 python3 KiemThu/kiem-tra-form-kiem-tra.py
+SUDIA_TEST_URL=https://localhost:7180 python3 KiemThu/kiem-tra-nhap-office.py
+```
+
+Các script dùng tài khoản demo, tạo dữ liệu có mã riêng và dọn lại sau khi chạy; **chỉ dùng ở Development**. Chúng bao quát: lưu nháp/xuất bản, ba loại câu hỏi, chấm tự động và tự luận, đồng hồ kiểm tra, khoá sửa đề đã có người làm, ẩn đáp án trước khi nộp, đọc Word/PowerPoint, chặn file sai định dạng. `KiemThu/bo-cau-hoi.json` là bộ câu hỏi kiểm thử chất lượng trợ lý.
+
+## 13. Quy trình Git
+
+```text
+feat/… · fix/… · style/… · chore/… · docs/…   (tách từ dev)
+        │  commit theo từng phần việc (Conventional Commits)
+        ▼
+       dev   ← gộp bằng merge commit, build & kiểm tra
+        │
+        ▼  chỉ khi chủ dự án duyệt
+       main
+```
+
+## 14. Hạn chế và hướng phát triển
+
+| Hiện trạng | Hướng xử lý |
+| --- | --- |
+| Bản xem thử mất khi khởi động lại máy chủ | Lưu nháp bền trong database |
+| Nhập Office chưa OCR, chưa giữ ảnh/bảng/đánh số | OCR, giữ ảnh, ánh xạ file nhiều bài |
+| Gọi AI trong yêu cầu web (chờ đồng bộ) | Tác vụ nền + trạng thái tiến độ |
+| Nguồn trợ lý tách khỏi bài soạn | Đồng bộ nội dung đã duyệt thành nguồn tìm kiếm; cân nhắc pgvector |
+| Chưa lưu lịch sử hội thoại | Lưu theo tài khoản |
+| Chưa có “đội miễn phí” | Mô hình đội, thành viên, quyền truy cập |
+| Chưa có hướng dẫn triển khai/sao lưu/giám sát | Cấu hình triển khai, CI/CD, kiểm thử tải |
+
+---
+
+## Tài liệu chi tiết
+
+- [Tài liệu dự án đầy đủ](docs/tai-lieu-du-an.md)
+- [Kế hoạch giảng viên và Admin](docs/ke-hoach-giang-vien-admin.md) · [Nâng cấp Admin](docs/nang-cap-admin.md)
+- [Nhập Word/PowerPoint](docs/nghien-cuu-nhap-word-powerpoint.md) · [Bàn giao giao bài tập](docs/ban-giao-giao-bai-tap.md)
