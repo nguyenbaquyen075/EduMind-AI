@@ -1,32 +1,126 @@
-@model DonHang
+@model KetQuaThanhToanViewModel
 @{
-    ViewData["Title"] = "Kết quả thanh toán";
-    var dsKhoa = (List<Khoa>)ViewBag.Khoa;
+    var d = Model.Don;
+    var thanhCong = d.TrangThai == TrangThaiDon.DaThanhToan;
+    var huy = d.TrangThai == TrangThaiDon.DaHuy;
+    var cho = !thanhCong && !huy;
+    ViewData["Title"] = thanhCong ? "Thanh toán thành công · Sử Địa" : huy ? "Chưa thanh toán · Sử Địa" : "Đang chờ thanh toán · Sử Địa";
+    string Han(DateTime? t) => t is DateTime h ? h.ToLocalTime().ToString("dd/MM/yyyy") : "Không giới hạn";
 }
-@section Head { <link rel="stylesheet" href="~/css/quan-ly.css" asp-append-version="true"><link rel="stylesheet" href="~/css/giao-bai.css" asp-append-version="true"> }
-<main class="gb" style="margin:32px auto;padding:0 20px;max-width:720px">
-@if (TempData["LoiThanhToan"] is string loi) { <p class="ql-thong-bao loi" role="alert" style="margin:0 0 16px">@loi</p> }
-<section class="gb-panel" role="status">
-@if (Model.TrangThai == TrangThaiDon.DaThanhToan)
-{
-<h1 style="margin:0 0 8px">Thanh toán thành công</h1>
-<p>Gói <b>@Model.TenGoi</b> đã được kích hoạt. Các khoá đã mở:</p>
-<ul style="padding-left:20px">@foreach (var k in dsKhoa) { <li style="margin:6px 0"><a asp-controller="Home" asp-action="KhoaHoc" asp-route-id="@k.Id">@k.Ten</a></li> }</ul>
-<p style="margin-top:20px"><a asp-controller="Home" asp-action="KhoaHoc" asp-route-id="" class="ql-nut">Vào học ngay →</a></p>
+@section Head {
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="~/css/hoc-vien.css" asp-append-version="true">
+<link rel="stylesheet" href="~/css/thanh-toan.css" asp-append-version="true">
 }
-else if (Model.TrangThai == TrangThaiDon.DaHuy)
+<div class="hv-trang">
+<partial name="_MenuTaiKhoan" model="Model.Menu" />
+<main class="hv-main tt">
+<partial name="_Buoc" model="@(thanhCong ? 4 : 3)" />
+@if (TempData["LoiThanhToan"] is string loi) { <p class="tt-thong-bao loi" role="alert">@loi</p> }
+
+<section class="tt-ket-qua @(thanhCong ? "ok" : huy ? "huy" : "cho")" role="status" aria-live="polite" id="khungKetQua">
+<span class="tt-ket-qua-icon" aria-hidden="true">
+@if (thanhCong) {<svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"></path></svg>}
+else if (huy) {<svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6 6 18"></path></svg>}
+else {<svg class="quay" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-6.2-8.55"></path></svg>}
+</span>
+<div>
+@if (thanhCong)
 {
-<h1 style="margin:0 0 8px">Chưa thanh toán</h1>
-<p>Đơn mua gói <b>@Model.TenGoi</b> đã huỷ hoặc hết hạn, bạn chưa bị trừ tiền.</p>
-<p style="margin-top:20px">@if (Model.GoiBanId is int goiId) { <a href="/ThanhToan/Mua/@goiId" class="ql-nut">Thanh toán lại</a> } <a href="/#goi" class="ql-nut phu">Xem các gói</a></p>
+<h1>Thanh toán thành công</h1>
+<p>Gói <b>@d.TenGoi</b> đã được kích hoạt. Chúc bạn học thật hiệu quả!</p>
+}
+else if (huy)
+{
+<h1>Chưa thanh toán</h1>
+<p>Đơn mua gói <b>@d.TenGoi</b> đã huỷ hoặc hết hạn. Bạn <b>chưa bị trừ tiền</b>.</p>
 }
 else
 {
-<h1 style="margin:0 0 8px">Đang chờ xác nhận thanh toán</h1>
-<p>Nếu bạn đã chuyển khoản, hệ thống sẽ mở khoá trong ít phút. Tải lại trang này để cập nhật.</p>
-<p style="margin-top:20px">@if (Model.LinkThanhToan is string link) { <a href="@link" class="ql-nut">Mở lại trang thanh toán</a> } <a href="/ThanhToan/KetQua?ma=@Model.MaThanhToan" class="ql-nut phu">Tải lại</a></p>
+<h1>Đang chờ xác nhận thanh toán</h1>
+<p>Nếu bạn đã chuyển khoản, hệ thống sẽ mở khoá trong ít phút. Trang này tự cập nhật, bạn không cần tải lại.</p>
+@if (Model.HetHanLink is DateTime het) { <p class="hv-phu" id="dem" data-het="@het.ToString("o")">Link thanh toán còn hiệu lực <b id="demGio">…</b></p> }
 }
-<p class="gb-muted" style="margin-top:20px">Mã đơn @Model.MaThanhToan · @DinhDang.Gia(Model.SoTien) · @Model.SoThang tháng</p>
+</div>
 </section>
-<p style="margin-top:16px"><a href="/ThanhToan">Xem lịch sử thanh toán</a></p>
+
+<div class="tt-hai-cot">
+<div class="tt-cot-trai">
+<section class="hv-khoi">
+<div class="hv-khoi-dau"><h2>Chi tiết đơn hàng</h2><span class="hv-chip @(thanhCong ? "xanh" : huy ? "" : "vang")">@(thanhCong ? "Đã thanh toán" : huy ? "Đã huỷ" : "Chờ thanh toán")</span></div>
+<dl class="tt-chi-tiet">
+<div><dt>Mã đơn</dt><dd>@d.MaThanhToan</dd></div>
+<div><dt>Gói học</dt><dd>@d.TenGoi</dd></div>
+<div><dt>Số tiền</dt><dd><b>@DinhDang.Gia(d.SoTien)</b></dd></div>
+<div><dt>Thời hạn</dt><dd>@d.SoThang tháng</dd></div>
+<div><dt>Tạo lúc</dt><dd>@DinhDang.GioNgay(d.NgayTao.ToLocalTime())</dd></div>
+@if (d.NgayThanhToan is DateTime tra) { <div><dt>Thanh toán lúc</dt><dd>@DinhDang.GioNgay(tra.ToLocalTime())</dd></div> }
+@if (!string.IsNullOrEmpty(d.MaGiaoDich)) { <div><dt>Mã giao dịch</dt><dd>@d.MaGiaoDich</dd></div> }
+</dl>
+</section>
+@if (thanhCong && Model.Khoa.Count > 0)
+{
+<section class="hv-khoi">
+<div class="hv-khoi-dau"><h2>Khoá học đã mở</h2><span>@Model.Khoa.Count khoá</span></div>
+<ul class="hv-ds">
+@foreach (var k in Model.Khoa)
+{
+<li><div class="ten"><b>@k.Ten</b><small>@k.Mon</small></div><a asp-controller="Home" asp-action="KhoaHoc" asp-route-id="@k.Id" class="hv-nut">Vào học</a></li>
+}
+</ul>
+</section>
+}
+</div>
+<aside class="tt-cot-phai">
+<div class="tt-tom-tat">
+<h2>Bước tiếp theo</h2>
+<div class="tt-hanh-dong">
+@if (thanhCong)
+{
+<a asp-controller="Home" asp-action="TongQuan" class="tt-nut lon">Về tổng quan</a>
+<a asp-action="HoaDon" asp-route-ma="@d.MaThanhToan" class="tt-nut vien" target="_blank" rel="noopener">Xem biên lai</a>
+}
+else if (huy)
+{
+@if (d.GoiBanId is int goiId) { <a asp-action="Mua" asp-route-id="@goiId" class="tt-nut lon">Thanh toán lại</a> }
+<a asp-action="Goi" class="tt-nut vien">Xem các gói</a>
+}
+else
+{
+@if (d.LinkThanhToan is string link) { <a href="@link" class="tt-nut lon" rel="noopener">Mở lại trang thanh toán</a> }
+<a asp-action="KetQua" asp-route-ma="@d.MaThanhToan" class="tt-nut vien">Kiểm tra lại</a>
+}
+<a asp-action="Index" class="tt-nut chu">Xem đơn hàng của tôi</a>
+</div>
+<p class="tt-ghi-chu">Cần hỗ trợ? Hãy liên hệ trung tâm kèm mã đơn <b>@d.MaThanhToan</b>.</p>
+</div>
+</aside>
+</div>
 </main>
+</div>
+@section Scripts {
+@if (cho)
+{
+<script>
+(() => {
+  const ma = @d.MaThanhToan;
+  const dem = document.getElementById('demGio'), host = document.getElementById('dem');
+  const veDem = () => {
+    if (!host) return;
+    const con = Math.max(0, Math.floor((new Date(host.dataset.het) - Date.now()) / 1000));
+    dem.textContent = con > 0 ? `${Math.floor(con / 60)}:${String(con % 60).padStart(2, '0')}` : 'đã hết hạn — hãy kiểm tra lại hoặc tạo đơn mới';
+  };
+  veDem(); setInterval(veDem, 1000);
+  let lan = 0;
+  const hoi = async () => {
+    if (document.hidden) return;
+    try {
+      const r = await fetch(`/ThanhToan/TrangThai?ma=${ma}`, { headers: { Accept: 'application/json' }, cache: 'no-store' });
+      if (r.ok && (await r.json()).trangThai !== 'ChoThanhToan') location.reload();
+    } catch { /* mạng chập chờn: thử lại lượt sau */ }
+  };
+  const t = setInterval(() => { if (++lan > 120) clearInterval(t); else hoi(); }, 5000);
+})();
+</script>
+}
+}
