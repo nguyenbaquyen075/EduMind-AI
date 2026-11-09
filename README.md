@@ -244,7 +244,10 @@ SuDia.Web/
 | | `/Home/HoiAi` | Chat với trợ lý AI |
 | | `/BaiTap/Lam/{id}` · `/BaiTap/BatDau/{id}` | Làm bài tập / kiểm tra được giao |
 | | `/TaiKhoan/HoSo` | Hồ sơ, đổi mật khẩu |
-| | `/ThanhToan` · `/ThanhToan/Mua/{id}` · `/ThanhToan/KetQua?ma=` | Đơn hàng, mua gói, kết quả |
+| | `/ThanhToan/Goi` | Chọn gói học (giá, khoá, quyền lợi, câu hỏi thường gặp) |
+| | `/ThanhToan/Mua/{id}` | Xác nhận mua: hạn học mới, phương thức, điều khoản |
+| | `/ThanhToan/KetQua?ma=` · `/ThanhToan/TrangThai?ma=` | Kết quả; tự cập nhật khi đang chờ thanh toán |
+| | `/ThanhToan` · `/ThanhToan/HoaDon?ma=` | Đơn hàng (lọc theo trạng thái) và biên lai in/PDF |
 | Giảng viên | `/GiangVien` | Tổng quan |
 | | `/GiangVien/NoiDung` | Chủ đề, bài, mục; nhập Word/PowerPoint; soạn bằng AI |
 | | `/GiangVien/GiaoBai` · `/GiangVien/DeThi` · `/GiangVien/CauHoi` | Giao bài, đề thi, ngân hàng câu hỏi |

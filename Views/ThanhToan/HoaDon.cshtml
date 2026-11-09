@@ -1,0 +1,37 @@
+@model HoaDonViewModel
+@{
+    Layout = null;
+    var d = Model.Don;
+}
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Biên lai @d.MaThanhToan · Sử Địa</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="~/css/thanh-toan.css" asp-append-version="true">
+</head>
+<body class="tt-bien-lai-trang">
+<div class="tt-bien-lai-thanh"><a href="/ThanhToan">← Đơn hàng của tôi</a><button type="button" onclick="window.print()">In / Lưu PDF</button></div>
+<article class="tt-bien-lai">
+<header>
+<div><p class="logo">Sử<span>·</span>Địa</p><p class="phu">Học viện ôn thi Lịch sử và Địa lí lớp 12</p></div>
+<div class="tr"><h1>BIÊN LAI THANH TOÁN</h1><p class="phu">Số: <b>@d.MaThanhToan</b></p><p class="phu">Ngày: @d.NgayThanhToan?.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</p></div>
+</header>
+<section class="hai">
+<div><h2>Người mua</h2><p><b>@Model.HoTen</b></p><p>@Model.Email</p></div>
+<div><h2>Thanh toán</h2><p>Trạng thái: <b class="xanh">Đã thanh toán</b></p>@if (!string.IsNullOrEmpty(d.MaGiaoDich)) {<p>Mã giao dịch: @d.MaGiaoDich</p>}<p>Phương thức: @(d.MaGiaoDich == "GIA-LAP" ? "Giả lập (môi trường thử)" : "Chuyển khoản QR (PayOS)")</p></div>
+</section>
+<table>
+<thead><tr><th>Nội dung</th><th>Thời hạn</th><th class="so">Thành tiền</th></tr></thead>
+<tbody>
+<tr><td><b>@d.TenGoi</b><small>@string.Join(" · ", Model.Khoa.Select(k => k.Ten))</small></td><td>@d.SoThang tháng</td><td class="so">@DinhDang.Gia(d.SoTien)</td></tr>
+</tbody>
+<tfoot><tr><td colspan="2">Tổng cộng</td><td class="so">@DinhDang.Gia(d.SoTien)</td></tr></tfoot>
+</table>
+<p class="chan">Biên lai này được tạo tự động từ hệ thống Sử Địa và xác nhận người mua đã thanh toán gói học nêu trên. Đây không phải hoá đơn giá trị gia tăng.</p>
+</article>
+</body>
+</html>

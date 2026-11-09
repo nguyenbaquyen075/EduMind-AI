@@ -30,7 +30,7 @@
 <div class="hv-menu-tai-khoan" role="menu">
 <a class="hv-menu-tai-khoan-dau" asp-controller="TaiKhoan" asp-action="HoSo" role="menuitem"><span class="hv-avatar" aria-hidden="true">@((nd?.HoTen ?? "?").Split(' ', StringSplitOptions.RemoveEmptyEntries).LastOrDefault()?[..1].ToUpper())</span><span><b>@nd?.HoTen</b><small>Học viên</small></span><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"></path></svg></a>
 <div class="hv-menu-tai-khoan-ngan" role="separator"></div>
-<a asp-controller="Home" asp-action="Index" asp-fragment="goi" role="menuitem"><svg aria-hidden="true" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.7 5.3L5 10l5.3 1.7L12 17l1.7-5.3L19 10l-5.3-1.7z"></path><path d="m19 16-.7 2.3L16 19l2.3.7L19 22l.7-2.3L22 19l-2.3-.7z"></path></svg>Nâng cấp gói</a>
+<a asp-controller="ThanhToan" asp-action="Goi" role="menuitem"><svg aria-hidden="true" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.7 5.3L5 10l5.3 1.7L12 17l1.7-5.3L19 10l-5.3-1.7z"></path><path d="m19 16-.7 2.3L16 19l2.3.7L19 22l.7-2.3L22 19l-2.3-.7z"></path></svg>Nâng cấp gói</a>
 <a asp-controller="TaiKhoan" asp-action="HoSo" asp-fragment="thong-tin-ca-nhan" role="menuitem"><svg aria-hidden="true" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"></circle><path d="M4 21a8 8 0 0 1 16 0"></path></svg>Thông tin cá nhân</a>
 <a asp-controller="TaiKhoan" asp-action="HoSo" asp-fragment="doi-mat-khau" role="menuitem"><svg aria-hidden="true" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>Bảo mật</a>
 <div class="hv-menu-tai-khoan-ngan" role="separator"></div>
@@ -53,8 +53,10 @@
 <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"></path><path d="M3 3v5h5"></path></svg>Ôn câu sai</a>
 <a asp-controller="Home" asp-action="HoiAi" aria-current="@Hien("HoiAi")" class="@Kieu("HoiAi")">
 <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>Hỏi AI</a>
-<a asp-controller="Home" asp-action="Index" asp-fragment="goi" class="@Kieu("MuaGoi")">
+<a asp-controller="ThanhToan" asp-action="Goi" aria-current="@Hien("MuaGoi")" class="@Kieu("MuaGoi")">
 <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12v9H4v-9"></path><path d="M2 7h20v5H2z"></path><path d="M12 21V7"></path></svg>Mua thêm gói</a>
+<a asp-controller="ThanhToan" asp-action="Index" aria-current="@Hien("DonHang")" class="@Kieu("DonHang")">
+<svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><path d="M14 3v6h6M8 13h8M8 17h5"></path></svg>Đơn hàng</a>
 </nav>
 <div class="hv-luot">
 <p class="hv-luot-nhan">Lượt hỏi AI hôm nay</p>
