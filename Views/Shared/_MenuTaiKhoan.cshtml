@@ -1,10 +1,42 @@
 @model MenuTaiKhoan
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<NguoiDung> Users
 @{
     string Kieu(string muc) => "hv-link" + (muc == Model.MucDangMo ? " dang-mo" : "");
     string? Hien(string muc) => muc == Model.MucDangMo ? "page" : null;
+    var nd = await Users.GetUserAsync(User);
 }
+<header class="hv-global-head">
+<a asp-controller="Home" asp-action="Index" class="hv-global-brand" aria-label="Sử Địa"><b>Sử<span>·</span>Địa</b></a>
+<div class="hv-global-search-wrap" data-global-search><label class="hv-global-search"><svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg><input type="search" placeholder="Tìm trang, chức năng…" aria-label="Tìm trang và chức năng"></label><div class="hv-ket-qua-tim" role="listbox" hidden></div></div>
+<div class="hv-global-tools">
+<button class="hv-thong-bao-nut" type="button" aria-label="Thông báo" title="Thông báo"><svg aria-hidden="true" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg></button>
+<details class="hv-head-tai-khoan">
+<summary title="@nd?.Email" aria-label="Mở menu tài khoản"><span class="hv-avatar" aria-hidden="true">@((nd?.HoTen ?? "?").Split(' ', StringSplitOptions.RemoveEmptyEntries).LastOrDefault()?[..1].ToUpper())</span></summary>
+<div class="hv-head-menu-tai-khoan" role="menu"><a asp-controller="TaiKhoan" asp-action="HoSo" role="menuitem">Thông tin cá nhân</a><a asp-controller="TaiKhoan" asp-action="HoSo" asp-fragment="doi-mat-khau" role="menuitem">Bảo mật</a></div>
+</details>
+<form class="hv-global-dang-xuat" method="post" asp-area="" asp-controller="TaiKhoan" asp-action="DangXuat"><button type="submit" aria-label="Đăng xuất" title="Đăng xuất"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M10 17l5-5-5-5M15 12H3M21 19V5a2 2 0 0 0-2-2h-6"></path></svg></button></form>
+</div>
+</header>
 <aside class="hv-side" aria-label="Khu học viên">
 <a asp-controller="Home" asp-action="Index" class="hv-logo"><b>Sử<span>·</span>Địa</b><em>Học viên</em></a>
+<button type="button" class="hv-menu-toggle" aria-label="Ẩn menu" title="Ẩn menu"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"></path></svg></button>
+<details class="hv-tai-khoan hv-tai-khoan-ben">
+<summary aria-label="Mở menu tài khoản" title="@nd?.Email">
+<span class="hv-avatar" aria-hidden="true">@((nd?.HoTen ?? "?").Split(' ', StringSplitOptions.RemoveEmptyEntries).LastOrDefault()?[..1].ToUpper())</span>
+<span class="hv-tai-khoan-ten"><b>@nd?.HoTen</b><small>Học viên</small></span>
+<svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"></path></svg>
+</summary>
+<div class="hv-menu-tai-khoan" role="menu">
+<a class="hv-menu-tai-khoan-dau" asp-controller="TaiKhoan" asp-action="HoSo" role="menuitem"><span class="hv-avatar" aria-hidden="true">@((nd?.HoTen ?? "?").Split(' ', StringSplitOptions.RemoveEmptyEntries).LastOrDefault()?[..1].ToUpper())</span><span><b>@nd?.HoTen</b><small>Học viên</small></span><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"></path></svg></a>
+<div class="hv-menu-tai-khoan-ngan" role="separator"></div>
+<a asp-controller="Home" asp-action="Index" asp-fragment="goi" role="menuitem"><svg aria-hidden="true" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.7 5.3L5 10l5.3 1.7L12 17l1.7-5.3L19 10l-5.3-1.7z"></path><path d="m19 16-.7 2.3L16 19l2.3.7L19 22l.7-2.3L22 19l-2.3-.7z"></path></svg>Nâng cấp gói</a>
+<a asp-controller="TaiKhoan" asp-action="HoSo" asp-fragment="thong-tin-ca-nhan" role="menuitem"><svg aria-hidden="true" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"></circle><path d="M4 21a8 8 0 0 1 16 0"></path></svg>Thông tin cá nhân</a>
+<a asp-controller="TaiKhoan" asp-action="HoSo" asp-fragment="doi-mat-khau" role="menuitem"><svg aria-hidden="true" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>Bảo mật</a>
+<div class="hv-menu-tai-khoan-ngan" role="separator"></div>
+<form method="post" asp-area="" asp-controller="TaiKhoan" asp-action="DangXuat" role="none"><button type="submit" role="menuitem"><svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M10 17l5-5-5-5M15 12H3M21 19V5a2 2 0 0 0-2-2h-6"></path></svg>Đăng xuất</button></form>
+</div>
+</details>
 <nav class="hv-nav" aria-label="Menu tài khoản">
 <p class="hv-nhom">Học tập</p>
 <a asp-controller="Home" asp-action="TongQuan" aria-current="@Hien("TongQuan")" class="@Kieu("TongQuan")">
@@ -21,8 +53,6 @@
 <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"></path><path d="M3 3v5h5"></path></svg>Ôn câu sai</a>
 <a asp-controller="Home" asp-action="HoiAi" aria-current="@Hien("HoiAi")" class="@Kieu("HoiAi")">
 <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>Hỏi AI</a>
-<a asp-controller="TaiKhoan" asp-action="HoSo" aria-current="@Hien("HoSo")" class="@Kieu("HoSo")">
-<svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"></circle><path d="M4 21a8 8 0 0 1 16 0"></path></svg>Tài khoản</a>
 <a asp-controller="Home" asp-action="Index" asp-fragment="goi" class="@Kieu("MuaGoi")">
 <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12v9H4v-9"></path><path d="M2 7h20v5H2z"></path><path d="M12 21V7"></path></svg>Mua thêm gói</a>
 </nav>
@@ -31,9 +61,17 @@
 <p class="hv-luot-so">@Model.LuotHoiDaDung<span> / @Model.LuotHoiToiDa</span></p>
 <div class="hv-thanh" role="progressbar" aria-label="Lượt hỏi AI đã dùng" aria-valuemin="0" aria-valuemax="@Model.LuotHoiToiDa" aria-valuenow="@Model.LuotHoiDaDung"><span style="width: @(Model.LuotHoiPhanTram)%"></span></div>
 </div>
-<form method="post" asp-area="" asp-controller="TaiKhoan" asp-action="DangXuat" class="hv-dang-xuat">
-<button type="submit">Đăng xuất</button>
-</form>
 </aside>
 <script>(() => { const a = document.querySelector('.hv-link.dang-mo'); const n = a?.parentElement;
-  if (n && n.scrollWidth > n.clientWidth) n.scrollLeft += a.getBoundingClientRect().left - n.getBoundingClientRect().left - (n.clientWidth - a.offsetWidth) / 2; })();</script>
+  if (n && n.scrollWidth > n.clientWidth) n.scrollLeft += a.getBoundingClientRect().left - n.getBoundingClientRect().left - (n.clientWidth - a.offsetWidth) / 2;
+  document.addEventListener('click', (e) => document.querySelectorAll('details.hv-tai-khoan[open]').forEach((d) => { if (!d.contains(e.target)) d.open = false; }));
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') document.querySelector('details.hv-tai-khoan[open]')?.removeAttribute('open'); });
+  const side = document.querySelector('.hv-side'), button = document.querySelector('.hv-menu-toggle'), key = 'sudia.hv.menu';
+  const desk = () => matchMedia('(min-width:901px)').matches;
+  let state = JSON.parse(localStorage.getItem(key) || '{"hidden":false}'); state.hidden ??= !!state.compact;
+  const apply = () => { side.classList.toggle('menu-an', desk() && !!state.hidden); button.setAttribute('aria-label', state.hidden ? 'Mở menu' : 'Ẩn menu'); button.title = button.getAttribute('aria-label'); };
+  button.addEventListener('click', () => { state.hidden = !state.hidden; localStorage.setItem(key, JSON.stringify(state)); apply(); });
+  addEventListener('resize', apply); apply();
+  const host = document.querySelector('[data-global-search]'); if (host) { const input = host.querySelector('input'), box = host.querySelector('[role=listbox]'), norm = (s) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim(); const dongNghia = { 'khoa':'khoa hoc bai hoc noi dung hoc tap', 'luyen de':'thi thu de thi kiem tra', 'diem':'ket qua danh gia tien do', 'on cau sai':'on tap luyen tap cau hoi', 'hoi ai':'tro ly ho tro tai lieu', 'mua them goi':'nang cap goi gia thanh toan', 'thong tin ca nhan':'tai khoan ho so bao mat' }; const muc = () => { const seen = new Set(); return [...document.querySelectorAll('a[href]')].map((a) => { const ten = a.textContent.trim().replace(/\s+/g, ' '), n = norm(ten); return { ten, href: a.href, tim: n + ' ' + Object.entries(dongNghia).filter(([d]) => n.includes(d)).map(([, tu]) => tu).join(' ') }; }).filter((x) => x.ten && !seen.has(x.ten + x.href) && seen.add(x.ten + x.href)); }; const tim = () => { const q = norm(input.value); return q ? muc().map((x) => ({ ...x, diem: norm(x.ten).includes(q) ? 2 : x.tim.includes(q) ? 1 : 0 })).filter((x) => x.diem).sort((a,b) => b.diem - a.diem).slice(0, 8) : []; }; const hien = () => { const kq = tim(); box.replaceChildren(...kq.map((x) => { const a = document.createElement('a'); a.href = x.href; a.textContent = x.ten; a.setAttribute('role', 'option'); return a; })); box.hidden = !kq.length; }; input.addEventListener('input', hien); input.addEventListener('keydown', (e) => { if (e.key === 'Enter') { const hit = tim()[0]; if (hit) { e.preventDefault(); location.href = hit.href; } } if (e.key === 'Escape') box.hidden = true; }); document.addEventListener('click', (e) => { if (!host.contains(e.target)) box.hidden = true; }); }
+})();</script>
+<script>(() => { const h=document.querySelector('[data-global-search]'),i=h?.querySelector('input'),b=h?.querySelector('[role=listbox]'); if(!i)return; const n=s=>s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase(), f=()=>[...document.querySelectorAll('a[href]')].map(a=>({t:a.textContent.trim(),u:a.href})).filter(x=>x.t).map(x=>({...x,s:n(x.t).split(/\s+/).filter(w=>w).reduce((z,w)=>z+(n(i.value).split(/\s+/).some(q=>w.includes(q)||q.includes(w))?1:0),0})).sort((a,c)=>c.s-a.s).slice(0,8); i.addEventListener('input',()=>{const r=f();b.replaceChildren(...r.map(x=>Object.assign(document.createElement('a'),{href:x.u,textContent:x.t})));b.hidden=!r.length});})();</script>
