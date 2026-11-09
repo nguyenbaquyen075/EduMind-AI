@@ -1,0 +1,11 @@
+@model int
+@{
+    var buoc = new[] { "Chọn gói", "Xác nhận & thanh toán", "Hoàn tất" };
+}
+<ol class="tt-buoc" aria-label="Các bước mua gói">
+@for (var i = 0; i < buoc.Length; i++)
+{
+    var trangThai = i + 1 < Model ? "xong" : i + 1 == Model ? "dang" : "";
+<li class="@trangThai" aria-current="@(i + 1 == Model ? "step" : null)"><span class="tt-so">@if (trangThai == "xong") {<svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"></path></svg>} else { @(i + 1) }</span>@buoc[i]</li>
+}
+</ol>

@@ -1,0 +1,97 @@
+@model ChonGoiViewModel
+@{
+    ViewData["Title"] = "Gói học · Sử Địa";
+    string Han(KhoaTrongGoi k) => k.KhongGioiHan ? "Không giới hạn" : k.HanHienTai is DateTime h ? h.ToLocalTime().ToString("dd/MM/yyyy") : "—";
+}
+@section Head {
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="~/css/hoc-vien.css" asp-append-version="true">
+<link rel="stylesheet" href="~/css/thanh-toan.css" asp-append-version="true">
+}
+<div class="hv-trang">
+<partial name="_MenuTaiKhoan" model="Model.Menu" />
+<main class="hv-main tt">
+<partial name="_Buoc" model="1" />
+<div class="tt-dau">
+<div><h1>Chọn gói học</h1><p class="hv-mo-ta">Mở khoá toàn bộ bài giảng, đề luyện tập, thi thử và trợ lý AI. Mua thêm khi còn hạn sẽ được <b>cộng nối tiếp</b>, không mất ngày học.</p></div>
+<a href="/ThanhToan" class="hv-nut phu">Đơn hàng của tôi</a>
+</div>
+
+@if (TempData["LoiThanhToan"] is string loi) { <p class="tt-thong-bao loi" role="alert">@loi</p> }
+@if (!Model.LaHocVien) { <p class="tt-thong-bao" role="status">Bạn đang đăng nhập bằng tài khoản không phải học viên, nên chỉ có thể xem gói. Việc mua dành cho tài khoản học viên.</p> }
+
+@if (Model.DangHoc.Count > 0)
+{
+<section class="hv-khoi tt-dang-hoc" aria-labelledby="dh">
+<div class="hv-khoi-dau"><h2 id="dh">Quyền học hiện tại</h2><span>@Model.DangHoc.Count khoá đang mở</span></div>
+<ul class="tt-chip-ds">
+@foreach (var k in Model.DangHoc)
+{
+<li><b>@k.Khoa.Ten</b><span class="hv-chip @(k.KhongGioiHan ? "tim" : "xanh")">@(k.KhongGioiHan ? "Không giới hạn" : "Đến " + Han(k))</span></li>
+}
+</ul>
+</section>
+}
+
+@if (Model.Goi.Count == 0)
+{
+<section class="hv-khoi"><p class="hv-trong">Hiện chưa có gói nào đang bán. Vui lòng quay lại sau.</p></section>
+}
+else
+{
+<div class="tt-luoi">
+@foreach (var g in Model.Goi)
+{
+    var goi = g.Goi;
+<article class="tt-goi @(goi.NoiBat ? "noi-bat" : "")" style="--mau:@goi.MauNhan">
+@if (goi.NoiBat) { <span class="tt-dai">Được chọn nhiều nhất</span> }
+<p class="tt-nhan">@goi.Nhan</p>
+<h2>@goi.Ten</h2>
+<p class="tt-gia">@(goi.Gia is null ? "Sắp mở bán" : DinhDang.Gia(goi.Gia))</p>
+<p class="tt-chu-thich">cho @(goi.SoThang == 12 ? "một năm học" : $"{goi.SoThang} tháng học")@(g.GiaMoiThang is int m ? $" · khoảng {DinhDang.Gia(m)}/tháng" : "")</p>
+
+<h3>Khoá học trong gói</h3>
+<ul class="tt-tick">
+@foreach (var k in g.Khoa)
+{
+<li><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"></path></svg><span>@k.Khoa.Ten@if (k.ConHan) {<small> · đang còn hạn @(k.KhongGioiHan ? "không giới hạn" : "đến " + Han(k))</small>}</span></li>
+}
+</ul>
+@if (goi.QuyenLoi.Count > 0)
+{
+<h3>Quyền lợi</h3>
+<ul class="tt-tick nhe">
+@foreach (var q in goi.QuyenLoi)
+{
+<li><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5L20 7"></path></svg><span>@q</span></li>
+}
+</ul>
+}
+<div class="tt-goi-chan">
+@if (!g.CoTheMua) { <span class="tt-nut tat">Chưa mở bán</span> }
+else if (!Model.LaHocVien) { <span class="tt-nut tat">Dành cho học viên</span> }
+else { <a asp-action="Mua" asp-route-id="@goi.Id" class="tt-nut @(goi.NoiBat ? "" : "vien")">@(g.Khoa.Any(k => k.DaGhiDanh) ? "Gia hạn gói này" : "Mua gói này")</a> }
+</div>
+</article>
+}
+</div>
+}
+
+<section class="hv-khoi tt-tin-cay" aria-label="Cam kết">
+<div><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"></path><path d="m9 12 2 2 4-4"></path></svg><b>Thanh toán an toàn</b><span>Qua cổng PayOS, chúng tôi không lưu thông tin thẻ hay tài khoản ngân hàng.</span></div>
+<div><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect><path d="M14 14h3v3h-3zM20 14v.01M14 20h.01M20 20h.01"></path></svg><b>Quét VietQR</b><span>Dùng ứng dụng của bất kỳ ngân hàng nào tại Việt Nam.</span></div>
+<div><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg><b>Mở khoá ngay</b><span>Khoá học được kích hoạt tự động ngay khi hệ thống nhận tiền.</span></div>
+</section>
+
+<section class="hv-khoi" aria-labelledby="cau-hoi">
+<div class="hv-khoi-dau"><h2 id="cau-hoi">Câu hỏi thường gặp</h2></div>
+<div class="tt-hoi">
+<details><summary>Thanh toán xong bao lâu thì vào học được?</summary><p>Thường trong vài giây. Trang kết quả tự cập nhật; nếu chưa thấy, bấm tải lại sau ít phút hoặc xem trạng thái trong mục Đơn hàng của tôi.</p></details>
+<details><summary>Mua thêm khi gói cũ còn hạn thì sao?</summary><p>Thời hạn mới được cộng nối tiếp vào ngày hết hạn hiện tại. Nếu đã hết hạn, thời hạn tính từ ngày thanh toán.</p></details>
+<details><summary>Link thanh toán hết hạn thì có bị trừ tiền không?</summary><p>Không. Đơn chưa thanh toán sẽ tự huỷ; bạn có thể tạo đơn mới bất cứ lúc nào.</p></details>
+<details><summary>Tôi đã chuyển khoản nhưng khoá chưa mở?</summary><p>Mở <a href="/ThanhToan">Đơn hàng của tôi</a>, chọn đơn tương ứng và bấm kiểm tra trạng thái. Nếu vẫn chưa mở, hãy liên hệ trung tâm kèm mã đơn.</p></details>
+<details><summary>Tôi cần biên lai?</summary><p>Mỗi đơn đã thanh toán có trang biên lai để in hoặc lưu thành PDF trong mục Đơn hàng của tôi.</p></details>
+</div>
+</section>
+</main>
+</div>
