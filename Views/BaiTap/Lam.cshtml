@@ -65,4 +65,33 @@ else { <textarea name="@c.Id" rows="6" maxlength="20000" placeholder="Nhập câ
 </form>
 }
 </main>
-@section Scripts { @if (Model.HetGio is not null && !daNop && !hetHan) { <script src="~/js/kiem-tra.js" asp-append-version="true"></script> } }
+@section Scripts {
+@if (Model.HetGio is not null && !daNop && !hetHan) { <script src="~/js/kiem-tra.js" asp-append-version="true"></script> }
+@if (!daNop && !hetHan)
+{
+<script>
+// Còn câu bỏ trống thì không cho nộp (trừ khi bài kiểm tra hết giờ tự nộp)
+(() => {
+  const form = document.getElementById('kiemTraForm');
+  if (!form) return;
+  form.addEventListener('submit', (e) => {
+    if (form.dataset.tuNop) return;
+    const thieu = [...form.querySelectorAll(':scope > fieldset.gb-question')].filter((f) => {
+      const ten = new Set([...f.querySelectorAll('input[type=radio]')].map((r) => r.name));
+      const thieuChon = [...ten].some((n) => !f.querySelector(`input[name="${CSS.escape(n)}"]:checked`));
+      const tl = f.querySelector('textarea');
+      return thieuChon || (tl && !tl.value.trim());
+    });
+    form.querySelectorAll('.gb-thieu').forEach((f) => f.classList.remove('gb-thieu'));
+    if (thieu.length === 0) return;
+    e.preventDefault();
+    thieu.forEach((f) => f.classList.add('gb-thieu'));
+    let loi = document.getElementById('loiNop');
+    if (!loi) { loi = document.createElement('p'); loi.id = 'loiNop'; loi.className = 'ql-thong-bao loi'; loi.setAttribute('role', 'alert'); form.querySelector('button[type=submit]').before(loi); }
+    loi.textContent = `Còn ${thieu.length} câu chưa trả lời. Hãy làm hết rồi nộp bài.`;
+    thieu[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+  });
+})();
+</script>
+}
+}
