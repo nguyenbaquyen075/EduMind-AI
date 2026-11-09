@@ -9,7 +9,9 @@ a{color:var(--nhan,#4F46E5)}
 .ql{min-height:100vh;display:flex}
 
 /* Menu trái */
-.ql-side{flex:0 0 256px;box-sizing:border-box;position:sticky;top:0;height:100vh;overflow-y:auto;display:flex;flex-direction:column;padding:18px 12px;background:var(--mat);border-right:1px solid var(--vien)}
+.ql-side{--ql-side-width:288px;flex:0 0 var(--ql-side-width);box-sizing:border-box;position:sticky;top:0;height:100vh;overflow-y:auto;display:flex;flex-direction:column;padding:18px 12px;background:var(--mat);border-right:1px solid var(--vien);transition:flex-basis .18s ease}
+.ql-menu-toggle{position:fixed;z-index:100;top:17px;left:calc(var(--ql-side-width) - 52px);display:grid;place-items:center;width:40px;height:40px;padding:0;border:1px solid var(--vien);border-radius:10px;background:var(--mat);color:var(--chu-3);cursor:pointer}.ql-menu-toggle:hover{background:#F3F4F6;color:var(--chu)}
+.ql-side.menu-an{flex-basis:0;padding:0;border:0;overflow:visible}.ql-side.menu-an>*:not(.ql-menu-toggle){display:none}.ql-side.menu-an .ql-menu-toggle{left:12px}.ql:has(.ql-side.menu-an) .ql-than{padding-left:60px}
 .ql-logo{display:flex;align-items:center;gap:8px;padding:4px 10px 18px;color:var(--chu);text-decoration:none}
 .ql-logo b{font-size:19px;font-weight:800}
 .ql-logo span{color:var(--nhan)}
@@ -25,7 +27,7 @@ a{color:var(--nhan,#4F46E5)}
 
 /* Thanh trên */
 .ql-than{flex:1 1 auto;min-width:0;display:flex;flex-direction:column}
-.ql-top{position:sticky;top:0;z-index:10;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 20px;padding:14px 32px;background:rgba(255,255,255,.92);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border-bottom:1px solid var(--vien)}
+.ql-top{position:sticky;top:64px;z-index:10;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 20px;padding:14px 32px;background:rgba(255,255,255,.92);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border-bottom:1px solid var(--vien)}
 .ql-crumb{margin:0;font-size:13px;color:var(--chu-3)}
 .ql-crumb a{color:var(--chu-3);text-decoration:none}.ql-crumb a:hover{color:var(--nhan)}
 .ql-top h1{margin:0;font-size:22px;font-weight:700;letter-spacing:-.01em}
@@ -203,7 +205,14 @@ a{color:var(--nhan,#4F46E5)}
 @media (max-width:640px){.ql-bang th,.ql-bang td{padding:9px 12px}}
 /* Màn hình hẹp: menu trái thu thành hàng link cuộn ngang, không đẩy nội dung xuống quá xa */
 @media (max-width:900px){.ql-side{flex-direction:row;flex-wrap:wrap;align-items:center;gap:6px 14px;padding:10px 12px;border-right:0;border-bottom:1px solid var(--vien)}.ql-logo{padding:4px 2px;margin-right:auto}.ql-chuyen{margin:0;font-size:12.5px}.ql-side nav{order:3;flex:1 1 100%;display:flex;gap:4px;margin:0;padding:0 0 2px;overflow-x:auto;scrollbar-width:none}.ql-side nav::-webkit-scrollbar{display:none}.ql-nhom{display:none}.ql-link{flex:none;white-space:nowrap;min-height:36px}}
-@media (max-width:900px){.ql{flex-direction:column}.ql-side{position:static;height:auto;flex:none;width:100%}.ql-main{padding:16px}.ql-top{padding:12px 16px}.ql-2cot{grid-template-columns:minmax(0,1fr)}.ql-luoi{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:900px){.ql-menu-toggle{display:none}}
+@media(min-width:901px){.ql-global-head{position:fixed;z-index:80;top:0;right:0;left:0;height:64px;display:flex;align-items:center;gap:24px;padding:0 28px 0 72px;box-sizing:border-box;background:#fff;border-bottom:1px solid #E8EBF0}.ql-global-brand{display:flex;align-items:center;gap:9px;flex:none;color:var(--chu);text-decoration:none}.ql-global-brand b{font-size:18px;font-weight:800}.ql-global-brand b span{color:var(--nhan)}.ql-global-search{display:flex;align-items:center;gap:8px;flex:1 1 380px;max-width:500px;height:38px;padding:0 12px;border:1px solid #E5E7EB;border-radius:9px;background:#FAFBFC;color:#98A2B3}.ql-global-search:focus-within{border-color:var(--nhan-vien);background:#fff;box-shadow:0 0 0 3px var(--nhan-nhat)}.ql-global-search input{width:100%;border:0;outline:0;background:transparent;color:var(--chu);font:inherit;font-size:13.5px}.ql-global-tools{display:flex;align-items:center;gap:8px;margin-left:auto}.ql-thong-bao-nut,.ql-global-dang-xuat button{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;padding:0;border:1px solid var(--vien);border-radius:9px;background:#fff;color:var(--chu-2);cursor:pointer}.ql-global-dang-xuat{margin:0}.ql-thong-bao-nut:hover,.ql-global-dang-xuat button:hover{background:#F8FAFC;color:var(--chu)}.ql-global-tools .ql-nguoi{margin:0;padding:3px;border:1px solid var(--vien);border-radius:9px;background:#fff}.ql-global-tools .ql-nguoi:hover,.ql-global-tools .ql-tai-khoan[open] .ql-nguoi{background:#F8FAFC}.ql-global-tools .ql-avatar{width:30px;height:30px}.ql-side{top:64px;height:calc(100vh - 64px)}.ql-side>.ql-logo{display:none}.ql-than{padding-top:64px}.ql-menu-toggle{top:12px;left:18px;width:40px;height:40px;border-color:transparent;background:transparent}.ql-side.menu-an .ql-menu-toggle{left:18px}.ql-side.menu-an>*:not(.ql-menu-toggle){display:none}}
+
+@media(min-width:901px){.ql-global-search{position:absolute;left:316px;width:min(500px,calc(100vw - 590px));max-width:none}}
+
+@media(min-width:901px){.ql-global-search-wrap{position:absolute;z-index:2;left:316px;width:min(500px,calc(100vw - 590px))}.ql-global-search-wrap .ql-global-search{position:static;width:100%;max-width:none;box-sizing:border-box}.ql-ket-qua-tim{position:absolute;top:calc(100% + 7px);left:0;right:0;overflow:hidden;padding:6px;border:1px solid var(--vien);border-radius:10px;background:#fff;box-shadow:0 12px 28px rgba(17,24,39,.14)}.ql-ket-qua-tim a{display:block;padding:8px 10px;border-radius:7px;color:var(--chu-2);font-size:13px;font-weight:500;text-decoration:none}.ql-ket-qua-tim a:hover{background:var(--nhan-nhat);color:var(--nhan-dam)}}
+
+@media (max-width:900px){.ql{flex-direction:column}.ql-side{position:static;height:auto;flex:none;width:100%}.ql-main{padding:16px}.ql-top{top:0;padding:12px 16px}.ql-2cot{grid-template-columns:minmax(0,1fr)}.ql-luoi{grid-template-columns:minmax(0,1fr)}}
 .ql-them{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.6fr);gap:0;margin-bottom:20px;border-radius:10px;background:var(--mat);border:1px solid var(--nhan-vien);overflow:hidden}
 .ql-them>form{display:flex;flex-direction:column;gap:10px;padding:16px 18px}
 .ql-them>form+form{border-left:1px solid var(--vien-nhe)}
@@ -304,8 +313,21 @@ a{color:var(--nhan,#4F46E5)}
 .ql-bang td.hanh-dong .ql-hang-nut,.ql-bang td:last-child>.ql-hang-nut{flex-wrap:nowrap}
 .ql-bang td.hanh-dong form{display:inline-flex}
 
-/* Avatar và nút Đăng xuất luôn đi cùng nhau */
-.ql-tk{display:inline-flex;align-items:center;gap:10px}
+/* Menu tài khoản dùng chung ở đầu trang quản lý */
+.ql-tai-khoan{position:relative;z-index:20}
+.ql-tai-khoan>summary{list-style:none;cursor:pointer}
+.ql-tai-khoan>summary::-webkit-details-marker{display:none}
+.ql-nguoi{display:inline-flex;align-items:center;gap:10px;min-height:42px;padding:4px 8px;border:1px solid transparent;border-radius:10px;color:var(--chu);font:inherit;font-weight:600}
+.ql-nguoi:hover,.ql-tai-khoan[open] .ql-nguoi{background:#F9FAFB;border-color:var(--vien)}
+.ql-nguoi>svg{color:var(--chu-3);transition:transform .16s ease}
+.ql-tai-khoan[open] .ql-nguoi>svg{transform:rotate(180deg)}
+.ql-menu-tai-khoan{position:absolute;top:calc(100% + 8px);right:0;min-width:220px;padding:6px;border:1px solid var(--vien);border-radius:12px;background:var(--mat);box-shadow:0 12px 28px rgba(17,24,39,.14)}
+.ql-menu-tai-khoan a,.ql-menu-tai-khoan button{display:flex;align-items:center;gap:10px;width:100%;min-height:38px;padding:0 10px;border:0;border-radius:8px;background:transparent;color:var(--chu-2);font:inherit;font-size:14px;font-weight:500;text-align:left;text-decoration:none;cursor:pointer}
+.ql-menu-tai-khoan a:hover,.ql-menu-tai-khoan button:hover{background:#F3F4F6;color:var(--chu)}
+.ql-menu-tai-khoan button{color:#B42318}
+.ql-menu-tai-khoan button:hover{background:#FEF2F2;color:#B42318}
+.ql-menu-tai-khoan svg{flex:none}
+.ql-menu-tai-khoan-ngan{height:1px;margin:6px 4px;background:var(--vien)}
 
 /* Không để chữ gãy dòng: menu bên, đầu trang trên điện thoại, bảng hẹp */
 .ql-link{white-space:nowrap}
@@ -314,6 +336,8 @@ a{color:var(--nhan,#4F46E5)}
 .ql-top-phai{gap:8px}
 .ql-nguoi{font-size:0;gap:0;padding-left:0;margin-left:0;border-left:0}
 .ql-nguoi .ql-avatar{font-size:13px}
+.ql-nguoi>svg{display:none}
+.ql-menu-tai-khoan{right:0}
 }
 @media (max-width:820px){
 .ql-bang td:first-child,.ql-bang th:first-child{min-width:150px}

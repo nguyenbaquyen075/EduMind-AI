@@ -43,8 +43,26 @@
 @await RenderSectionAsync("Head", required: false)
 }
 <div class="ql ql--@(khu == "Admin" ? "admin" : "gv")">
+<header class="ql-global-head">
+<a href="@(khu == "Admin" ? "/Admin" : "/GiangVien")" class="ql-global-brand" aria-label="Sử Địa"><b>Sử<span>·</span>Địa</b></a>
+<div class="ql-global-search-wrap" data-global-search><label class="ql-global-search"><svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg><input type="search" placeholder="Tìm trang, chức năng…" aria-label="Tìm trang và chức năng"></label><div class="ql-ket-qua-tim" role="listbox" hidden></div></div>
+<div class="ql-global-tools">
+<button class="ql-thong-bao-nut" type="button" aria-label="Thông báo" title="Thông báo"><svg aria-hidden="true" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg></button>
+<details class="ql-tai-khoan">
+<summary class="ql-nguoi" title="@nd?.Email" aria-label="Mở menu tài khoản">
+<span class="ql-avatar" aria-hidden="true">@((nd?.HoTen ?? "?").Split(' ', StringSplitOptions.RemoveEmptyEntries).LastOrDefault()?[..1].ToUpper())</span>
+</summary>
+<div class="ql-menu-tai-khoan" role="menu">
+<a asp-area="" asp-controller="TaiKhoan" asp-action="HoSo" role="menuitem"><svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"></circle><path d="M4 21a8 8 0 0 1 16 0"></path></svg>Thông tin cá nhân</a>
+<a asp-area="" asp-controller="TaiKhoan" asp-action="HoSo" asp-fragment="doi-mat-khau" role="menuitem"><svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>Bảo mật</a>
+</div>
+</details>
+<form class="ql-global-dang-xuat" method="post" asp-area="" asp-controller="TaiKhoan" asp-action="DangXuat"><button type="submit" aria-label="Đăng xuất" title="Đăng xuất"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M10 17l5-5-5-5M15 12H3M21 19V5a2 2 0 0 0-2-2h-6"></path></svg></button></form>
+</div>
+</header>
 <aside class="ql-side" aria-label="Menu @(khu == "Admin" ? "quản trị" : "giảng viên")">
 <a href="@(khu == "Admin" ? "/Admin" : "/GiangVien")" class="ql-logo"><b>Sử<span>·</span>Địa</b><em>@(khu == "Admin" ? "Quản trị" : "Giảng viên")</em></a>
+<button type="button" class="ql-menu-toggle" aria-label="Ẩn menu" title="Ẩn menu"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"></path></svg></button>
 <nav>
 @foreach (var m in menu)
 {
@@ -69,9 +87,18 @@
 }
 </aside>
 <script>(() => { const a = document.querySelector('.ql-link.dang-mo'); const n = a?.parentElement;
-  if (n && n.scrollWidth > n.clientWidth) n.scrollLeft += a.getBoundingClientRect().left - n.getBoundingClientRect().left - (n.clientWidth - a.offsetWidth) / 2; })();</script>
+  if (n && n.scrollWidth > n.clientWidth) n.scrollLeft += a.getBoundingClientRect().left - n.getBoundingClientRect().left - (n.clientWidth - a.offsetWidth) / 2;
+  const side = document.querySelector('.ql-side'), button = document.querySelector('.ql-menu-toggle'), key = 'sudia.ql.menu';
+  const desk = () => matchMedia('(min-width:901px)').matches;
+  let state = JSON.parse(localStorage.getItem(key) || '{"hidden":false}'); state.hidden ??= !!state.compact;
+  const apply = () => { side.classList.toggle('menu-an', desk() && !!state.hidden); button.setAttribute('aria-label', state.hidden ? 'Mở menu' : 'Ẩn menu'); button.title = button.getAttribute('aria-label'); };
+  button.addEventListener('click', () => { state.hidden = !state.hidden; localStorage.setItem(key, JSON.stringify(state)); apply(); });
+  addEventListener('resize', apply); apply();
+  const host = document.querySelector('[data-global-search]'); if (host) { const input = host.querySelector('input'), box = host.querySelector('[role=listbox]'), norm = (s) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim(); const dongNghia = { 'khoa':'khoa hoc bai hoc noi dung hoc tap', 'bai tap':'cau hoi de thi kiem tra nop bai', 'lich':'lich day lich hoc thoi khoa bieu', 'hoc vien':'lop hoc ghi danh tien do', 'diem':'ket qua danh gia tien do', 'doanh thu':'don hang thanh toan kinh doanh', 'tai khoan':'ho so ca nhan bao mat phan quyen', 'tro ly':'ai tai lieu ho tro', 'goi':'gia nang cap mua thanh toan' }; const muc = () => { const seen = new Set(); return [...document.querySelectorAll('a[href]')].map((a) => { const ten = a.textContent.trim().replace(/\s+/g, ' '), n = norm(ten); return { ten, href: a.href, tim: n + ' ' + Object.entries(dongNghia).filter(([d]) => n.includes(d)).map(([, tu]) => tu).join(' ') }; }).filter((x) => x.ten && !seen.has(x.ten + x.href) && seen.add(x.ten + x.href)); }; const tim = () => { const q = norm(input.value); return q ? muc().map((x) => ({ ...x, diem: norm(x.ten).includes(q) ? 2 : x.tim.includes(q) ? 1 : 0 })).filter((x) => x.diem).sort((a,b) => b.diem - a.diem).slice(0, 8) : []; }; const hien = () => { const kq = tim(); box.replaceChildren(...kq.map((x) => { const a = document.createElement('a'); a.href = x.href; a.textContent = x.ten; a.setAttribute('role', 'option'); return a; })); box.hidden = !kq.length; }; input.addEventListener('input', hien); input.addEventListener('keydown', (e) => { if (e.key === 'Enter') { const hit = tim()[0]; if (hit) { e.preventDefault(); location.href = hit.href; } } if (e.key === 'Escape') box.hidden = true; }); document.addEventListener('click', (e) => { if (!host.contains(e.target)) box.hidden = true; }); }
+})();</script>
 
 <div class="ql-than">
+<script>(() => { const h=document.querySelector('[data-global-search]'),i=h?.querySelector('input'),b=h?.querySelector('[role=listbox]'); if(!i)return; const n=s=>s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase(), f=()=>[...document.querySelectorAll('a[href]')].map(a=>({t:a.textContent.trim(),u:a.href})).filter(x=>x.t).map(x=>({...x,s:n(x.t).split(/\s+/).filter(w=>w).reduce((z,w)=>z+(n(i.value).split(/\s+/).some(q=>w.includes(q)||q.includes(w))?1:0),0})).sort((a,c)=>c.s-a.s).slice(0,8); i.addEventListener('input',()=>{const r=f();b.replaceChildren(...r.map(x=>Object.assign(document.createElement('a'),{href:x.u,textContent:x.t})));b.hidden=!r.length});})();</script>
 <header class="ql-top">
 <div class="ql-top-trai">
 @if (ViewData["Crumb"] is string crumb)
@@ -82,8 +109,6 @@
 </div>
 <div class="ql-top-phai">
 @await RenderSectionAsync("Actions", required: false)
-<span class="ql-tk"><span class="ql-nguoi" title="@nd?.Email"><span class="ql-avatar" aria-hidden="true">@((nd?.HoTen ?? "?").Split(' ', StringSplitOptions.RemoveEmptyEntries).LastOrDefault()?[..1].ToUpper())</span>@nd?.HoTen</span>
-<form method="post" asp-area="" asp-controller="TaiKhoan" asp-action="DangXuat"><button type="submit" class="ql-nut phu nho">Đăng xuất</button></form></span>
 </div>
 </header>
 @if (TempData["ThongBao"] is string tb)
@@ -104,10 +129,10 @@
 // Nút xoá: hỏi lại trước khi gửi
 document.querySelectorAll('form[data-hoi]').forEach((f) => f.addEventListener('submit', (e) => { if (!confirm(f.dataset.hoi)) e.preventDefault(); }));
 // Menu ⋮: bấm ra ngoài hoặc Esc thì đóng
-document.addEventListener('click', (e) => document.querySelectorAll('details.ql-ba-cham[open]').forEach((d) => { if (!d.contains(e.target)) d.open = false; }));
+document.addEventListener('click', (e) => document.querySelectorAll('details.ql-ba-cham[open], details.ql-tai-khoan[open]').forEach((d) => { if (!d.contains(e.target)) d.open = false; }));
 document.addEventListener('keydown', (e) => {
     if (e.key !== 'Escape') return;
-    const d = document.querySelector('details.ql-ba-cham[open]');
+    const d = document.querySelector('details.ql-tai-khoan[open], details.ql-ba-cham[open]');
     if (d) { d.open = false; d.querySelector('summary').focus(); }
 });
 </script>
