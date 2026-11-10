@@ -18,6 +18,8 @@ public class DangNhapModel
 
 public class DangKyModel
 {
+    public string? ReturnUrl { get; set; }
+
     [Required(ErrorMessage = "Nhập họ tên")]
     [StringLength(80)]
     public string HoTen { get; set; } = "";
