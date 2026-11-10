@@ -29,8 +29,8 @@ public class PayOSWebhookController(AppDbContext db, PayOSService payos, DonHang
         {
             var don = await db.DonHang.AsNoTracking().FirstOrDefaultAsync(d => d.MaThanhToan == ma, ct);
             if (don is null) log.LogInformation("Webhook PayOS cho đơn không có trong hệ thống: {Ma}", ma);
-            else if (soTien < don.SoTien) log.LogWarning("Đơn {Ma} nhận {Nhan} nhỏ hơn giá {Gia}", ma, soTien, don.SoTien);
-            else await donHang.XacNhanDaThanhToanAsync(don.Id, data.TryGetProperty("reference", out var r) ? r.GetString() : null, ct);
+            else if (soTien < don.SoTien) { db.NhatKyDuyet.Add(new NhatKyDuyet { DonHangId = don.Id, TacNhan = "PayOS-Webhook", QuyetDinh = QuyetDinhDuyet.CanXemXet, LyDo = "Số tiền PayOS xác nhận nhỏ hơn giá đơn.", DuLieuJson = JsonSerializer.Serialize(new { soTien, don.SoTien }) }); await db.SaveChangesAsync(ct); }
+            else await donHang.XacNhanDaThanhToanAsync(don.Id, data.TryGetProperty("reference", out var r) ? r.GetString() : null, soTien, "PayOS-Webhook", ct);
         }
         return Ok(new { success = true });
     }

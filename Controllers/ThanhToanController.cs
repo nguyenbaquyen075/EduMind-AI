@@ -77,12 +77,12 @@ public class ThanhToanController(AppDbContext db, PayOSService payos, DonHangSer
         {
             Menu = Menu("MuaGoi"), Goi = goi, HoTen = nd?.HoTen ?? "", Email = nd?.Email ?? "",
             LaHocVien = LaHocVien, CoTheThanhToan = payos.DaCauHinh || GiaLap, GiaLap = GiaLap,
-            DonDangCho = dangCho, PhutHetHan = PhutHetHan,
+            DonDangCho = dangCho, PhutHetHan = PhutHetHan, SoDienThoai = nd?.PhoneNumber ?? "",
         });
     }
 
     [HttpPost, ValidateAntiForgeryToken, ActionName(nameof(Mua))]
-    public async Task<IActionResult> TaoDon(int id, bool dongY, CancellationToken ct)
+    public async Task<IActionResult> TaoDon(int id, bool dongY, string? soDienThoai, bool dongYNhanTin, string? linkFacebook, CancellationToken ct)
     {
         var goi = await db.GoiBan.AsNoTracking().FirstOrDefaultAsync(g => g.Id == id && g.DangBan, ct);
         if (goi is null) return NotFound();
@@ -90,13 +90,16 @@ public class ThanhToanController(AppDbContext db, PayOSService payos, DonHangSer
             : goi.Gia is not > 0 ? "Gói này chưa có giá bán."
             : goi.KhoaIds.Count == 0 ? "Gói này chưa gắn khoá học nào."
             : !dongY ? "Bạn cần đồng ý với điều khoản mua gói trước khi thanh toán."
+            : dongYNhanTin && !SoDienThoai.ThuChuanHoa(soDienThoai, out _) ? "Số điện thoại nhận SMS không đúng định dạng."
+            : !string.IsNullOrWhiteSpace(linkFacebook) && !System.Text.RegularExpressions.Regex.IsMatch(linkFacebook, @"^https://(www\.|m\.)?facebook\.com/[\w.\-/?=&%]+$") ? "Link Facebook không hợp lệ."
             : !payos.DaCauHinh && !GiaLap ? "Thanh toán online chưa được cấu hình. Vui lòng liên hệ trung tâm." : null;
         if (loi is not null) { TempData["LoiThanhToan"] = loi; return RedirectToAction(nameof(Mua), new { id }); }
 
-        var don = await donHang.TaoDonAsync(Uid, goi, ct);
+        SoDienThoai.ThuChuanHoa(soDienThoai, out var soChuan);
+        var don = await donHang.TaoDonAsync(Uid, goi, dongYNhanTin ? soChuan : null, dongYNhanTin, linkFacebook, ct);
         if (GiaLap)
         {
-            await donHang.XacNhanDaThanhToanAsync(don.Id, "GIA-LAP", ct);
+            await donHang.XacNhanDaThanhToanAsync(don.Id, "GIA-LAP", don.SoTien, "PayOS-KetQua", ct);
             return RedirectToAction(nameof(KetQua), new { ma = don.MaThanhToan });
         }
         try
@@ -123,10 +126,12 @@ public class ThanhToanController(AppDbContext db, PayOSService payos, DonHangSer
         if (don is null) return NotFound();
         don = await DongBoAsync(don, ct, baoLoi: true);
         var khoa = await db.Khoa.AsNoTracking().Where(k => don.KhoaIds.Contains(k.Id)).OrderBy(k => k.ThuTu).ToListAsync(ct);
+        var thongBao = await db.ThongBao.AsNoTracking().Where(t => t.DonHangId == don.Id).OrderBy(t => t.Kenh).ToListAsync(ct);
         return View(new KetQuaThanhToanViewModel
         {
             Menu = Menu("DonHang"), Don = don, Khoa = khoa,
             HetHanLink = don.TrangThai == TrangThaiDon.ChoThanhToan ? don.NgayTao.AddMinutes(PhutHetHan) : null,
+            ThongBao = thongBao,
         });
     }
 
@@ -137,7 +142,9 @@ public class ThanhToanController(AppDbContext db, PayOSService payos, DonHangSer
         var don = await db.DonHang.AsNoTracking().FirstOrDefaultAsync(d => d.MaThanhToan == ma && d.NguoiDungId == Uid, ct);
         if (don is null) return NotFound();
         don = await DongBoAsync(don, ct, baoLoi: false);
-        return Json(new { trangThai = don.TrangThai });
+        var thongBao = await db.ThongBao.AsNoTracking().Where(t => t.DonHangId == don.Id).OrderBy(t => t.Kenh).ToListAsync(ct);
+        return Json(new { trangThai = don.TrangThai, thongBao = thongBao.Select(t => new { kenh = t.Kenh, trangThai = t.TrangThai,
+            nguoiNhan = t.Kenh == KenhThongBao.Sms ? SoDienThoai.Che(t.NguoiNhan) : t.NguoiNhan, guiLuc = t.GuiLuc, maNhaCungCap = t.MaNhaCungCap }) });
     }
 
     private async Task<DonHang> DongBoAsync(DonHang don, CancellationToken ct, bool baoLoi)
@@ -146,7 +153,7 @@ public class ThanhToanController(AppDbContext db, PayOSService payos, DonHangSer
         try
         {
             var tt = await payos.LayTrangThaiAsync(don.MaThanhToan, ct);
-            if (tt.Status == "PAID" && tt.AmountPaid >= don.SoTien) await donHang.XacNhanDaThanhToanAsync(don.Id, null, ct);
+            if (tt.Status == "PAID" && tt.AmountPaid >= don.SoTien) await donHang.XacNhanDaThanhToanAsync(don.Id, null, tt.AmountPaid, "PayOS-KetQua", ct);
             else if (tt.Status is "CANCELLED" or "EXPIRED") await donHang.HuyAsync(don.Id, ct);
         }
         catch (InvalidOperationException ex)
