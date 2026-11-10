@@ -53,7 +53,7 @@ public class DoanhThuController(AppDbContext db, PayOSService payos, DonHangServ
         {
             var tt = await payos.LayTrangThaiAsync(don.MaThanhToan, ct);
             if (tt.Status == "PAID" && tt.AmountPaid >= don.SoTien)
-            { await donHang.XacNhanDaThanhToanAsync(don.Id, null, ct); ThongBao($"Đơn {don.MaThanhToan} đã thanh toán, đã mở khoá cho học viên."); }
+            { await donHang.XacNhanDaThanhToanAsync(don.Id, null, tt.AmountPaid, "Admin", ct); ThongBao($"Đơn {don.MaThanhToan} đã thanh toán, đã mở khoá cho học viên."); }
             else if (tt.Status is "CANCELLED" or "EXPIRED")
             { await donHang.HuyAsync(don.Id, ct); ThongBao($"Đơn {don.MaThanhToan} đã huỷ/hết hạn trên PayOS."); }
             else ThongBao($"PayOS báo đơn {don.MaThanhToan} đang ở trạng thái {tt.Status}.");

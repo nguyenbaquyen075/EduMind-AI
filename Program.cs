@@ -5,6 +5,8 @@ using Microsoft.EntityFrameworkCore;
 using SuDia.Web.Data;
 using SuDia.Web.Services;
 using SuDia.Web.Services.TroLy;
+using SuDia.Web.Services.Sms;
+using SuDia.Web.Services.Email;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -66,6 +68,16 @@ builder.Services.AddScoped<HocVienService>();
 builder.Services.Configure<PayOSOptions>(builder.Configuration.GetSection("PayOS"));
 builder.Services.AddHttpClient<PayOSService>(http => http.Timeout = TimeSpan.FromSeconds(20));
 builder.Services.AddScoped<DonHangService>();
+builder.Services.AddScoped<DuyetDonAgent>();
+builder.Services.AddScoped<ThongBaoService>();
+builder.Services.Configure<SmsOptions>(builder.Configuration.GetSection("Sms"));
+if (builder.Environment.IsDevelopment()) builder.Services.AddSingleton<ISmsSender, LogSmsSender>();
+else builder.Services.AddSingleton<ISmsSender, ChuaCoSmsSender>();
+builder.Services.Configure<EmailOptions>(builder.Configuration.GetSection("Email"));
+if (builder.Environment.IsDevelopment()) builder.Services.AddSingleton<IEmailSender, LogEmailSender>();
+else builder.Services.AddSingleton<IEmailSender, ChuaCoEmailSender>();
+builder.Services.AddHostedService<ThongBaoWorker>();
+builder.Services.AddHostedService<DoiSoatDonWorker>();
 builder.Services.Configure<HocOnlineOptions>(builder.Configuration.GetSection("HocOnline"));
 
 // Giới hạn: 10 câu hỏi / phút / địa chỉ IP
@@ -79,6 +91,9 @@ builder.Services.AddRateLimiter(o =>
 
 var app = builder.Build();
 app.Logger.LogInformation("AI soạn bài Gemini: {TrangThai}", string.IsNullOrWhiteSpace(builder.Configuration["GEMINI_API_KEY"]) ? "Chưa cấu hình kết nối" : "Đã cấu hình kết nối");
+
+// dotnet ef chỉ cần tạo service provider để đọc model; không chạy máy chủ hay khởi tạo dữ liệu.
+if (Environment.GetEnvironmentVariable("EF_DESIGN_TIME") == "1") return;
 
 if (!app.Environment.IsDevelopment())
 {
@@ -96,9 +111,15 @@ app.UseAuthorization();
 app.MapControllerRoute(name: "areas", pattern: "{area:exists}/{controller=TongQuan}/{action=Index}/{id?}");
 app.MapControllerRoute(name: "default", pattern: "{controller=Home}/{action=Index}/{id?}");
 
-// Cập nhật database, vai trò, nội dung mẫu; tài khoản dùng thử chỉ tạo ở Development
-await KhoiTaoDuLieu.ChayAsync(app.Services, app.Environment.IsDevelopment(),
-    builder.Configuration["TaiKhoanMau:MatKhau"] ?? "SuDia@2026");
+// Cập nhật database, vai trò, nội dung mẫu; tài khoản dùng thử chỉ tạo ở Development.
+// EF Tools nạp Program để lấy metadata migration, không được thử kết nối database lúc đó.
+var dangTaoMigration = AppDomain.CurrentDomain.GetAssemblies()
+    .Any(a => a.GetName().Name == "Microsoft.EntityFrameworkCore.Design");
+if (!dangTaoMigration)
+{
+    await KhoiTaoDuLieu.ChayAsync(app.Services, app.Environment.IsDevelopment(),
+        builder.Configuration["TaiKhoanMau:MatKhau"] ?? "SuDia@2026");
+}
 
 // dotnet run -- --du-lieu-mau --xac-nhan-xoa-du-lieu-mau:
 // làm mới toàn bộ dữ liệu mẫu (chỉ Development) rồi thoát

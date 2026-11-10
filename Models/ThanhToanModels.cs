@@ -36,6 +36,7 @@ public class MuaGoiViewModel
     public required bool GiaLap { get; init; }
     public DonHang? DonDangCho { get; init; }
     public int PhutHetHan { get; init; } = 15;
+    public string SoDienThoai { get; init; } = "";
 }
 
 public class KetQuaThanhToanViewModel
@@ -44,6 +45,7 @@ public class KetQuaThanhToanViewModel
     public required DonHang Don { get; init; }
     public required IReadOnlyList<Khoa> Khoa { get; init; }
     public required DateTime? HetHanLink { get; init; }
+    public required IReadOnlyList<ThongBao> ThongBao { get; init; }
 }
 
 public class LichSuDonViewModel
