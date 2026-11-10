@@ -24,6 +24,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
     public DbSet<LuotLamKiemTra> LuotLamKiemTra => Set<LuotLamKiemTra>();
     public DbSet<GoiBan> GoiBan => Set<GoiBan>();
     public DbSet<DonHang> DonHang => Set<DonHang>();
+    public DbSet<ThongBao> ThongBao => Set<ThongBao>();
+    public DbSet<NhatKyDuyet> NhatKyDuyet => Set<NhatKyDuyet>();
 
     protected override void OnModelCreating(ModelBuilder b)
     {
@@ -45,8 +47,17 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
         b.Entity<LuotLamKiemTra>().HasKey(x => new { x.BaiTapGiaoId, x.NguoiDungId });
         b.Entity<DonHang>().HasIndex(x => x.MaThanhToan).IsUnique();
         b.Entity<DonHang>().HasIndex(x => new { x.NguoiDungId, x.NgayTao });
+        b.Entity<DonHang>().Property(x => x.SoDienThoai).HasMaxLength(16);
+        b.Entity<DonHang>().Property(x => x.LinkFacebook).HasMaxLength(200);
         // Xoá gói không xoá đơn đã bán; đơn giữ tên gói và giá đã chép lại
         b.Entity<DonHang>().HasOne(x => x.GoiBan).WithMany().HasForeignKey(x => x.GoiBanId).OnDelete(DeleteBehavior.SetNull);
         b.Entity<DonHang>().HasOne(x => x.NguoiDung).WithMany().HasForeignKey(x => x.NguoiDungId).OnDelete(DeleteBehavior.Restrict);
+        b.Entity<ThongBao>().HasIndex(x => new { x.DonHangId, x.Kenh, x.Loai }).IsUnique();
+        b.Entity<ThongBao>().HasIndex(x => new { x.TrangThai, x.GuiTiepLuc });
+        b.Entity<ThongBao>().Property(x => x.LoiCuoi).HasMaxLength(500);
+        b.Entity<ThongBao>().HasOne(x => x.DonHang).WithMany().HasForeignKey(x => x.DonHangId).OnDelete(DeleteBehavior.Cascade);
+        b.Entity<NhatKyDuyet>().Property(x => x.DuLieuJson).HasColumnType("jsonb");
+        b.Entity<NhatKyDuyet>().HasIndex(x => new { x.DonHangId, x.ThoiDiem });
+        b.Entity<NhatKyDuyet>().HasOne(x => x.DonHang).WithMany().HasForeignKey(x => x.DonHangId).OnDelete(DeleteBehavior.Cascade);
     }
 }

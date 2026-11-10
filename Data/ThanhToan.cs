@@ -42,6 +42,68 @@ public class DonHang
     public string? MaLinkThanhToan { get; set; }     // paymentLinkId của PayOS
     public string? LinkThanhToan { get; set; }       // checkoutUrl
     public string? MaGiaoDich { get; set; }          // reference ngân hàng từ webhook
+    public string? SoDienThoai { get; set; }         // chuẩn hoá: +84901234567
+    public bool DongYNhanTin { get; set; }
+    public string? LinkFacebook { get; set; }        // dành cho Messenger ở đợt sau
     public DateTime NgayTao { get; set; } = DateTime.UtcNow;
     public DateTime? NgayThanhToan { get; set; }
+}
+
+public static class KenhThongBao
+{
+    public const string Sms = "Sms";
+    public const string Email = "Email";
+}
+
+public static class LoaiThongBao
+{
+    public const string DaThanhToan = "DaThanhToan";
+}
+
+public static class TrangThaiThongBao
+{
+    public const string ChoGui = "ChoGui";
+    public const string DangGui = "DangGui";
+    public const string DaGui = "DaGui";
+    public const string Loi = "Loi";
+    public const string BoQua = "BoQua";
+}
+
+public class ThongBao
+{
+    public int Id { get; set; }
+    public int DonHangId { get; set; }
+    public DonHang? DonHang { get; set; }
+    public string NguoiDungId { get; set; } = "";
+    public string Kenh { get; set; } = KenhThongBao.Sms;
+    public string Loai { get; set; } = LoaiThongBao.DaThanhToan;
+    public string NguoiNhan { get; set; } = "";
+    public string NoiDung { get; set; } = "";
+    public string TrangThai { get; set; } = TrangThaiThongBao.ChoGui;
+    public int SoLanThu { get; set; }
+    public DateTime? GuiLuc { get; set; }
+    public DateTime? DangGuiLuc { get; set; }
+    public DateTime GuiTiepLuc { get; set; } = DateTime.UtcNow;
+    public string? MaNhaCungCap { get; set; }
+    public string? LoiCuoi { get; set; }
+    public DateTime TaoLuc { get; set; } = DateTime.UtcNow;
+}
+
+public static class QuyetDinhDuyet
+{
+    public const string TuDongDuyet = "TuDongDuyet";
+    public const string CanXemXet = "CanXemXet";
+    public const string TuChoi = "TuChoi";
+}
+
+public class NhatKyDuyet
+{
+    public int Id { get; set; }
+    public int DonHangId { get; set; }
+    public DonHang? DonHang { get; set; }
+    public DateTime ThoiDiem { get; set; } = DateTime.UtcNow;
+    public string TacNhan { get; set; } = "";
+    public string QuyetDinh { get; set; } = "";
+    public string LyDo { get; set; } = "";
+    public string DuLieuJson { get; set; } = "{}";
 }
