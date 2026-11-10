@@ -18,7 +18,6 @@
 </div>
 
 @if (TempData["LoiThanhToan"] is string loi) { <p class="tt-thong-bao loi" role="alert">@loi</p> }
-@if (!Model.LaHocVien) { <p class="tt-thong-bao" role="status">Bạn đang đăng nhập bằng tài khoản không phải học viên, nên chỉ có thể xem gói. Việc mua dành cho tài khoản học viên.</p> }
 
 @if (Model.DangHoc.Count > 0)
 {
@@ -69,7 +68,6 @@ else
 }
 <div class="tt-goi-chan">
 @if (!g.CoTheMua) { <span class="tt-nut tat">Chưa mở bán</span> }
-else if (!Model.LaHocVien) { <span class="tt-nut tat">Dành cho học viên</span> }
 else { <a asp-action="Mua" asp-route-id="@goi.Id" class="tt-nut @(goi.NoiBat ? "" : "vien")">@(g.Khoa.Any(k => k.DaGhiDanh) ? "Gia hạn gói này" : "Mua gói này")</a> }
 </div>
 </article>

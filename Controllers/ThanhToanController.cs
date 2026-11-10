@@ -16,7 +16,6 @@ public class ThanhToanController(AppDbContext db, PayOSService payos, DonHangSer
     IWebHostEnvironment env, UserManager<NguoiDung> users, IOptions<PayOSOptions> payosOpt, ILogger<ThanhToanController> log) : Controller
 {
     private string Uid => User.FindFirstValue(ClaimTypes.NameIdentifier)!;
-    private bool LaHocVien => User.IsInRole(VaiTro.HocVien);
     // Chưa có khoá PayOS thì máy dev được giả lập thanh toán để thử trọn luồng; môi trường thật thì không.
     private bool GiaLap => !payos.DaCauHinh && env.IsDevelopment();
 
@@ -37,7 +36,7 @@ public class ThanhToanController(AppDbContext db, PayOSService payos, DonHangSer
             Menu = Menu("MuaGoi"),
             Goi = goi.Select(g => new GoiHienThi(g, KhoaTrongGoi(g, khoa, ghiDanh))).ToList(),
             DangHoc = dangHoc.Where(g => g.Khoa is not null).Select(g => new KhoaTrongGoi(g.Khoa!, true, g.HanDen is null, g.HanDen, g.HanDen)).ToList(),
-            LaHocVien = LaHocVien, CoTheThanhToan = payos.DaCauHinh || GiaLap, GiaLap = GiaLap,
+            CoTheThanhToan = payos.DaCauHinh || GiaLap, GiaLap = GiaLap,
         });
     }
 
@@ -76,7 +75,7 @@ public class ThanhToanController(AppDbContext db, PayOSService payos, DonHangSer
         return View(new MuaGoiViewModel
         {
             Menu = Menu("MuaGoi"), Goi = goi, HoTen = nd?.HoTen ?? "", Email = nd?.Email ?? "",
-            LaHocVien = LaHocVien, CoTheThanhToan = payos.DaCauHinh || GiaLap, GiaLap = GiaLap,
+            CoTheThanhToan = payos.DaCauHinh || GiaLap, GiaLap = GiaLap,
             DonDangCho = dangCho, PhutHetHan = PhutHetHan, SoDienThoai = nd?.PhoneNumber ?? "",
         });
     }
@@ -86,8 +85,7 @@ public class ThanhToanController(AppDbContext db, PayOSService payos, DonHangSer
     {
         var goi = await db.GoiBan.AsNoTracking().FirstOrDefaultAsync(g => g.Id == id && g.DangBan, ct);
         if (goi is null) return NotFound();
-        var loi = !LaHocVien ? "Chỉ tài khoản học viên mua được gói học."
-            : goi.Gia is not > 0 ? "Gói này chưa có giá bán."
+        var loi = goi.Gia is not > 0 ? "Gói này chưa có giá bán."
             : goi.KhoaIds.Count == 0 ? "Gói này chưa gắn khoá học nào."
             : !dongY ? "Bạn cần đồng ý với điều khoản mua gói trước khi thanh toán."
             : dongYNhanTin && !SoDienThoai.ThuChuanHoa(soDienThoai, out _) ? "Số điện thoại nhận SMS không đúng định dạng."
