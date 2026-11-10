@@ -1,11 +1,11 @@
 @model KetQuaThanhToanViewModel
+@using SuDia.Web.Services
 @{
     var d = Model.Don;
     var thanhCong = d.TrangThai == TrangThaiDon.DaThanhToan;
     var huy = d.TrangThai == TrangThaiDon.DaHuy;
     var cho = !thanhCong && !huy;
     ViewData["Title"] = thanhCong ? "Thanh toán thành công · Sử Địa" : huy ? "Chưa thanh toán · Sử Địa" : "Đang chờ thanh toán · Sử Địa";
-    string Han(DateTime? t) => t is DateTime h ? h.ToLocalTime().ToString("dd/MM/yyyy") : "Không giới hạn";
 }
 @section Head {
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
@@ -43,6 +43,14 @@ else
 }
 </div>
 </section>
+@foreach (var tb in Model.ThongBao.Where(t => t.TrangThai != TrangThaiThongBao.BoQua))
+{
+    var kenh = tb.Kenh == KenhThongBao.Email ? "email" : "SMS";
+    var nguoiNhan = tb.Kenh == KenhThongBao.Email ? tb.NguoiNhan : SoDienThoai.Che(tb.NguoiNhan);
+    var giaLap = tb.MaNhaCungCap == "development-log" ? " (giả lập)" : "";
+    var text = tb.TrangThai switch { TrangThaiThongBao.ChoGui or TrangThaiThongBao.DangGui => $"Đang gửi {kenh} tới {nguoiNhan}…", TrangThaiThongBao.DaGui => $"Đã gửi {kenh} tới {nguoiNhan} lúc {tb.GuiLuc?.ToLocalTime():HH:mm}{giaLap}.", _ => $"Chưa gửi được {kenh}. Khoá học vẫn đã được mở." };
+    <p class="tt-thong-bao">@text</p>
+}
 
 <div class="tt-hai-cot">
 <div class="tt-cot-trai">
