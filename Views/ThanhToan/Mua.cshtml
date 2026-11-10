@@ -60,6 +60,14 @@
 </label>
 <div class="tt-nguoi-mua"><span class="hv-phu">Người mua</span><b>@Model.HoTen</b><span>@Model.Email</span></div>
 </section>
+
+<section class="hv-khoi">
+<div class="hv-khoi-dau"><h2>4. Nhận thông báo</h2></div>
+<p class="tt-ghi-chu">SMS chỉ được gửi sau khi PayOS xác nhận đã nhận đủ tiền.</p>
+<label class="ql-truong">Số điện thoại<input type="tel" name="soDienThoai" value="@Model.SoDienThoai" autocomplete="tel" placeholder="0901234567"></label>
+<label class="tt-dong-y"><input type="checkbox" name="dongYNhanTin" value="true" @(string.IsNullOrWhiteSpace(Model.SoDienThoai) ? null : "checked")><span>Gửi tin nhắn SMS xác nhận tới số này</span></label>
+<label class="ql-truong">Link Facebook (tuỳ chọn)<input type="url" name="linkFacebook" placeholder="Dùng cho Messenger ở bản sau"></label>
+</section>
 </div>
 
 <aside class="tt-cot-phai" aria-label="Tóm tắt đơn hàng">
