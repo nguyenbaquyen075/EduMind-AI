@@ -3,7 +3,6 @@
     var g = Model.Goi; var goi = g.Goi;
     ViewData["Title"] = $"Thanh toán gói {goi.Ten} · Sử Địa";
     var coGia = goi.Gia is > 0;
-    var duDieuKien = Model.LaHocVien && coGia && g.Khoa.Count > 0 && Model.CoTheThanhToan;
     string Han(DateTime? d, bool khongGioiHan) => khongGioiHan ? "Không giới hạn" : d is DateTime h ? h.ToLocalTime().ToString("dd/MM/yyyy") : "—";
 }
 @section Head {
@@ -81,8 +80,7 @@
 </dl>
 <div class="tt-tong"><span>Tổng thanh toán</span><b>@(coGia ? DinhDang.Gia(goi.Gia) : "Chưa có giá")</b></div>
 
-@if (!Model.LaHocVien) { <p class="tt-thong-bao">Chỉ tài khoản học viên mua được gói học.</p> }
-else if (!coGia || g.Khoa.Count == 0) { <p class="tt-thong-bao">Gói đang chờ cập nhật, chưa mở bán.</p> }
+@if (!coGia || g.Khoa.Count == 0) { <p class="tt-thong-bao">Gói đang chờ cập nhật, chưa mở bán.</p> }
 else if (!Model.CoTheThanhToan) { <p class="tt-thong-bao">Thanh toán online chưa được cấu hình. Vui lòng liên hệ trung tâm.</p> }
 else
 {

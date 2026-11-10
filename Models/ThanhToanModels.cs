@@ -20,7 +20,6 @@ public class ChonGoiViewModel
     public required MenuTaiKhoan Menu { get; init; }
     public required IReadOnlyList<GoiHienThi> Goi { get; init; }
     public required IReadOnlyList<KhoaTrongGoi> DangHoc { get; init; }
-    public required bool LaHocVien { get; init; }
     public required bool CoTheThanhToan { get; init; }
     public required bool GiaLap { get; init; }
 }
@@ -31,7 +30,6 @@ public class MuaGoiViewModel
     public required GoiHienThi Goi { get; init; }
     public required string HoTen { get; init; }
     public required string Email { get; init; }
-    public required bool LaHocVien { get; init; }
     public required bool CoTheThanhToan { get; init; }
     public required bool GiaLap { get; init; }
     public DonHang? DonDangCho { get; init; }

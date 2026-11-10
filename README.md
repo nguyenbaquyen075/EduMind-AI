@@ -147,7 +147,7 @@ Bài tập đã có bài nộp, hoặc đề đã có lượt làm, sẽ **bị 
 
 <p align="center"><img src="docs/images/luong-thanh-toan.svg" alt="Luồng mua gói học và thanh toán PayOS" width="100%"></p>
 
-- Chỉ tài khoản **học viên** mua được; gói phải đang bán, có giá và gắn ít nhất một khoá.
+- Mọi tài khoản đã đăng nhập đều có thể mua; gói phải đang bán, có giá và gắn ít nhất một khoá.
 - Link thanh toán PayOS hết hạn sau **15 phút** (`PayOS:PhutHetHanLink`).
 - Hệ thống **không tin tham số trên URL**: trang kết quả hỏi lại PayOS, còn webhook được xác minh bằng chữ ký và kiểm tra số tiền không nhỏ hơn giá gói.
 - Xác nhận đơn dùng `UPDATE` có điều kiện trong giao dịch, nên webhook và trang kết quả đến cùng lúc cũng **không cộng hạn học hai lần**.
