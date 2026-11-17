@@ -77,10 +77,20 @@ public class EfKhoaHocService : IKhoaHocService
         var mau = _mau.LayTrangChu();
         var goi = _db.GoiBan.AsNoTracking().Where(g => g.DangBan).OrderBy(g => g.ThuTu).ToList()
             .Select(g => new GoiHoc(g.Nhan, g.Ten, g.Gia, g.MauNhan, g.NoiBat, g.QuyenLoi, g.Id, g.SoThang)).ToList();
+        // Giảng viên: tài khoản có vai trò GiangVien (tối đa 4 người)
+        var vaiTroGv = _db.Roles.AsNoTracking().Where(r => r.Name == VaiTro.GiangVien).Select(r => r.Id).FirstOrDefault();
+        var giangVien = vaiTroGv is null ? new List<GiangVienTrangChu>() : (
+            from ur in _db.UserRoles.AsNoTracking()
+            join u in _db.Users.AsNoTracking() on ur.UserId equals u.Id
+            where ur.RoleId == vaiTroGv
+            orderby u.HoTen
+            select new { u.HoTen, u.Email }).Take(4).ToList()
+            .Select(u => new GiangVienTrangChu(string.IsNullOrWhiteSpace(u.HoTen) ? (u.Email ?? "Giảng viên") : u.HoTen, "Giảng viên")).ToList();
         return new TrangChuViewModel
         {
             CauHoiGoiY = mau.CauHoiGoiY, BuocHoc = mau.BuocHoc, MonHoc = mau.MonHoc, SoSanh = mau.SoSanh,
             GoiHoc = goi,
+            GiangVien = giangVien,
         };
     }
 
