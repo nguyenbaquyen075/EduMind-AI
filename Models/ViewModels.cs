@@ -26,6 +26,9 @@ public record GoiHoc(
 
 public record DongSoSanh(string QuyenLoi, string HocThu, string MotMon, string TronBo);
 
+/// <summary>Giảng viên hiện ở trang chủ. Mon: nhãn môn dạy (để trống thì hiện "Giảng viên")</summary>
+public record GiangVienTrangChu(string HoTen, string Mon);
+
 public class TrangChuViewModel
 {
     public IReadOnlyList<string> CauHoiGoiY { get; init; } = [];
@@ -33,6 +36,7 @@ public class TrangChuViewModel
     public IReadOnlyList<MonHoc> MonHoc { get; init; } = [];
     public IReadOnlyList<GoiHoc> GoiHoc { get; init; } = [];
     public IReadOnlyList<DongSoSanh> SoSanh { get; init; } = [];
+    public IReadOnlyList<GiangVienTrangChu> GiangVien { get; init; } = [];
 }
 
 // ======================================================= Tổng quan
