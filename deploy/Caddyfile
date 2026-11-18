@@ -1,0 +1,15 @@
+# Caddy tự xin và gia hạn chứng chỉ HTTPS cho tên miền, chuyển http → https
+{$TEN_MIEN} {
+	encode gzip zstd
+	# Tải tài liệu tối đa 10 tệp × 20 MB mỗi lần
+	request_body {
+		max_size 210MB
+	}
+	reverse_proxy web:8080
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options nosniff
+		Referrer-Policy strict-origin-when-cross-origin
+		-Server
+	}
+}
