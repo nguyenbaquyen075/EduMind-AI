@@ -54,12 +54,12 @@ def webhook_optional():
 def quote(value): return "'" + value.replace("'", "''") + "'"
 def snapshot_enrollments(user_id, package_id):
     rows = sql(f'''SELECT g."KhoaId" || E'\\t' || coalesce(g."HanDen"::text, '__NULL__') || E'\\t' || g."NgayTao"::text
-        FROM "GhiDanh" g JOIN "GoiBan" p ON p."Id"={package_id}
-        WHERE g."NguoiDungId"={quote(user_id)} AND g."KhoaId" = ANY(p."KhoaIds")''')
+        FROM "GhiDanh" g JOIN "GoiBanKhoa" p ON p."GoiBanId"={package_id} AND p."KhoaId" = g."KhoaId"
+        WHERE g."NguoiDungId"={quote(user_id)}''')
     return [row.split("\t", 2) for row in rows.splitlines() if row]
 def restore_enrollments(user_id, package_id, snapshot):
     sql(f'''DELETE FROM "GhiDanh" WHERE "NguoiDungId"={quote(user_id)}
-        AND "KhoaId" IN (SELECT unnest("KhoaIds") FROM "GoiBan" WHERE "Id"={package_id})''')
+        AND "KhoaId" IN (SELECT "KhoaId" FROM "GoiBanKhoa" WHERE "GoiBanId"={package_id})''')
     for khoa_id, han_den, ngay_tao in snapshot:
         han_sql = "NULL" if han_den == "__NULL__" else quote(han_den)
         sql(f'''INSERT INTO "GhiDanh" ("NguoiDungId", "KhoaId", "HanDen", "NgayTao")
@@ -72,7 +72,7 @@ def delete_orders(order_ids):
         f'DELETE FROM "DonHang" WHERE "Id" IN ({ids});')
 
 try:
-    package = sql('SELECT "Id" FROM "GoiBan" WHERE "DangBan" AND "Gia">0 AND cardinality("KhoaIds")>0 ORDER BY "Id" LIMIT 1')
+    package = sql('SELECT "Id" FROM "GoiBan" WHERE "DangBan" AND "Gia">0 AND EXISTS (SELECT 1 FROM "GoiBanKhoa" k WHERE k."GoiBanId"="GoiBan"."Id") ORDER BY "Id" LIMIT 1')
     assert package, "Development chưa có gói bán được"
     # Khách bị [Authorize] chuyển đến đăng nhập, sau đó đăng ký phải quay đúng trang Mua.
     guest = client()

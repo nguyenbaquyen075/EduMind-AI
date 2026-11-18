@@ -1,7 +1,7 @@
 namespace SuDia.Web.Data;
 
 // Một bài học có nhiều bài tập được giao riêng cho từng buổi.
-public class BaiTapGiao
+public class BaiTapGiao : ICoCapNhat
 {
     public int Id { get; set; }
     public int BaiId { get; set; }
@@ -15,6 +15,7 @@ public class BaiTapGiao
     public string NoiDungJson { get; set; } = "[]";
     public DateTime NgayTao { get; set; } = DateTime.UtcNow;
     public DeThi? DeThi { get; set; }
+    public DateTime CapNhatLuc { get; set; } = DateTime.UtcNow;
 }
 
 public class LuotLamKiemTra

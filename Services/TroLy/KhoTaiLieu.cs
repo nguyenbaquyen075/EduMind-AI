@@ -1,27 +1,38 @@
 using System.Globalization;
 using System.Text;
 using System.Text.RegularExpressions;
+using Microsoft.EntityFrameworkCore;
+using Npgsql;
+using SuDia.Web.Data;
 
 namespace SuDia.Web.Services.TroLy;
 
-/// <param name="Khoa">Mã khoá, ví dụ "lich-su-12"</param>
+/// <param name="Khoa">Mã khoá, ví dụ "lich-su-12"; rỗng nếu không thuộc khoá nào (gói học)</param>
 /// <param name="Mon">"Lịch sử 12"</param>
 /// <param name="Nguon">"Lịch sử 12 · Bài 7 · Mục 3 — Chiến dịch Điện Biên Phủ"</param>
-public record DoanTaiLieu(string Khoa, string Mon, string Nguon, string NoiDung);
+/// <param name="Loai">Bài học | Tài liệu | Thông tin khoá | Gói học</param>
+/// <param name="Lien">Đường dẫn mở nguồn (bài học tới đúng mục, tệp tài liệu); null nếu không có trang riêng</param>
+public record DoanTaiLieu(string Khoa, string Mon, string Nguon, string NoiDung, string Loai = LoaiDoan.BaiHoc, string? Lien = null);
+
+public static class LoaiDoan
+{
+    public const string BaiHoc = "Bài học";
+    public const string TaiLieu = "Tài liệu";
+    public const string ThongTinKhoa = "Thông tin khoá";
+    public const string GoiHoc = "Gói học";
+}
 
 /// <summary>
-/// Nạp tài liệu khoá (.md) và tìm đoạn liên quan đến câu hỏi.
-/// Cắt đoạn theo Heading 3 (Mục) như quy chuẩn ở Phần 5 của prompt-he-thong-tro-ly.md.
-/// Tìm kiếm BM25 trên chữ đã bỏ dấu (gõ không dấu vẫn tìm được), dùng cả cặp từ ghép
-/// vì tiếng Việt là ngôn ngữ đơn âm tiết ("dien bien", "bien phu").
-/// Khi có database: thay bằng pgvector + full-text, giữ nguyên giao diện TimKiem.
+/// Tìm đoạn tài liệu trong chỉ mục PostgreSQL (bảng DoanChiMuc, cột tsvector chữ đã bỏ dấu, chỉ mục GIN).
+/// Dùng chung cho Học viên › Tài liệu và trợ lý AI. Chỉ mục do DongBoChiMuc cập nhật khi nội dung đổi.
+/// Câu hỏi được tách thành âm tiết (bỏ từ dừng) ghép bằng OR; cặp âm tiết liền nhau ("dien bien", "bien phu")
+/// được cộng điểm thêm vì tiếng Việt là ngôn ngữ đơn âm tiết.
 /// </summary>
-public class KhoTaiLieu
+public class KhoTaiLieu(IServiceScopeFactory phamVi, string thuMucMd)
 {
     private const int DoDaiToiDa = 1500;   // ký tự mỗi đoạn
-    private const double K1 = 1.2, B = 0.75;
 
-    private static readonly HashSet<string> TuDung =
+    internal static readonly HashSet<string> TuDung =
     [
         "la", "cua", "va", "cac", "nhung", "mot", "nao", "gi", "khi", "the", "thi", "sao", "bao", "nhieu",
         "co", "khong", "duoc", "trong", "voi", "cho", "ve", "tu", "den", "o", "ai", "hay", "hoac", "nay",
@@ -29,60 +40,129 @@ public class KhoTaiLieu
         "nhe", "a", "oi", "vi", "de", "theo", "minh", "em", "ban", "biet", "hoi",
     ];
 
-    private readonly List<DoanTaiLieu> _doan = [];
-    private readonly List<Dictionary<string, int>> _tanSo = [];
-    private readonly List<int> _doDai = [];
-    private readonly Dictionary<string, int> _soDoanChua = [];
-    private double _doDaiTrungBinh;
+    /// <summary>Thư mục tệp .md dự phòng (dùng cho khoá chưa có nội dung trong hệ thống).</summary>
+    public string ThuMucMd => thuMucMd;
 
-    public IReadOnlyList<DoanTaiLieu> TatCa => _doan;
+    /// <summary>Số liệu cho trang quản trị.</summary>
+    public record ThongKeChiMuc(int SoDoan, int SoDoanCoSoDuLieu, int SoKhoaCoSoDuLieu, int SoDoanTepMd, DateTime NapLuc, int SoDoanTaiLieuTaiLen = 0);
 
-    public KhoTaiLieu(string thuMuc)
+    public async Task<ThongKeChiMuc> ThongKeAsync(CancellationToken ct = default)
     {
-        if (Directory.Exists(thuMuc))
-            foreach (var file in Directory.GetFiles(thuMuc, "*.md").Order())
-                NapFile(file);
-
-        foreach (var d in _doan)
+        using var scope = phamVi.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var nhom = await db.DoanChiMuc.AsNoTracking().GroupBy(d => 1).Select(g => new
         {
-            var tu = TachTu(d.Nguon + "\n" + d.NoiDung);
-            var tf = new Dictionary<string, int>();
-            foreach (var t in tu) tf[t] = tf.GetValueOrDefault(t) + 1;
-            foreach (var t in tf.Keys) _soDoanChua[t] = _soDoanChua.GetValueOrDefault(t) + 1;
-            _tanSo.Add(tf);
-            _doDai.Add(tu.Count);
-        }
-        _doDaiTrungBinh = _doDai.Count == 0 ? 1 : Math.Max(1, _doDai.Average());
+            Tong = g.Count(),
+            Md = g.Count(d => d.NguonKhoa.StartsWith("Md:")),
+            TaiLieu = g.Count(d => d.Loai == LoaiDoan.TaiLieu),
+            Luc = g.Max(d => (DateTime?)d.NapLuc),
+        }).FirstOrDefaultAsync(ct);
+        var soKhoa = await db.DoanChiMuc.Where(d => d.KhoaId != null && !d.NguonKhoa.StartsWith("Md:")).Select(d => d.KhoaId).Distinct().CountAsync(ct);
+        return nhom is null ? new(0, 0, 0, 0, DateTime.MinValue)
+            : new(nhom.Tong, nhom.Tong - nhom.Md, soKhoa, nhom.Md, (nhom.Luc ?? DateTime.MinValue).ToLocalTime(), nhom.TaiLieu);
     }
 
     /// <summary>Trả về tối đa <paramref name="soDoan"/> đoạn liên quan nhất, điểm giảm dần.</summary>
-    public IReadOnlyList<DoanTaiLieu> TimKiem(string cauHoi, string? khoa, int soDoan)
+    public Task<IReadOnlyList<DoanTaiLieu>> TimKiemAsync(string cauHoi, string? khoa, int soDoan, CancellationToken ct = default) =>
+        TimKiemAsync(cauHoi, khoa is null ? null : [khoa], soDoan, null, ct);
+
+    /// <summary>Tìm trong các khoá cho trước (null = mọi khoá). Đoạn không thuộc khoá nào (gói học) luôn được xét.</summary>
+    /// <param name="loai">Chỉ lấy các loại đoạn này (null = mọi loại)</param>
+    public async Task<IReadOnlyList<DoanTaiLieu>> TimKiemAsync(string cauHoi, IReadOnlyCollection<string>? dsKhoa, int soDoan,
+        IReadOnlyCollection<string>? loai, CancellationToken ct = default)
     {
-        var tuHoi = TachTu(cauHoi).Distinct().ToList();
-        if (tuHoi.Count == 0) return [];
+        var amTiet = Regex.Split(BoDau(cauHoi), "[^a-z0-9]+").Where(t => t.Length > 0).Take(60).ToList();
+        var tu = amTiet.Where(t => !TuDung.Contains(t)).Distinct().ToList();
+        if (tu.Count == 0) return [];
+        var cap = amTiet.Zip(amTiet.Skip(1)).Where(p => !TuDung.Contains(p.First) || !TuDung.Contains(p.Second))
+            .Select(p => $"{p.First} <-> {p.Second}").Distinct().ToList();
 
-        var n = _doan.Count;
-        var ketQua = new List<(int I, double Diem)>();
-        for (var i = 0; i < n; i++)
+        var sql = new StringBuilder("""
+            SELECT d.* FROM "DoanChiMuc" d,
+                   to_tsquery('simple', @q) q
+            """);
+        if (cap.Count > 0) sql.Append(", to_tsquery('simple', @cap) c");
+        sql.Append("""
+             WHERE d."TimKiem" @@ q
+               AND (@khoa::text[] IS NULL OR d."KhoaId" IS NULL OR d."KhoaId" = ANY(@khoa::text[]))
+               AND (@loai::text[] IS NULL OR d."Loai" = ANY(@loai::text[]))
+             ORDER BY ts_rank_cd(d."TimKiem", q, 1)
+            """);
+        if (cap.Count > 0) sql.Append(" + 2 * ts_rank_cd(d.\"TimKiem\", c, 1)");
+        sql.Append(" DESC, d.\"Id\" LIMIT @n");
+
+        var thamSo = new List<NpgsqlParameter>
         {
-            if (khoa is not null && _doan[i].Khoa != khoa) continue;
-            double diem = 0;
-            foreach (var t in tuHoi)
-            {
-                if (!_tanSo[i].TryGetValue(t, out var tf)) continue;
-                var df = _soDoanChua[t];
-                var idf = Math.Log(1 + (n - df + 0.5) / (df + 0.5));
-                diem += idf * tf * (K1 + 1) / (tf + K1 * (1 - B + B * _doDai[i] / _doDaiTrungBinh));
-            }
-            if (diem > 0) ketQua.Add((i, diem));
-        }
+            new("q", string.Join(" | ", tu)),
+            new("khoa", NpgsqlTypes.NpgsqlDbType.Array | NpgsqlTypes.NpgsqlDbType.Text) { Value = dsKhoa is null ? DBNull.Value : dsKhoa.ToArray() },
+            new("loai", NpgsqlTypes.NpgsqlDbType.Array | NpgsqlTypes.NpgsqlDbType.Text) { Value = loai is null ? DBNull.Value : loai.ToArray() },
+            new("n", soDoan),
+        };
+        if (cap.Count > 0) thamSo.Add(new("cap", string.Join(" | ", cap)));
 
-        return ketQua.OrderByDescending(x => x.Diem).Take(soDoan).Select(x => _doan[x.I]).ToList();
+        using var scope = phamVi.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var dong = await db.DoanChiMuc.FromSqlRaw(sql.ToString(), thamSo.ToArray<object>()).AsNoTracking().ToListAsync(ct);
+        return dong.Select(d => new DoanTaiLieu(d.KhoaId ?? "", d.Mon, d.Nguon, d.NoiDung, d.Loai, d.Lien)).ToList();
+    }
+
+    /// <summary>
+    /// Vài mục bài học có thật để trợ lý gợi ý học viên hỏi: liên quan tới <paramref name="lienQuan"/> (chủ đề đang học)
+    /// nếu có, không thì chọn ngẫu nhiên.
+    /// </summary>
+    public async Task<IReadOnlyList<string>> GoiYChuDeAsync(string? khoa, int so, string? lienQuan = null, CancellationToken ct = default)
+    {
+        List<string> nguon = [];
+        if (!string.IsNullOrWhiteSpace(lienQuan))
+            nguon = (await TimKiemAsync(lienQuan, khoa is null ? null : [khoa], so + 3, [LoaiDoan.BaiHoc], ct)).Select(d => d.Nguon).Distinct().Take(so).ToList();
+        if (nguon.Count == 0)
+        {
+            using var scope = phamVi.CreateScope();
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            nguon = await db.DoanChiMuc.AsNoTracking()
+                .Where(d => d.Loai == LoaiDoan.BaiHoc && (khoa == null || d.KhoaId == khoa))
+                .Select(d => d.Nguon).Distinct().OrderBy(_ => EF.Functions.Random()).Take(so).ToListAsync(ct);
+        }
+        // "Lịch sử 12 · Bài 7 · Mục 2 — Các chiến dịch lớn" → "Các chiến dịch lớn (Lịch sử 12, Bài 7)"
+        return nguon.Select(n =>
+        {
+            var p = n.Split(" · ");
+            var ten = n.Contains(" — ") ? n[(n.IndexOf(" — ") + 3)..] : n;
+            return p.Length >= 2 ? $"{ten} ({p[0]}, {p[1]})" : ten;
+        }).ToList();
+    }
+
+    /// <summary>Trích một khúc ngắn quanh từ khoá đầu tiên khớp câu tìm (so khớp không dấu) để hiện trong kết quả.</summary>
+    public static string TrichKhuc(string noiDung, string cauHoi, int doDai = 240)
+    {
+        var phang = Regex.Replace(noiDung, @"\s+", " ").Trim();
+        if (phang.Length <= doDai) return phang;
+        var khongDau = BoDau(phang);
+        var viTri = -1;
+        if (khongDau.Length == phang.Length)
+            foreach (var tu in Regex.Split(BoDau(cauHoi), @"[^a-z0-9]+").Where(t => t.Length > 2 && !TuDung.Contains(t)))
+            {
+                var m = Regex.Match(khongDau, $@"\b{Regex.Escape(tu)}\b");
+                if (m.Success) { viTri = m.Index; break; }
+            }
+        var dau = Math.Max(0, Math.Min(viTri < 0 ? 0 : viTri - doDai / 3, phang.Length - doDai));
+        var khuc = phang.Substring(dau, doDai);
+        return (dau > 0 ? "…" : "") + khuc.Trim() + (dau + doDai < phang.Length ? "…" : "");
+    }
+
+    /// <summary>Đọc các tệp .md dự phòng thành đoạn (khoá lấy từ phần đầu tệp "khoa:").</summary>
+    public static List<DoanTaiLieu> DocTepMd(string thuMuc)
+    {
+        var kq = new List<DoanTaiLieu>();
+        if (Directory.Exists(thuMuc))
+            foreach (var file in Directory.GetFiles(thuMuc, "*.md").Order())
+                NapFile(file, kq);
+        return kq;
     }
 
     // ---------------------------------------------------------------- Nạp file
 
-    private void NapFile(string duongDan)
+    private static void NapFile(string duongDan, List<DoanTaiLieu> ra)
     {
         var dong = File.ReadAllLines(duongDan);
         var batDau = 0;
@@ -111,7 +191,7 @@ public class KhoTaiLieu
             if (text.Length == 0) return;
             var nguon = TaoNguon(mon, bai, muc);
             foreach (var phan in ChiaNho(text))
-                _doan.Add(new DoanTaiLieu(khoa, mon, nguon, phan));
+                ra.Add(new DoanTaiLieu(khoa, mon, nguon, phan));
         }
 
         for (var i = batDau; i < dong.Length; i++)
@@ -144,7 +224,7 @@ public class KhoTaiLieu
     }
 
     // Mục dài thì chia theo đoạn văn, mỗi phần ≤ DoDaiToiDa ký tự
-    private static IEnumerable<string> ChiaNho(string text)
+    internal static IEnumerable<string> ChiaNho(string text)
     {
         if (text.Length <= DoDaiToiDa) { yield return text; yield break; }
         var sb = new StringBuilder();
@@ -169,18 +249,5 @@ public class KhoTaiLieu
         foreach (var c in tach)
             if (CharUnicodeInfo.GetUnicodeCategory(c) != UnicodeCategory.NonSpacingMark) sb.Append(c);
         return sb.ToString();
-    }
-
-    /// <summary>Âm tiết (bỏ từ dừng) + cặp âm tiết liền nhau, đều đã bỏ dấu.</summary>
-    private static List<string> TachTu(string s)
-    {
-        var amTiet = Regex.Split(BoDau(s), @"[^a-z0-9]+").Where(t => t.Length > 0).ToList();
-        var kq = new List<string>();
-        for (var i = 0; i < amTiet.Count; i++)
-        {
-            if (!TuDung.Contains(amTiet[i])) kq.Add(amTiet[i]);
-            if (i + 1 < amTiet.Count) kq.Add(amTiet[i] + "_" + amTiet[i + 1]);
-        }
-        return kq;
     }
 }

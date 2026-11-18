@@ -29,7 +29,7 @@ public class GoiHocController(AppDbContext db, PayOSService payos) : AdminContro
         if (g is null) return NotFound();
         await NapKhoa();
         return View(new GoiBanForm { Id = g.Id, Ten = g.Ten, Nhan = g.Nhan, MauNhan = g.MauNhan, Gia = g.Gia, SoThang = g.SoThang,
-            NoiBat = g.NoiBat, DangBan = g.DangBan, QuyenLoi = string.Join("\n", g.QuyenLoi), KhoaIds = g.KhoaIds });
+            NoiBat = g.NoiBat, DangBan = g.DangBan, QuyenLoi = string.Join("\n", g.QuyenLoi), KhoaIds = [.. g.KhoaIds] });
     }
 
     [HttpPost, ValidateAntiForgeryToken]
@@ -49,7 +49,7 @@ public class GoiHocController(AppDbContext db, PayOSService payos) : AdminContro
             Db.GoiBan.Add(g);
         }
         g.Ten = f.Ten.Trim(); g.Nhan = f.Nhan?.Trim() ?? ""; g.MauNhan = f.MauNhan; g.Gia = f.Gia; g.SoThang = f.SoThang;
-        g.NoiBat = f.NoiBat; g.DangBan = f.DangBan; g.KhoaIds = f.KhoaIds;
+        g.NoiBat = f.NoiBat; g.DangBan = f.DangBan; g.DatKhoa(f.KhoaIds);
         g.QuyenLoi = (f.QuyenLoi ?? "").Split('\n').Select(x => x.Trim()).Where(x => x.Length > 0).ToList();
         await Db.SaveChangesAsync();
         ThongBao(g.DangBan && g.Gia is null ? $"Đã lưu gói {g.Ten}. Gói chưa có giá nên chưa mua được." : $"Đã lưu gói {g.Ten}.");

@@ -124,9 +124,17 @@ public class CauHoiController(AppDbContext db) : GiangVienControllerBase(db)
     {
         var c = await Db.CauHoi.FirstOrDefaultAsync(x => x.Id == id && (LaAdmin || x.Bai!.ChuDe!.Khoa!.GiangVienId == Uid));
         if (c is null) return NotFound();
-        Db.CauHoi.Remove(c);
-        await Db.SaveChangesAsync();
-        ThongBao("Đã xoá câu hỏi (và gỡ khỏi các đề thi có câu này).");
+        // Giữ nguyên đề thi và kết quả học viên: câu đã dùng thì không xoá, chỉ sửa
+        if (await Db.DeThiCau.AnyAsync(x => x.CauHoiId == id))
+            BaoLoi("Câu hỏi đang nằm trong đề thi thử nên không xoá được. Hãy gỡ câu khỏi đề trước, hoặc sửa nội dung câu.");
+        else if (await Db.CauTraLoi.AnyAsync(x => x.CauHoiId == id))
+            BaoLoi("Học viên đã làm câu hỏi này nên không xoá được (cần giữ kết quả). Hãy sửa nội dung câu nếu cần.");
+        else
+        {
+            Db.CauHoi.Remove(c);
+            await Db.SaveChangesAsync();
+            ThongBao("Đã xoá câu hỏi.");
+        }
         return RedirectToAction(nameof(Index), new { bai = c.BaiId });
     }
 

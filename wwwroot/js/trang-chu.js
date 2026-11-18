@@ -34,7 +34,7 @@
   const sendBtn = $('chatGui');
   const mon = $('chatMon');
 
-  const lichSu = []; // 3 lượt gần nhất gửi kèm để server hiểu câu hỏi nối tiếp
+  const lichSu = []; // 6 lượt gần nhất gửi kèm để server hiểu câu hỏi nối tiếp
   let timers = [];
   let demoOn = true;
   let busy = false;
@@ -100,7 +100,7 @@
       const res = await fetch('/api/tro-ly/hoi', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', RequestVerificationToken: token },
-        body: JSON.stringify({ cauHoi: q, khoaId: mon.value || null, lichSu: lichSu.slice(-3) }),
+        body: JSON.stringify({ cauHoi: q, khoaId: mon.value || null, lichSu: lichSu.slice(-6) }),
       });
       if (res.status === 429) return { label: 'Tạm dừng', text: 'Bạn hỏi hơi nhanh, vui lòng đợi một chút rồi hỏi tiếp.', mark: '', source: '' };
       if (res.status === 400) {

@@ -14,7 +14,7 @@ public class DeThiController(AppDbContext db) : GiangVienControllerBase(db)
         var rows = await Db.DeThi.AsNoTracking().Where(d => khoaIds.Contains(d.KhoaId)).OrderBy(d => d.KhoaId).ThenBy(d => d.Id)
             .Select(d => new { d.Id, d.Ten, d.SoPhut, d.DangMo, Khoa = d.Khoa!.Ten, SoCau = d.Cau.Count,
                 d.BaiTapGiaoId, NoiDung = d.BaiTapGiao == null ? null : d.BaiTapGiao.NoiDungJson,
-                LuotLam = Db.BaiLam.Count(b => b.LaDeThi && b.MaDe == d.Id) + Db.LuotLamKiemTra.Count(b => b.BaiTapGiaoId == d.BaiTapGiaoId) }).ToListAsync();
+                LuotLam = Db.BaiLam.Count(b => b.DeThiId == d.Id) + Db.LuotLamKiemTra.Count(b => b.BaiTapGiaoId == d.BaiTapGiaoId) }).ToListAsync();
         ViewBag.De = rows.Select(d => new { d.Id, d.Ten, d.SoPhut, d.DangMo, d.Khoa,
             SoCau = d.NoiDung is string text ? NoiDungBaiTap.Doc(text).Count : d.SoCau,
             d.BaiTapGiaoId, d.LuotLam }).ToList();
@@ -53,15 +53,12 @@ public class DeThiController(AppDbContext db) : GiangVienControllerBase(db)
         var d = f.Id == 0 ? null : await Db.DeThi.Include(x => x.Cau).FirstOrDefaultAsync(x => x.Id == f.Id && x.KhoaId == f.KhoaId);
         if (f.Id != 0 && d is null) return NotFound();
         if (d?.BaiTapGiaoId is not null) return BadRequest("Đề này dùng form soạn bài chung. Hãy mở lại từ danh sách kiểm tra.");
-        if (d is not null && await Db.BaiLam.AnyAsync(b => b.LaDeThi && b.MaDe == d.Id))
+        if (d is not null && await Db.BaiLam.AnyAsync(b => b.DeThiId == d.Id))
             return BadRequest("Đề đã có bài làm. Hãy tạo đề mới để giữ nguyên nội dung và kết quả.");
         if (d is null)
         {
-            // Mã đề theo khoá: khoá thứ n dùng dải n*1000+1… (Lịch sử 1001…, Địa lí 2001…)
-            var thuTu = await Db.Khoa.Where(k => k.Id == f.KhoaId).Select(k => k.ThuTu).FirstAsync();
-            var coSo = (thuTu + 1) * 1000;
-            var maMoi = (await Db.DeThi.Where(x => x.Id > coSo && x.Id < coSo + 1000).MaxAsync(x => (int?)x.Id) ?? coSo) + 1;
-            d = new DeThi { Id = maMoi, KhoaId = f.KhoaId };
+            // Mã đề do CSDL tự tăng
+            d = new DeThi { KhoaId = f.KhoaId };
             Db.DeThi.Add(d);
         }
         d.Ten = f.Ten.Trim();
@@ -79,7 +76,7 @@ public class DeThiController(AppDbContext db) : GiangVienControllerBase(db)
     {
         var d = await Db.DeThi.FirstOrDefaultAsync(x => x.Id == id);
         if (d is null || !await KhoaCuaToi().AnyAsync(k => k.Id == d.KhoaId)) return NotFound();
-        if (await Db.BaiLam.AnyAsync(b => b.LaDeThi && b.MaDe == id) || (d.BaiTapGiaoId is int btId &&
+        if (await Db.BaiLam.AnyAsync(b => b.DeThiId == id) || (d.BaiTapGiaoId is int btId &&
             (await Db.BaiNopGiao.AnyAsync(n => n.BaiTapGiaoId == btId) || await Db.LuotLamKiemTra.AnyAsync(n => n.BaiTapGiaoId == btId))))
         {
             BaoLoi("Đề đã có học viên làm. Giữ lại nội dung và kết quả; anh có thể tạo đề mới.");
