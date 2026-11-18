@@ -43,7 +43,7 @@ html { scroll-behavior: smooth; scroll-padding-top: var(--tc-head-h, 72px); }
 .tc-logo span { color: #1D4ED8; }
 .tc-nav { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 6px; font-size: 15px; font-weight: 500; }
 .tc-nav a { display: inline-flex; align-items: center; min-height: 44px; padding: 0 12px; text-decoration: none; }
-.tc-nav a.tc-btn { margin-left: 4px; padding: 0 22px; }
+.tc-nav a.tc-btn { margin-left: 28px; padding: 0 22px; }
 
 /* ---------- Phần đầu: ảnh nền + khung chat ---------- */
 .tc-hero { position: relative; aspect-ratio: 1672 / 941; min-height: 760px; }
