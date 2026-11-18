@@ -43,7 +43,7 @@
     try {
       const res = await fetch('/api/tro-ly/hoi', { method:'POST', signal:requestController.signal, headers: {
         'Content-Type':'application/json', 'RequestVerificationToken':form.querySelector('[name=__RequestVerificationToken]').value
-      }, body:JSON.stringify({cauHoi:q, khoaId:subject.value || null, lichSu:history.slice(-3)}) });
+      }, body:JSON.stringify({cauHoi:q, khoaId:subject.value || null, lichSu:history.slice(-6)}) });
       if (current !== version) return;
       if (res.status === 429) throw new Error('Bạn hỏi hơi nhanh. Vui lòng đợi khoảng một phút rồi thử lại.');
       if (res.status === 400) throw new Error('Không gửi được câu hỏi. Vui lòng tải lại trang rồi thử lại.');
@@ -52,7 +52,7 @@
       if (current !== version) return;
       if (!data.noiDung) throw new Error('Chưa nhận được câu trả lời. Bạn vui lòng thử lại.');
       message('assistant', data.noiDung, data.nhan || 'Trợ lý AI', data.nguon || '');
-      if (!data.tuChoi) history = [...history, {cauHoi:q, traLoi:data.noiDung}].slice(-3);
+      if (!data.tuChoi) history = [...history, {cauHoi:q, traLoi:data.noiDung}].slice(-6);
     } catch(e) {
       if (current !== version) return;
       const m = message('assistant', e.name === 'AbortError' ? 'Trợ lý trả lời lâu hơn dự kiến. Bạn vui lòng thử lại.' : e.message, 'Chưa gửi được', '', true);

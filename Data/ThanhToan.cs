@@ -3,7 +3,7 @@ namespace SuDia.Web.Data;
 // ======================================================= Gói học bán online và đơn hàng thanh toán PayOS
 
 /// <summary>Gói học hiển thị ở trang chủ; admin sửa giá, quyền lợi và các khoá được mở.</summary>
-public class GoiBan
+public class GoiBan : ICoCapNhat
 {
     public int Id { get; set; }
     public string Ten { get; set; } = "";             // "Sử & Địa 12"
@@ -15,7 +15,30 @@ public class GoiBan
     public bool DangBan { get; set; } = true;
     public int ThuTu { get; set; }
     public List<string> QuyenLoi { get; set; } = [];
-    public List<string> KhoaIds { get; set; } = [];   // các khoá được ghi danh khi mua
+    public List<GoiBanKhoa> KhoaTrongGoi { get; set; } = [];   // các khoá được ghi danh khi mua (luôn được nạp kèm gói)
+    public DateTime CapNhatLuc { get; set; } = DateTime.UtcNow;
+
+    /// <summary>Mã các khoá trong gói (chỉ đọc, lấy từ KhoaTrongGoi). Không dùng trong câu truy vấn LINQ.</summary>
+    [System.ComponentModel.DataAnnotations.Schema.NotMapped]
+    public IReadOnlyList<string> KhoaIds => KhoaTrongGoi.Select(k => k.KhoaId).ToList();
+
+    /// <summary>Đặt lại danh sách khoá của gói: giữ dòng cũ còn dùng, thêm dòng mới, bỏ dòng thừa.</summary>
+    public void DatKhoa(IEnumerable<string> khoaIds)
+    {
+        var moi = khoaIds.Distinct().ToList();
+        KhoaTrongGoi.RemoveAll(k => !moi.Contains(k.KhoaId));
+        foreach (var id in moi.Where(id => KhoaTrongGoi.All(k => k.KhoaId != id)))
+            KhoaTrongGoi.Add(new GoiBanKhoa { KhoaId = id });
+    }
+}
+
+/// <summary>Khoá thuộc gói bán (bảng nối). Không xoá được khoá còn nằm trong gói.</summary>
+public class GoiBanKhoa
+{
+    public int GoiBanId { get; set; }
+    public GoiBan? GoiBan { get; set; }
+    public string KhoaId { get; set; } = "";
+    public Khoa? Khoa { get; set; }
 }
 
 public static class TrangThaiDon

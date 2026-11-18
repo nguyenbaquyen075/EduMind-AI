@@ -1,0 +1,71 @@
+@model GvKhoTaiLieuViewModel
+@{
+    ViewData["Title"] = "Kho tài liệu – Giảng viên";
+    ViewData["TieuDe"] = "Kho tài liệu";
+    ViewData["Muc"] = "TaiLieu";
+    string Co(long b) => b >= 1024 * 1024 ? $"{b / 1024d / 1024:0.#} MB" : $"{Math.Max(1, b / 1024)} KB";
+}
+@if (Model.DsKhoa.Count == 0)
+{
+<p class="ql-trong">Bạn chưa được gán khoá nào. Admin gán khoá ở mục Khoá học.</p>
+    return;
+}
+<form method="get" class="ql-bo-loc">
+<div class="ql-truong"><label for="khoa">Khoá</label>
+<select id="khoa" name="khoa" onchange="this.form.submit()">@foreach (var k in Model.DsKhoa) { <option value="@k.Id" selected="@(k.Id == Model.KhoaId)">@k.Ten</option> }</select></div>
+<div class="ql-truong"><label for="q">Tìm theo tên tài liệu</label><input id="q" name="q" type="text" value="@Model.TuKhoa" placeholder="Ví dụ: Điện Biên Phủ"></div>
+<button class="ql-nut phu" type="submit">Lọc</button>
+</form>
+
+<section class="ql-khoi">
+<div class="ql-khoi-dau"><h2>Thêm tài liệu vào kho</h2><p>Word (.docx), PowerPoint (.pptx), PDF, .txt, .md — tối đa 20 MB mỗi tệp, 10 tệp mỗi lần. Học viên của khoá tìm và mở được; trợ lý AI dùng để trả lời.</p></div>
+<form method="post" asp-action="Tai" enctype="multipart/form-data" class="ql-khoi-than ql-hang-nut" style="align-items:flex-end">
+<input type="hidden" name="khoaId" value="@Model.KhoaId">
+<div class="ql-truong" style="flex:1 1 280px;margin:0"><label for="tep">Tệp</label><input id="tep" type="file" name="tep" multiple required accept="@SuDia.Web.Services.TaiLieuKhoaService.ChapNhan"></div>
+<div class="ql-truong" style="flex:1 1 240px;margin:0"><label for="baiId">Gắn với bài (không bắt buộc)</label>
+<select id="baiId" name="baiId"><option value="">— Tài liệu chung của khoá —</option>@foreach (var b in Model.Bai) { <option value="@b.Id">@b.Ten</option> }</select></div>
+<button class="ql-nut" type="submit">Tải lên</button>
+</form>
+</section>
+
+<section class="ql-khoi">
+<div class="ql-khoi-dau"><h2>Tài liệu trong kho (@Model.TaiLieu.Count)</h2><p>Tắt "Học viên thấy" để giữ tài liệu nội bộ: học viên không tìm thấy và AI không đọc.</p></div>
+@if (Model.TaiLieu.Count == 0)
+{
+<p class="ql-trong">Chưa có tài liệu nào@(string.IsNullOrWhiteSpace(Model.TuKhoa) ? "" : " khớp từ khoá"). Khi bạn nhập Word/PowerPoint lúc soạn bài, tệp gốc cũng được lưu vào đây.</p>
+}
+else
+{
+<div class="ad-table-wrap"><table class="ql-bang">
+<thead><tr><th>Tài liệu</th><th>Gắn với bài</th><th>Trạng thái</th><th class="so">Dung lượng</th><th>Tải lên</th><th></th></tr></thead>
+<tbody>
+@foreach (var t in Model.TaiLieu)
+{
+<tr>
+<td><a href="/GiangVien/TaiLieu/Mo/@t.Id" target="_blank" rel="noopener"><b>@t.Ten</b></a><span class="ql-phu" style="display:block">@t.TenTep · @t.LoaiTep.ToUpperInvariant()</span></td>
+<td>@(t.Bai ?? "Chung của khoá")</td>
+<td>
+@if (t.TrangThai == TrangThaiTaiLieu.SanSang) { <span class="ql-chip xanh">Đã đọc @t.SoKyTu.ToString("N0") ký tự</span> }
+else { <span class="ql-chip do" title="@t.LoiDoc">Chưa đọc được chữ</span><span class="ql-phu" style="display:block">@t.LoiDoc</span> }
+@if (!t.HienChoHocVien) { <span class="ql-chip vang">Nội bộ</span> }
+</td>
+<td class="so">@Co(t.KichThuoc)</td>
+<td>@t.TaiLuc.ToLocalTime().ToString("dd/MM/yyyy HH:mm")<span class="ql-phu" style="display:block">@t.NguoiTai</span></td>
+<td class="hanh-dong">
+<details><summary class="ql-nut phu nho">Sửa</summary>
+<form method="post" asp-action="Sua" class="ql-form" style="min-width:260px;margin-top:8px">
+<input type="hidden" name="id" value="@t.Id">
+<div class="ql-truong"><label>Tên hiển thị</label><input name="ten" value="@t.Ten" maxlength="200" required></div>
+<div class="ql-truong"><label>Gắn với bài</label><select name="baiId"><option value="">— Chung của khoá —</option>@foreach (var b in Model.Bai) { <option value="@b.Id" selected="@(t.Bai == b.Ten)">@b.Ten</option> }</select></div>
+<label class="ql-check"><input type="checkbox" name="hienChoHocVien" value="true" checked="@t.HienChoHocVien"> Học viên thấy (AI được đọc)</label>
+<button class="ql-nut nho" type="submit">Lưu</button>
+</form>
+</details>
+<a class="ql-nut phu nho" href="/GiangVien/TaiLieu/Chu/@t.Id" target="_blank" rel="noopener">Xem chữ</a>
+<form method="post" asp-action="Xoa" data-hoi="Xoá &quot;@t.Ten&quot; khỏi kho? Học viên và trợ lý AI sẽ không dùng được nữa." style="display:inline"><input type="hidden" name="id" value="@t.Id"><button class="ql-nut xoa nho" type="submit">Xoá</button></form>
+</td>
+</tr>
+}
+</tbody></table></div>
+}
+</section>

@@ -113,7 +113,7 @@ public class EfKhoaHocService : IKhoaHocService
         for (var d = DateTime.Today; ngay.Contains(d); d = d.AddDays(-1)) chuoi++;
 
         // Nên ôn lại: bài có lần làm gần nhất dưới 80%
-        var nenOn = baiLam.Where(b => !b.LaDeThi).GroupBy(b => b.MaDe).Select(g => g.First())
+        var nenOn = baiLam.Where(b => !b.LaDeThi).GroupBy(b => b.BaiId).Select(g => g.First())
             .Where(b => b.SoCau > 0 && b.SoDung < b.SoCau * 0.8).Select(b => b.TenDe).Take(3).ToList();
 
         return new TongQuanViewModel
@@ -220,7 +220,7 @@ public class EfKhoaHocService : IKhoaHocService
         var soCau = _db.CauHoi.AsNoTracking().GroupBy(c => c.BaiId).Select(g => new { g.Key, N = g.Count() }).ToDictionary(x => x.Key, x => x.N);
         // Kết quả gần nhất của mỗi bài / đề
         var ganNhat = _db.BaiLam.AsNoTracking().Where(b => b.NguoiDungId == _userId).OrderByDescending(b => b.NopLuc).ToList()
-            .GroupBy(b => (b.MaDe, b.LaDeThi)).ToDictionary(g => g.Key, g => g.First());
+            .GroupBy(b => (MaDe: b.LaDeThi ? b.DeThiId!.Value : b.BaiId!.Value, b.LaDeThi)).ToDictionary(g => g.Key, g => g.First());
         var deThi = _db.DeThi.AsNoTracking().Where(d => d.DangMo).OrderBy(d => d.Id)
             .Select(d => new { d.Id, d.KhoaId, d.Ten, d.SoPhut, SoCau = d.Cau.Count, d.BaiTapGiaoId,
                 NoiDung = d.BaiTapGiao == null ? null : d.BaiTapGiao.NoiDungJson }).ToList();
@@ -254,7 +254,8 @@ public class EfKhoaHocService : IKhoaHocService
     {
         var ma = id ?? 7;
         var danhMuc = DanhMuc();
-        var de = ma >= 1000 ? _db.DeThi.AsNoTracking().FirstOrDefault(d => d.Id == ma) : null;
+        // Mã bài và mã đề dùng chung một dãy số (không trùng), nên tra thẳng bảng đề
+        var de = _db.DeThi.AsNoTracking().FirstOrDefault(d => d.Id == ma);
 
         if (de is not null && danhMuc.FirstOrDefault(k => k.Id == de.KhoaId) is { } khoa)
         {
@@ -279,7 +280,7 @@ public class EfKhoaHocService : IKhoaHocService
 
         _db.BaiLam.Add(new BaiLam
         {
-            NguoiDungId = _userId, MaDe = daNop.Id, LaDeThi = daNop.LaDeThi, TenDe = daNop.TenDe,
+            NguoiDungId = _userId, BaiId = daNop.LaDeThi ? null : daNop.Id, DeThiId = daNop.LaDeThi ? daNop.Id : null, LaDeThi = daNop.LaDeThi, TenDe = daNop.TenDe,
             SoCau = daNop.CauHoi.Count, SoDung = daNop.SoDung,
             TraLoi = daNop.CauHoi.Select((c, i) => new CauTraLoi { CauHoiId = c.Id, ThuTu = i + 1, DaChon = daNop.Chon(i + 1), Dung = daNop.Dung(i + 1) }).ToList(),
         });

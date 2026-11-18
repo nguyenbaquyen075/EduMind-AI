@@ -54,6 +54,55 @@ public class HomeController : Controller
             Cau = await hv.CauSai(uid, khoa), DsKhoa = dsKhoa, KhoaId = khoa });
     }
 
+    // ------------------------------------------------------------------ Kho tài liệu
+    // Học viên tìm trong bài học + tài liệu giảng viên tải lên của các khoá mình đang học (nhân viên: mọi khoá)
+    private async Task<List<(string Id, string Ten)>> KhoaXemTaiLieu(AppDbContext db, HocVienService hv)
+    {
+        if (User.IsInRole(VaiTro.Admin) || User.IsInRole(VaiTro.GiangVien))
+            return (await db.Khoa.AsNoTracking().OrderBy(k => k.ThuTu).Select(k => new { k.Id, k.Ten }).ToListAsync()).Select(k => (k.Id, k.Ten)).ToList();
+        return await hv.KhoaCuaToi(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+    }
+
+    [Authorize]
+    public async Task<IActionResult> TaiLieu([FromServices] AppDbContext db, [FromServices] HocVienService hv,
+        [FromServices] SuDia.Web.Services.TroLy.KhoTaiLieu kho, string? q, string? khoa)
+    {
+        var dsKhoa = await KhoaXemTaiLieu(db, hv);
+        if (khoa is not null && !dsKhoa.Any(k => k.Id == khoa)) khoa = null;
+        var phamVi = khoa is not null ? [khoa] : dsKhoa.Select(k => k.Id).ToList();
+        var tenKhoa = dsKhoa.ToDictionary(k => k.Id, k => k.Ten);
+
+        IReadOnlyList<KetQuaTimTaiLieu> ketQua = [];
+        if (!string.IsNullOrWhiteSpace(q) && phamVi.Count > 0)
+        {
+            q = q.Trim().Length > 200 ? q.Trim()[..200] : q.Trim();
+            ketQua = (await kho.TimKiemAsync(q, phamVi, 20, [SuDia.Web.Services.TroLy.LoaiDoan.BaiHoc, SuDia.Web.Services.TroLy.LoaiDoan.TaiLieu]))
+                .Select(d => new KetQuaTimTaiLieu(d.Loai, tenKhoa.GetValueOrDefault(d.Khoa, d.Mon), d.Nguon,
+                    SuDia.Web.Services.TroLy.KhoTaiLieu.TrichKhuc(d.NoiDung.StartsWith("Tài liệu: ") ? d.NoiDung[(d.NoiDung.IndexOf('\n') + 1)..] : d.NoiDung, q), d.Lien))
+                .ToList();
+        }
+        var taiLieu = phamVi.Count == 0 ? [] : await db.TaiLieuKhoa.AsNoTracking()
+            .Where(t => t.HienChoHocVien && phamVi.Contains(t.KhoaId)).OrderBy(t => t.Bai == null ? int.MaxValue : t.Bai.ThuTu).ThenByDescending(t => t.TaiLuc)
+            .Select(t => new TaiLieuHocVien(t.Id, t.Ten, t.LoaiTep, t.KichThuoc, t.Bai == null ? null : "Bài " + t.Bai.So + ". " + t.Bai.Ten, t.TaiLuc,
+                t.TrangThai == TrangThaiTaiLieu.SanSang)).Take(200).ToListAsync();
+
+        return View(new TaiLieuHocVienViewModel
+        {
+            Menu = _svc.LayKhoaHoc(null).Menu with { MucDangMo = "TaiLieu" },
+            DsKhoa = dsKhoa, KhoaId = khoa, TuKhoa = q, KetQua = ketQua, TaiLieu = taiLieu,
+        });
+    }
+
+    [Authorize, HttpGet("/Home/TaiLieu/Mo/{id:int}")]
+    public async Task<IActionResult> MoTaiLieu(int id, [FromServices] AppDbContext db, [FromServices] HocVienService hv,
+        [FromServices] TaiLieuKhoaService khoTep)
+    {
+        var dsKhoa = (await KhoaXemTaiLieu(db, hv)).Select(k => k.Id).ToList();
+        var tl = await db.TaiLieuKhoa.AsNoTracking().FirstOrDefaultAsync(t => t.Id == id && t.HienChoHocVien && dsKhoa.Contains(t.KhoaId));
+        if (tl is null) return NotFound();
+        return await khoTep.TraTepAsync(tl, HttpContext.RequestAborted);
+    }
+
     [Authorize]
     public IActionResult HoiAi([FromServices] IAiService ai, string? khoa, string? hoi)
     {

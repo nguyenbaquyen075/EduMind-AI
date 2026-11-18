@@ -70,3 +70,18 @@ public class DoiMatKhauModel
     [System.ComponentModel.DataAnnotations.Compare(nameof(MatKhauMoi), ErrorMessage = "Hai mật khẩu mới chưa khớp")]
     public string NhapLai { get; set; } = "";
 }
+
+// ======================================================= Kho tài liệu (học viên)
+public record KetQuaTimTaiLieu(string Loai, string Khoa, string Nguon, string Khuc, string? Lien);
+public record TaiLieuHocVien(int Id, string Ten, string LoaiTep, long KichThuoc, string? Bai, DateTime TaiLuc, bool DocDuocChu);
+
+public class TaiLieuHocVienViewModel
+{
+    public required MenuTaiKhoan Menu { get; init; }
+    public IReadOnlyList<(string Id, string Ten)> DsKhoa { get; init; } = [];
+    public string? KhoaId { get; init; }
+    public string? TuKhoa { get; init; }
+    public IReadOnlyList<KetQuaTimTaiLieu> KetQua { get; init; } = [];
+    /// <summary>Danh sách tệp trong kho của khoá đang chọn (hiện khi chưa gõ tìm).</summary>
+    public IReadOnlyList<TaiLieuHocVien> TaiLieu { get; init; } = [];
+}

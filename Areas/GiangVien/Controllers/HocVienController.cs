@@ -42,12 +42,12 @@ public class HocVienController(AppDbContext db) : GiangVienControllerBase(db)
         var nd = await Db.Users.AsNoTracking().FirstAsync(u => u.Id == id);
         var baiIds = await Db.Bai.Where(b => b.ChuDe!.KhoaId == khoa).Select(b => b.Id).ToListAsync();
         var deIds = await Db.DeThi.Where(d => d.KhoaId == khoa).Select(d => d.Id).ToListAsync();
-        var maDe = baiIds.Concat(deIds).ToList();
 
         ViewBag.NguoiDung = nd;
         ViewBag.Khoa = await Db.Khoa.AsNoTracking().FirstAsync(k => k.Id == khoa);
         ViewBag.TomTat = (await BangDiem(khoa, id)).FirstOrDefault();
-        ViewBag.BaiLam = await Db.BaiLam.AsNoTracking().Where(b => b.NguoiDungId == id && maDe.Contains(b.MaDe)).OrderByDescending(b => b.NopLuc)
+        ViewBag.BaiLam = await Db.BaiLam.AsNoTracking().Where(b => b.NguoiDungId == id
+                && ((b.BaiId != null && baiIds.Contains(b.BaiId.Value)) || (b.DeThiId != null && deIds.Contains(b.DeThiId.Value)))).OrderByDescending(b => b.NopLuc)
             .Select(b => new
             {
                 b.Id, b.TenDe, b.SoDung, b.SoCau, b.NopLuc, b.LaDeThi,
@@ -93,7 +93,7 @@ public class HocVienController(AppDbContext db) : GiangVienControllerBase(db)
         var hocCuoi = await Db.TienDoBai.Where(t => ids.Contains(t.NguoiDungId) && baiIds.Contains(t.BaiId))
             .GroupBy(t => t.NguoiDungId).Select(g => new { g.Key, T = g.Max(t => t.CapNhat) }).ToDictionaryAsync(x => x.Key, x => x.T);
         var baiLam = await Db.BaiLam.AsNoTracking().Where(b => ids.Contains(b.NguoiDungId)
-                && ((!b.LaDeThi && baiIds.Contains(b.MaDe)) || (b.LaDeThi && deIds.Contains(b.MaDe))))
+                && ((b.BaiId != null && baiIds.Contains(b.BaiId.Value)) || (b.DeThiId != null && deIds.Contains(b.DeThiId.Value))))
             .Select(b => new { b.NguoiDungId, b.LaDeThi, b.SoCau, b.SoDung, b.NopLuc }).ToListAsync();
         var giao = await Db.BaiTapGiao.AsNoTracking().Where(b => b.DaGiao && b.DeThi == null && b.Bai!.ChuDe!.KhoaId == khoa)
             .Select(b => new { b.Id, b.NoiDungJson }).ToListAsync();

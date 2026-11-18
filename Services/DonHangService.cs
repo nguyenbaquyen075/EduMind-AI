@@ -30,6 +30,17 @@ public sealed class DonHangService(AppDbContext db, DuyetDonAgent agent, ThongBa
     /// </summary>
     public async Task<bool> XacNhanDaThanhToanAsync(int donId, string? maGiaoDich, int? soTienNhan = null, string tacNhan = "PayOS", CancellationToken ct = default)
     {
+        // Kết nối CSDL rớt giữa chừng: chiến lược thử lại chạy lại cả giao dịch (bỏ các thay đổi đang theo dõi của lần trước)
+        var lan = 0;
+        return await db.Database.CreateExecutionStrategy().ExecuteAsync(async () =>
+        {
+            if (lan++ > 0) db.ChangeTracker.Clear();
+            return await XacNhanTrongGiaoDichAsync(donId, maGiaoDich, soTienNhan, tacNhan, ct);
+        });
+    }
+
+    private async Task<bool> XacNhanTrongGiaoDichAsync(int donId, string? maGiaoDich, int? soTienNhan, string tacNhan, CancellationToken ct)
+    {
         await using var tx = await db.Database.BeginTransactionAsync(ct);
         var luc = DateTime.UtcNow;
         var doi = await db.DonHang.Where(d => d.Id == donId && d.TrangThai != TrangThaiDon.DaThanhToan)

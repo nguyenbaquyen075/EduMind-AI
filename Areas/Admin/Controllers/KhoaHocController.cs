@@ -110,7 +110,7 @@ public class KhoaHocController(AppDbContext db, IWebHostEnvironment env) : Admin
         if (goi is null)
         {
             if (f.Gia is null) return;
-            goi = new GoiBan { Ten = k.Ten, Nhan = "Một khoá", KhoaIds = [k.Id], ThuTu = (await Db.GoiBan.MaxAsync(g => (int?)g.ThuTu) ?? -1) + 1 };
+            goi = new GoiBan { Ten = k.Ten, Nhan = "Một khoá", KhoaTrongGoi = [new GoiBanKhoa { KhoaId = k.Id }], ThuTu = (await Db.GoiBan.MaxAsync(g => (int?)g.ThuTu) ?? -1) + 1 };
             Db.GoiBan.Add(goi);
         }
         goi.Gia = f.Gia; goi.SoThang = f.SoThang; goi.DangBan = f.DangBan;
