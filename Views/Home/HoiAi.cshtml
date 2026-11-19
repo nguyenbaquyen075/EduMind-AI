@@ -34,8 +34,8 @@
 <form id="aiForm" class="ai-composer">
 @Html.AntiForgeryToken()
 <label for="aiCauHoi" class="ai-sr">Câu hỏi cho trợ lý AI</label>
-<textarea id="aiCauHoi" name="cauHoi" rows="2" maxlength="@GioiHanHoiAi.CauHoi" placeholder="Nhập câu hỏi của bạn về Sử, Địa…" aria-describedby="aiHuongDan" required>@Model.CauHoiBanDau</textarea>
-<div class="ai-composer-footer"><span id="aiDem">0/@GioiHanHoiAi.CauHoi ký tự</span><button type="submit" id="aiGui" aria-label="Gửi câu hỏi" disabled>Gửi <span aria-hidden="true">↑</span></button></div>
+<textarea id="aiCauHoi" name="cauHoi" rows="2" placeholder="Nhập câu hỏi của bạn về Sử, Địa…" aria-describedby="aiHuongDan" required>@Model.CauHoiBanDau</textarea>
+<div class="ai-composer-footer"><button type="submit" id="aiGui" aria-label="Gửi câu hỏi" disabled>Gửi <span aria-hidden="true">↑</span></button></div>
 </form>
 <p id="aiHuongDan" class="ai-note">Enter để gửi, Shift + Enter để xuống dòng. Câu trả lời có thể chưa chính xác, nên đối chiếu lại với bài học.</p>
 </div>

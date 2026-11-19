@@ -7,12 +7,10 @@
   const typing = document.getElementById('aiDangTraLoi');
   const sendButton = document.getElementById('aiGui');
   const subject = document.getElementById('aiKhoa');
-  const maxLength = input.maxLength;
   const suggestions = [...document.querySelectorAll('#aiGoiY button')];
   let history = [], controller = null, version = 0, busy = false;
   function update() {
-    sendButton.disabled = busy || !input.value.trim() || input.value.length > maxLength;
-    document.getElementById('aiDem').textContent = `${input.value.length}/${maxLength} ký tự`;
+    sendButton.disabled = busy || !input.value.trim();
     suggestions.forEach(b => { b.disabled = busy; b.hidden = !!subject.value && b.dataset.mon !== subject.value; });
     list.setAttribute('aria-busy', String(busy));
   }
@@ -32,7 +30,7 @@
   }
   async function send(raw, retryRow) {
     const q = String(raw || '').trim();
-    if (!q || q.length > maxLength || busy) return;
+    if (!q || busy) return;
     const current = version;
     welcome.hidden = true;
     if (retryRow) retryRow.remove(); else message('user', q);
