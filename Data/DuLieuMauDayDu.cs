@@ -252,11 +252,12 @@ public static class DuLieuMauDayDu
                 SoThang = g.SoThang, KhoaIds = [.. g.KhoaIds], TrangThai = trangThai, NgayTao = now.AddMinutes(-phut) });
         }
         await db.SaveChangesAsync();
+        await db.DongBoMaTuTangAsync();
     }
 
     private static BaiLam TaoBaiLam(string uid, int maDe, bool laDeThi, string ten, List<CauHoi> cau, double gioi, DateTime luc, Random rd)
     {
-        var bl = new BaiLam { NguoiDungId = uid, MaDe = maDe, LaDeThi = laDeThi, TenDe = ten, SoCau = cau.Count, NopLuc = luc };
+        var bl = new BaiLam { NguoiDungId = uid, BaiId = laDeThi ? null : maDe, DeThiId = laDeThi ? maDe : null, LaDeThi = laDeThi, TenDe = ten, SoCau = cau.Count, NopLuc = luc };
         for (var i = 0; i < cau.Count; i++)
         {
             var dung = rd.NextDouble() < gioi;

@@ -2,7 +2,8 @@ namespace SuDia.Web.Models;
 
 public static class GioiHanHoiAi
 {
-    public const int CauHoi = 5000;
+    // Chỉ là chốt an toàn phía máy chủ, không hiện cho người dùng
+    public const int CauHoi = 50000;
 }
 
 /// <param name="LichSu">2–3 lượt hỏi đáp gần nhất, để hiểu câu hỏi nối tiếp ("còn đợt 2 thì sao?")</param>

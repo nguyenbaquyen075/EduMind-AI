@@ -165,3 +165,17 @@ public class SuaNguoiDungForm
     [Required(ErrorMessage = "Nhập họ tên"), StringLength(150)] public string HoTen { get; set; } = "";
     [Required(ErrorMessage = "Nhập email"), EmailAddress(ErrorMessage = "Email chưa đúng")] public string Email { get; set; } = "";
 }
+
+// ======================================================= Kho tài liệu (giảng viên)
+public record BaiChon(int Id, string Ten);
+public record GvTaiLieuDong(int Id, string Ten, string TenTep, string LoaiTep, long KichThuoc, string TrangThai, string? LoiDoc,
+    bool HienChoHocVien, string? Bai, string? NguoiTai, DateTime TaiLuc, int SoKyTu);
+
+public class GvKhoTaiLieuViewModel
+{
+    public IReadOnlyList<(string Id, string Ten)> DsKhoa { get; init; } = [];
+    public string? KhoaId { get; init; }
+    public string? TuKhoa { get; init; }
+    public IReadOnlyList<BaiChon> Bai { get; init; } = [];
+    public IReadOnlyList<GvTaiLieuDong> TaiLieu { get; init; } = [];
+}

@@ -27,7 +27,7 @@ public class AdminThongKeService(AppDbContext db)
         var baiIds = db.Bai.Where(b => b.ChuDe!.KhoaId == khoa).Select(b => b.Id);
         var deIds = db.DeThi.Where(d => d.KhoaId == khoa).Select(d => d.Id);
         var luyen = await db.BaiLam.AsNoTracking().Where(b => b.NopLuc >= dau && b.NopLuc < cuoi &&
-            (khoa == null || (b.LaDeThi ? deIds.Contains(b.MaDe) : baiIds.Contains(b.MaDe))))
+            (khoa == null || (b.DeThiId != null && deIds.Contains(b.DeThiId.Value)) || (b.BaiId != null && baiIds.Contains(b.BaiId.Value))))
             .Select(b => new { b.NguoiDungId, b.NopLuc, b.SoCau, b.SoDung }).ToListAsync();
         var nop = await db.BaiNopGiao.AsNoTracking().Where(b => b.NopLuc >= dau && b.NopLuc < cuoi &&
             (khoa == null || b.BaiTapGiao!.Bai!.ChuDe!.KhoaId == khoa))

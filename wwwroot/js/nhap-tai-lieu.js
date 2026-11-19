@@ -21,7 +21,7 @@
       } else if (title && !title.value.trim()) title.value = result.tenBai;
       content.dispatchEvent(new Event('input', { bubbles: true }));
       apply.hidden = true;
-      show('Đã điền nội dung từ file. Kiểm tra lại rồi chọn cách chia.');
+      show('Đã điền nội dung từ file. Kiểm tra lại rồi chọn cách chia.' + (result.daLuuKho ? ' Tệp gốc đã được lưu vào Kho tài liệu của khoá.' : ''));
     };
     apply.addEventListener('click', fill);
     file.addEventListener('change', async () => {
@@ -35,6 +35,10 @@
       controller = new AbortController();
       const current = controller;
       const data = new FormData(); data.append('taiLieu', selected);
+      // Gửi kèm khoá / bài đang soạn để máy chủ cất tệp gốc vào kho tài liệu của khoá
+      const khoaId = form.querySelector('[name=khoaId]')?.value, baiId = form.querySelector('[name=baiId]')?.value;
+      if (khoaId) data.append('khoaId', khoaId);
+      if (baiId) data.append('baiId', baiId);
       show('Đang đọc tài liệu và nhận diện đề mục…');
       const buttons = [...form.querySelectorAll('button[type=submit]')];
       buttons.forEach(b => b.disabled = true);

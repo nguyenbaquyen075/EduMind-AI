@@ -18,3 +18,10 @@ claude-sessions/
 appsettings.*.local.json
 appsettings.Development.json
 *.env
+
+# Kho tài liệu giảng viên tải lên (tệp gốc) — dữ liệu chạy, không đưa lên repo
+App_Data/
+
+# Triển khai: cấu hình bí mật và bản sao lưu trên máy chủ
+deploy/.env
+deploy/sao-luu/

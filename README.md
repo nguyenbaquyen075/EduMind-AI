@@ -147,7 +147,7 @@ Bài tập đã có bài nộp, hoặc đề đã có lượt làm, sẽ **bị 
 
 <p align="center"><img src="docs/images/luong-thanh-toan.svg" alt="Luồng mua gói học và thanh toán PayOS" width="100%"></p>
 
-- Chỉ tài khoản **học viên** mua được; gói phải đang bán, có giá và gắn ít nhất một khoá.
+- Mọi tài khoản đã đăng nhập đều có thể mua; gói phải đang bán, có giá và gắn ít nhất một khoá.
 - Link thanh toán PayOS hết hạn sau **15 phút** (`PayOS:PhutHetHanLink`).
 - Hệ thống **không tin tham số trên URL**: trang kết quả hỏi lại PayOS, còn webhook được xác minh bằng chữ ký và kiểm tra số tiền không nhỏ hơn giá gói.
 - Xác nhận đơn dùng `UPDATE` có điều kiện trong giao dịch, nên webhook và trang kết quả đến cùng lúc cũng **không cộng hạn học hai lần**.
@@ -244,7 +244,10 @@ SuDia.Web/
 | | `/Home/HoiAi` | Chat với trợ lý AI |
 | | `/BaiTap/Lam/{id}` · `/BaiTap/BatDau/{id}` | Làm bài tập / kiểm tra được giao |
 | | `/TaiKhoan/HoSo` | Hồ sơ, đổi mật khẩu |
-| | `/ThanhToan` · `/ThanhToan/Mua/{id}` · `/ThanhToan/KetQua?ma=` | Đơn hàng, mua gói, kết quả |
+| | `/ThanhToan/Goi` | Chọn gói học (giá, khoá, quyền lợi, câu hỏi thường gặp) |
+| | `/ThanhToan/Mua/{id}` | Xác nhận mua: hạn học mới, phương thức, điều khoản |
+| | `/ThanhToan/KetQua?ma=` · `/ThanhToan/TrangThai?ma=` | Kết quả; tự cập nhật khi đang chờ thanh toán |
+| | `/ThanhToan` · `/ThanhToan/HoaDon?ma=` | Đơn hàng (lọc theo trạng thái) và biên lai in/PDF |
 | Giảng viên | `/GiangVien` | Tổng quan |
 | | `/GiangVien/NoiDung` | Chủ đề, bài, mục; nhập Word/PowerPoint; soạn bằng AI |
 | | `/GiangVien/GiaoBai` · `/GiangVien/DeThi` · `/GiangVien/CauHoi` | Giao bài, đề thi, ngân hàng câu hỏi |

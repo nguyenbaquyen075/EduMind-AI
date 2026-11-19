@@ -15,7 +15,6 @@ public class TongQuanController(AppDbContext db) : GiangVienControllerBase(db)
         var baiIds = bai.Select(b => b.Id).ToList();
         var khoaIds = await KhoaCuaToi().Select(k => k.Id).ToListAsync();
         var deIds = await Db.DeThi.Where(d => khoaIds.Contains(d.KhoaId)).Select(d => d.Id).ToListAsync();
-        var maDe = baiIds.Concat(deIds).ToList();
 
         var viec = bai.Where(b => b.SoMuc == 0).Take(4)
             .Select(b => new ViecCanLam($"{b.Khoa} · Bài {b.So}. {b.Ten} — chưa có nội dung", $"/GiangVien/NoiDung/SoanBai/{b.Id}", "Soạn bài"))
@@ -24,7 +23,7 @@ public class TongQuanController(AppDbContext db) : GiangVienControllerBase(db)
             .ToList();
 
         var bayNgay = DateTime.UtcNow.AddDays(-7);
-        var tuan = await Db.BaiLam.AsNoTracking().Where(b => maDe.Contains(b.MaDe) && b.NopLuc >= bayNgay).Select(b => new { b.SoCau, b.SoDung }).ToListAsync();
+        var tuan = await Db.BaiLam.AsNoTracking().Where(b => ((b.BaiId != null && baiIds.Contains(b.BaiId.Value)) || (b.DeThiId != null && deIds.Contains(b.DeThiId.Value))) && b.NopLuc >= bayNgay).Select(b => new { b.SoCau, b.SoDung }).ToListAsync();
         var cauTuan = tuan.Sum(b => b.SoCau);
 
         return View(new GiangVienTongQuanViewModel
@@ -37,7 +36,7 @@ public class TongQuanController(AppDbContext db) : GiangVienControllerBase(db)
                 new("Bài nộp 7 ngày qua", tuan.Count.ToString(), cauTuan == 0 ? null : $"đúng {Math.Round(tuan.Sum(b => b.SoDung) * 100.0 / cauTuan)}%"),
             ],
             ViecCanLam = viec,
-            BaiLam = await Db.BaiLam.AsNoTracking().Where(b => maDe.Contains(b.MaDe)).OrderByDescending(b => b.NopLuc).Take(6)
+            BaiLam = await Db.BaiLam.AsNoTracking().Where(b => (b.BaiId != null && baiIds.Contains(b.BaiId.Value)) || (b.DeThiId != null && deIds.Contains(b.DeThiId.Value))).OrderByDescending(b => b.NopLuc).Take(6)
                 .Select(b => new BaiLamGanDay(b.NguoiDung!.HoTen != "" ? b.NguoiDung.HoTen : b.NguoiDung.Email!, b.TenDe, b.SoDung, b.SoCau, b.NopLuc)).ToListAsync(),
             CauSai = (await Db.CauTraLoi.AsNoTracking()
                 .Join(Db.CauHoi, t => t.CauHoiId, c => c.Id, (t, c) => new { t.Dung, c.Id, c.NoiDung, c.NguonHienThi, c.BaiId })

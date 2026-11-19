@@ -140,7 +140,7 @@ try:
     assert sql(f'SELECT "BaiTapGiaoId" FROM "DeThi" WHERE "Id"={legacy};') == str(converted_id)
     assert sql(f'SELECT "NoiDung" FROM "CauHoi" WHERE "Id"={bank};') == bank_before
     locked=int(sql(f'''SELECT "Id" FROM "DeThi" WHERE "Ten"='{marker}-locked';'''))
-    sql(f'''INSERT INTO "BaiLam" ("NguoiDungId","MaDe","LaDeThi","TenDe","SoCau","SoDung","NopLuc") SELECT "Id",{locked},true,'{marker}-locked',1,1,now() FROM "AspNetUsers" WHERE "Email"='hocvien@sudia.vn';''')
+    sql(f'''INSERT INTO "BaiLam" ("NguoiDungId","DeThiId","LaDeThi","TenDe","SoCau","SoDung","NopLuc") SELECT "Id",{locked},true,'{marker}-locked',1,1,now() FROM "AspNetUsers" WHERE "Email"='hocvien@sudia.vn';''')
     _,p=get(teacher,f'/GiangVien/DeThi/Sua/{locked}'); assert 'data-locked="true"' in p
     save({**converted,'deThiId':locked,'ten':marker+'-locked'},400)
     assert req(teacher,'/GiangVien/DeThi/Luu',{'Id':locked,'KhoaId':'lich-su-12','Ten':marker+'-locked','SoPhut':5,'DangMo':'true','CauHoiIds':[bank],'__RequestVerificationToken':token(p)})[0] == 400

@@ -21,7 +21,7 @@ public class TaiKhoanController : Controller
     public async Task<IActionResult> DangNhap(string? returnUrl)
     {
         if (User.Identity?.IsAuthenticated == true && await _users.GetUserAsync(User) is { } nd) return await VeTrangTheoVaiTro(nd);
-        return View(new DangNhapModel { ReturnUrl = returnUrl });
+        return View(new DangNhapModel { ReturnUrl = Url.IsLocalUrl(returnUrl) ? returnUrl : null });
     }
 
     [HttpPost]
@@ -41,10 +41,10 @@ public class TaiKhoanController : Controller
     }
 
     [HttpGet]
-    public async Task<IActionResult> DangKy()
+    public async Task<IActionResult> DangKy(string? returnUrl)
     {
         if (User.Identity?.IsAuthenticated == true && await _users.GetUserAsync(User) is { } nd) return await VeTrangTheoVaiTro(nd);
-        return View(new DangKyModel());
+        return View(new DangKyModel { ReturnUrl = Url.IsLocalUrl(returnUrl) ? returnUrl : null });
     }
 
     // Đăng ký mới là học viên, chưa ghi danh khoá nào (học thử bài đầu). Admin ghi danh sau
@@ -52,6 +52,7 @@ public class TaiKhoanController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DangKy(DangKyModel m)
     {
+        m.ReturnUrl = Url.IsLocalUrl(m.ReturnUrl) ? m.ReturnUrl : null;
         if (!ModelState.IsValid) return View(m);
 
         var nd = new NguoiDung { UserName = m.Email, Email = m.Email, HoTen = m.HoTen.Trim() };
@@ -68,6 +69,7 @@ public class TaiKhoanController : Controller
         }
         await _users.AddToRoleAsync(nd, VaiTro.HocVien);
         await _signIn.SignInAsync(nd, isPersistent: true);
+        if (Url.IsLocalUrl(m.ReturnUrl)) return LocalRedirect(m.ReturnUrl!);
         return RedirectToAction("TongQuan", "Home");
     }
 

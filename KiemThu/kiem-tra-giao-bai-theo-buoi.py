@@ -26,8 +26,9 @@ def login(email):
     assert status==200 and '/DangNhap' not in url
     return c
 teacher=login('giangvien@sudia.vn'); student=login('hocvien@sudia.vn')
-fixture_sql = f'''INSERT INTO "Bai" ("Id","ChuDeId","So","Ten","SoMuc","SoPhut","ThuTu","HocThu","DaXuatBan")
-SELECT (SELECT coalesce(max("Id"),0)+1 FROM "Bai"),c."Id",999,'{marker}',0,0,999,false,true
+# Mã bài do CSDL tự tăng (identity), không tự tính max+1
+fixture_sql = f'''INSERT INTO "Bai" ("ChuDeId","So","Ten","SoMuc","SoPhut","ThuTu","HocThu","DaXuatBan")
+SELECT c."Id",999,'{marker}',0,0,999,false,true
 FROM "ChuDe" c JOIN "Khoa" k ON k."Id"=c."KhoaId" JOIN "AspNetUsers" t ON t."Id"=k."GiangVienId"
 JOIN "GhiDanh" g ON g."KhoaId"=k."Id" JOIN "AspNetUsers" s ON s."Id"=g."NguoiDungId"
 WHERE t."Email"='giangvien@sudia.vn' AND s."Email"='hocvien@sudia.vn' LIMIT 1 RETURNING "Id";'''
@@ -84,7 +85,9 @@ try:
     print('PASS: phân quyền giảng viên/học viên và yêu cầu đăng nhập')
 finally:
     for i in created:
-        sql=f'DELETE FROM "BaiTapGiao" WHERE "Id" = {int(i)} AND "Ten" = \'{marker}\';'
+        # Bài tập đã có bài nộp thì CSDL chặn xoá (RESTRICT): xoá bài nộp / lượt làm thử trước
+        sql=(f'DELETE FROM "BaiNopGiao" WHERE "BaiTapGiaoId" = {int(i)}; DELETE FROM "LuotLamKiemTra" WHERE "BaiTapGiaoId" = {int(i)}; '
+             f'DELETE FROM "BaiTapGiao" WHERE "Id" = {int(i)} AND "Ten" = \'{marker}\';')
         subprocess.run(['psql','-d',DATABASE,'-v','ON_ERROR_STOP=1','-c',sql],check=True,capture_output=True)
     subprocess.run(['psql','-d',DATABASE,'-v','ON_ERROR_STOP=1','-c',f'''DELETE FROM "Bai" WHERE "Id"={bai} AND "Ten"='{marker}';'''],check=True,capture_output=True)
     print('CLEANUP: đã xoá bài học, bài tập và bài nộp thử theo mã riêng')

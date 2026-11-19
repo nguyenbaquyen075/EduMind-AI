@@ -1,182 +1,175 @@
 @model TrangChuViewModel
 @{
     Layout = "_Layout";
-    ViewData["Title"] = "Trang chủ – Sử Địa";
+    ViewData["Title"] = "SửĐịa.AI – Học tập thông minh";
+
+    // Ảnh bìa và số chủ đề của gói lấy theo môn có trong tên gói
+    var monSu = Model.MonHoc.FirstOrDefault(m => m.Ten.StartsWith("Lịch sử"));
+    var monDia = Model.MonHoc.FirstOrDefault(m => m.Ten.StartsWith("Địa lí"));
+
+    // Dữ liệu cho phần Lộ trình cá nhân (chạy bằng JS)
+    var duLieuLoTrinh = System.Text.Json.JsonSerializer.Serialize(new
+    {
+        su = monSu?.Chuong ?? [],
+        dia = monDia?.Chuong ?? [],
+    });
 }
 @section Head {
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500;1,600&display=swap">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800;900&display=swap">
 <link rel="stylesheet" href="~/css/trang-chu.css" asp-append-version="true">
 }
 
-<div style="position: relative; overflow-x: clip; min-height: 100vh; background: #14120F; color: #D9D2C5; font-family: 'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif; font-size: 16px; line-height: 1.65">
-<div class="stars" aria-hidden="true" style="--star: rgba(255,248,232,0.65); --star2: rgba(226,194,127,0.7); --neb1: rgba(110,92,190,0.12); --neb2: rgba(200,161,90,0.08); --glow: rgba(226,194,127,0.35)">
-<div class="neb"></div>
-<div class="l l1"></div>
-<div class="l l2"></div>
-<div class="l l3"></div>
-<span class="spark" style="left: 41.9%; top: 33.2%; animation-duration: 5.3s; animation-delay: 0.4s"></span>
-<span class="spark" style="left: 29.3%; top: 36.6%; animation-duration: 4.9s; animation-delay: 0.8s"></span>
-<span class="spark" style="left: 31.7%; top: 53.4%; animation-duration: 3.7s; animation-delay: 0.6s"></span>
-<span class="spark" style="left: 48.4%; top: 70.3%; animation-duration: 4.3s; animation-delay: 1.5s"></span>
-<span class="spark" style="left: 34.6%; top: 42.4%; animation-duration: 6.3s; animation-delay: 2.5s"></span>
-<span class="spark spark-sm" style="left: 54.3%; top: 53.8%; animation-duration: 4.6s; animation-delay: 5.0s"></span>
-<span class="spark spark-sm" style="left: 43.4%; top: 55.3%; animation-duration: 4.7s; animation-delay: 1.3s"></span>
-<span class="spark" style="left: 71.1%; top: 33.2%; animation-duration: 3.6s; animation-delay: 1.4s"></span>
-<span class="spark" style="left: 46.3%; top: 43.7%; animation-duration: 5.0s; animation-delay: 5.7s"></span>
-<span class="spark" style="left: 45.3%; top: 44.9%; animation-duration: 4.7s; animation-delay: 2.4s"></span>
-<span class="spark" style="left: 30.1%; top: 36.0%; animation-duration: 3.6s; animation-delay: 2.0s"></span>
-<span class="spark" style="left: 31.7%; top: 53.2%; animation-duration: 4.9s; animation-delay: 5.7s"></span>
-<span class="spark spark-sm" style="left: 30.2%; top: 36.0%; animation-duration: 4.3s; animation-delay: 3.8s"></span>
-<span class="spark spark-sm" style="left: 49.1%; top: 41.0%; animation-duration: 3.5s; animation-delay: 4.5s"></span>
-<span class="spark spark-sm" style="left: 49.0%; top: 59.2%; animation-duration: 4.8s; animation-delay: 1.2s"></span>
-<span class="spark" style="left: 33.7%; top: 52.1%; animation-duration: 3.1s; animation-delay: 3.2s"></span>
-</div>
+<div class="tc-page">
+<div class="tc-glow tc-glow-1" aria-hidden="true"></div>
+<div class="tc-glow tc-glow-2" aria-hidden="true"></div>
+<div class="tc-glow tc-glow-3" aria-hidden="true"></div>
+<div class="tc-glow tc-glow-4" aria-hidden="true"></div>
 
-<header id="siteHead" class="site-head" style="position: sticky; top: 0; z-index: 20">
-<div style="max-width: 1240px; margin: 0 auto; padding: 22px 32px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 20px">
-<a href="#" style="display: flex; align-items: baseline; gap: 12px; text-decoration: none; color: #F4EEE2">
-<span style="font-family: 'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif; font-size: 26px; font-weight: 700; letter-spacing: 0.5px">Sử<span style="color: #C8A15A">·</span>Địa</span>
-<span style="font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: #A39B8E">Học viện ôn thi</span>
-</a>
-<nav aria-label="Menu chính" style="display: flex; flex-wrap: wrap; gap: 32px; font-size: 13px; letter-spacing: 1.5px; text-transform: uppercase">
-<a href="#phuongphap" style="color: #D9D2C5; text-decoration: none">Phương pháp</a>
-<a href="#monhoc" style="color: #D9D2C5; text-decoration: none">Môn học</a>
-<a href="#troly" style="color: #D9D2C5; text-decoration: none">Trợ lý</a>
-<a href="#goi" style="color: #D9D2C5; text-decoration: none">Gói học</a>
+<header class="tc-head">
+<div class="tc-wrap tc-head-row">
+<a href="/" class="tc-logo">SửĐịa<span>.AI</span></a>
+<nav aria-label="Menu chính" class="tc-nav">
+<a href="#chatbot">Chatbot AI</a>
+<a href="#khoahoc">Khoá học</a>
+<a href="#giangvien">Giảng viên</a>
+<a href="#lotrinh">Lộ trình</a>
+<a href="#lienhe">Liên hệ</a>
+<a asp-controller="TaiKhoan" asp-action="DangKy" class="tc-btn tc-btn-primary">Bắt đầu ngay</a>
 </nav>
-<div style="display: flex; align-items: center; gap: 20px">
-<a asp-controller="TaiKhoan" asp-action="DangNhap" style="font-size: 14px; color: #D9D2C5; text-decoration: none">Đăng nhập</a>
-<a asp-controller="TaiKhoan" asp-action="DangKy" style="display: inline-flex; align-items: center; min-height: 44px; padding: 0 22px; border-radius: 6px; background: #C8A15A; color: #14120F; text-decoration: none; font-size: 14px; font-weight: 600; letter-spacing: 0.3px">Bắt đầu học</a>
-</div>
 </div>
 </header>
 
-<section class="hero-cover" style="position: relative; overflow: hidden; color: #EDE6D8">
-<div class="hero-bg" aria-hidden="true" style="position: absolute; inset: 0"></div>
-<div aria-hidden="true" style="position: absolute; inset: 0; background: linear-gradient(90deg, rgba(15,13,10,0.92) 0%, rgba(15,13,10,0.75) 32%, rgba(15,13,10,0.25) 55%, rgba(15,13,10,0) 70%); -webkit-mask-image: linear-gradient(180deg, #000 84%, transparent 100%); mask-image: linear-gradient(180deg, #000 84%, transparent 100%)"></div>
-<div id="chatDim" hidden aria-hidden="true" style="position: absolute; inset: 0; background: rgba(15,13,10,0.45)"></div>
-
-<div class="hero-inner" style="position: relative; max-width: 1240px; margin: 0 auto; padding: var(--head-h, 89px) 32px 0; min-height: clamp(620px, calc(56.25vw - 89px), 1000px); display: flex; align-items: center">
-
-<div id="heroIntro" style="width: 100%; max-width: 600px; padding: 24px 0 64px">
-<p class="wipe" style="margin: 0 0 14px; font-size: 12px; letter-spacing: 3px; text-transform: uppercase; color: #C8A15A">Ôn thi THPT · Lịch sử &amp; Địa lí 12</p>
-
-<p class="wipe w2" style="margin: 0 0 28px; max-width: 540px; font-size: 18px; font-weight: 300; line-height: 1.6; color: #D9D2C5">Đọc bài, luyện đề, và hỏi bất cứ điều gì bạn chưa hiểu. Trợ lý trả lời đúng theo tài liệu khoá học, kèm nguồn để bạn tự kiểm chứng.</p>
-<form class="pill-in js-ask" method="post" style="position: relative; display: flex; align-items: center; gap: 12px; min-height: 58px; padding: 0 62px 0 20px; border: 1px solid #5C5446; border-radius: 999px; background: rgba(20,18,15,0.72); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px)">
-<svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#BDB5A7" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><path d="M21 21l-4.3-4.3"></path></svg>
-<label for="hero-ask" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Câu hỏi cho trợ lý</label>
-<input id="hero-ask" type="text" placeholder="Hỏi về một sự kiện, nhân vật, mốc năm…" style="flex: 1 1 auto; min-width: 0; min-height: 46px; padding: 0; border: none; background: transparent; font: inherit; font-size: 16px; color: #F4EEE2; outline: none">
-<button type="submit" class="roll-in" aria-label="Gửi câu hỏi" style="position: absolute; top: 5px; left: calc(100% - 52px); width: 46px; height: 46px; border: none; border-radius: 999px; background: #C8A15A; color: #14120F; display: flex; align-items: center; justify-content: center; cursor: pointer"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="M13 6l6 6-6 6"></path></svg></button>
-</form>
-<div class="chips" style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 12px">
-@foreach (var q in Model.CauHoiGoiY)
-{
-<button data-q="@q" type="button" class="chip" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 6px 14px; border: 1px solid #4A443A; border-radius: 10px; background: rgba(20,18,15,0.6); color: #E9DFC6; font: inherit; font-size: 14px; cursor: pointer; text-align: left"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#C8A15A" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4h6a4 4 0 0 1 4 4v13a3 3 0 0 0-3-3H2z"></path><path d="M22 4h-6a4 4 0 0 0-4 4v13a3 3 0 0 1 3-3h7z"></path></svg><span>@q</span></button>
-}
+<section id="chatbot" class="tc-hero">
+<div class="tc-hero-photo" role="img" aria-label="Góc học tập sáng: chồng sách, đèn bàn, bản đồ Việt Nam cổ, laptop, quả địa cầu và chậu cây trên bàn gỗ"></div>
+<div class="tc-sparks" aria-hidden="true">
+<span style="left: 8%; width: 7px; height: 7px; animation-duration: 11s; animation-delay: 0s"></span>
+<span style="left: 26%; width: 6px; height: 6px; animation-duration: 13s; animation-delay: 4s"></span>
+<span style="left: 40%; width: 6px; height: 6px; animation-duration: 12.5s; animation-delay: 5.5s"></span>
+<span style="left: 52%; width: 8px; height: 8px; animation-duration: 12s; animation-delay: 7.5s"></span>
+<span style="left: 64%; width: 7px; height: 7px; animation-duration: 11s; animation-delay: 1.2s"></span>
+<span style="left: 76%; width: 6px; height: 6px; animation-duration: 11.5s; animation-delay: 2.5s"></span>
+<span style="left: 92%; width: 7px; height: 7px; animation-duration: 13s; animation-delay: 9s"></span>
 </div>
+<div class="tc-hero-fade" aria-hidden="true"></div>
+
+<div class="tc-hero-inner">
+<div class="tc-hero-title tc-up">
+<p>SửĐịa.AI</p>
+<h1><span class="tc-shimmer">Học tập thông minh</span></h1>
 </div>
 
-<div id="chatPanel" hidden class="chat-open" style="width: 100%; max-width: 660px; margin: 32px 0 64px; border: 1px solid #4A443A; border-radius: 18px; background: rgba(18,16,13,0.86); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); box-shadow: 0 40px 100px rgba(0,0,0,0.6); overflow: hidden">
-<div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 18px; border-bottom: 1px solid #2E2A24">
-<div style="display: flex; align-items: center; gap: 14px">
-<span aria-hidden="true" style="width: 34px; height: 34px; border-radius: 999px; border: 1px solid #C8A15A; display: flex; align-items: center; justify-content: center; font-family: 'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif; font-size: 14px; color: #C8A15A">S·Đ</span>
+<div class="tc-up tc-u2"><div class="tc-shake"><div class="tc-glass" id="chatGlass">
+<div class="tc-chat-head">
 <div>
-<p style="margin: 0; font-family: 'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif; font-size: 18px; color: #F4EEE2">Học cùng AI</p>
-<p style="margin: 0; font-size: 13px; color: #A39B8E">Trả lời theo tài liệu khoá Lịch sử &amp; Địa lí 12</p>
+<p class="tc-chat-title">Hỏi AI</p>
+<p class="tc-chat-sub">Hỏi đáp Lịch sử, Địa lí</p>
 </div>
-</div>
-<button type="button" id="chatClose" aria-label="Thu nhỏ khung chat" style="width: 40px; height: 40px; border: 1px solid #3A352D; border-radius: 999px; background: transparent; color: #D9D2C5; display: flex; align-items: center; justify-content: center; cursor: pointer">
-<svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18"></path><path d="M6 6l12 12"></path></svg>
-</button>
-</div>
-
-<div id="msgList" style="height: 360px; overflow-y: auto; padding: 18px 20px; display: flex; flex-direction: column; gap: 14px">
-<div id="typing" hidden class="msg" style="align-self: flex-start; display: flex; align-items: center; gap: 12px; color: #A39B8E; font-size: 14px">
-<span aria-hidden="true" style="flex: 0 0 32px; height: 32px; border-radius: 999px; border: 1px solid #C8A15A; display: flex; align-items: center; justify-content: center; font-family: 'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif; font-size: 11px; color: #C8A15A">S·Đ</span>
-<span>Đang tra trong tài liệu khoá</span>
-<span style="display: inline-flex; gap: 4px"><span class="dot"></span><span class="dot dot2"></span><span class="dot dot3"></span></span>
+<div class="tc-chat-tools">
+<label for="chatMon" class="tc-sr">Chọn môn học</label>
+<select id="chatMon" class="tc-lg">
+<option value="">Tất cả môn học</option>
+<option value="lich-su-12">Lịch sử 12</option>
+<option value="dia-li-12">Địa lí 12</option>
+</select>
+<button type="button" id="chatMoi" class="tc-lg"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg>Đoạn chat mới</button>
 </div>
 </div>
 
-<div style="padding: 12px 16px 16px; border-top: 1px solid #2E2A24">
-<div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px">
+<div class="tc-chat-list" id="chatList">
+<div class="tc-chat-inner" id="chatInner">
+<div class="tc-empty" id="chatEmpty" hidden>
+<span class="tc-empty-icon" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4z"></path></svg></span>
+<p class="tc-empty-title">Bạn muốn hỏi gì hôm nay?</p>
+<p class="tc-empty-sub">Thử một câu gợi ý bên dưới.</p>
+<div class="tc-chips">
 @foreach (var q in Model.CauHoiGoiY)
 {
-<button data-q="@q" type="button" class="chip" style="min-height: 34px; padding: 0 12px; border: 1px solid #3A352D; border-radius: 999px; background: transparent; color: #BDB5A7; font: inherit; font-size: 13px; cursor: pointer">@q</button>
+<button type="button" class="tc-lg tc-chip" data-q="@q">@q</button>
 }
 </div>
-<form class="js-ask" method="post" style="display: flex; align-items: center; gap: 10px; min-height: 54px; padding: 0 5px 0 18px; border: 1px solid #5C5446; border-radius: 999px; background: rgba(0,0,0,0.25)">
-<label for="chat-ask" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Câu hỏi tiếp theo</label>
-<input id="chat-ask" type="text" placeholder="Hỏi tiếp…" style="flex: 1 1 auto; min-width: 0; min-height: 44px; padding: 0; border: none; background: transparent; font: inherit; font-size: 15px; color: #F4EEE2; outline: none">
-<button type="submit" aria-label="Gửi câu hỏi" style="flex: 0 0 44px; height: 44px; border: none; border-radius: 999px; background: #C8A15A; color: #14120F; display: flex; align-items: center; justify-content: center; cursor: pointer"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="M13 6l6 6-6 6"></path></svg></button>
-</form>
+</div>
+<div class="tc-typing" id="chatTyping" hidden>
+<span class="tc-ai-icon" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4z"></path></svg></span>
+<span class="tc-lg tc-dots"><span class="tc-dot"></span><span class="tc-dot"></span><span class="tc-dot"></span></span>
+</div>
 </div>
 </div>
 
+<div class="tc-chat-foot">
+<form id="chatForm" class="tc-lg tc-chat-form">
+<label for="chatHoi" class="tc-sr">Câu hỏi cho AI</label>
+<textarea id="chatHoi" rows="1"placeholder="Nhập câu hỏi của bạn về Sử, Địa..."></textarea>
+<div class="tc-chat-actions">
+<span></span>
+<button type="submit" id="chatGui" class="tc-send" disabled>Gửi<svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"></path><path d="M5 12l7-7 7 7"></path></svg></button>
+</div>
+</form>
+</div>
+</div></div></div>
 </div>
 </section>
 
-<section id="phuongphap" class="depth" style="position: relative">
-<div style="max-width: 1240px; margin: 0 auto; padding: 112px 32px">
-<div class="rise" style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 32px; margin-bottom: 64px">
-<h2 style="margin: 0; max-width: 640px; font-family: 'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif; font-size: 52px; font-weight: 600; line-height: 1.1; letter-spacing: -0.5px; color: #F4EEE2">Một phương pháp, <span style="font-style: italic; color: #C8A15A">bốn bước</span> mỗi bài.</h2>
-<p style="margin: 0; max-width: 360px; color: #A39B8E">Không học dàn trải. Mỗi bài được thiết kế để đọc trong một buổi, luyện ngay và hỏi lại chỗ chưa vững.</p>
+<section id="khoahoc" class="tc-section">
+<div class="tc-wrap">
+<div class="tc-section-head">
+<span class="tc-bar" aria-hidden="true"></span>
+<p class="tc-eyebrow">KHOÁ HỌC</p>
+<h2>Chọn khoá phù hợp với bạn</h2>
+<p class="tc-lead">Khoá nào cũng có chatbot AI hỏi đáp theo tài liệu.</p>
 </div>
-<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); background: rgba(20,18,15,0.94); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border-top: 1px solid #F4EEE2; padding: 0 28px 24px">
-@{
-    var sdBuoc = new[] { "7s", "8.5s", "7.5s", "9s" };
-    var sdlBuoc = new[] { "0s", "-2s", "-4s", "-1s" };
-}
-@for (var i = 0; i < Model.BuocHoc.Count; i++)
+<div class="tc-courses">
+@foreach (var g in Model.GoiHoc)
 {
-    var b = Model.BuocHoc[i];
-    var cuoi = i == Model.BuocHoc.Count - 1;
-    var dem = i == 0 ? "" : $" s{i + 1}";
-    var padding = i == 0 ? "28px 28px 8px 0" : cuoi ? "28px 0 8px 28px" : "28px 28px 8px 28px";
-    var vien = cuoi ? "" : " border-right: 1px solid #2E2A24;";
-<div class="@("rise" + dem) sway" style="--sd: @(sdBuoc[i % 4]); --sdl: @(sdlBuoc[i % 4]); padding: @padding;@vien">
-<p style="margin: 0 0 20px; font-family: 'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif; font-size: 44px; font-style: italic; color: #C8A15A; line-height: 1">@b.SoLaMa</p>
-<h3 style="margin: 0 0 8px; font-size: 18px; font-weight: 600; color: #F4EEE2">@b.Ten</h3>
-<p style="margin: 0; color: #A39B8E; font-size: 15px">@b.MoTa</p>
-</div>
-}
-</div>
-</div>
-</section>
-
-<section id="monhoc" class="depth" style="position: relative">
-<div style="max-width: 1240px; margin: 0 auto; padding: 112px 32px">
-<div class="rise" style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 32px; margin-bottom: 56px">
-<div>
-<p style="margin: 0 0 14px; font-size: 12px; letter-spacing: 3px; text-transform: uppercase; color: #C8A15A">Chương trình học</p>
-<h2 style="margin: 0; max-width: 640px; font-family: 'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif; font-size: 52px; font-weight: 600; line-height: 1.1; letter-spacing: -0.5px; color: #F4EEE2">Hai môn thi, <span style="font-style: italic; color: #C8A15A">một lộ trình</span>.</h2>
-</div>
-<p style="margin: 0; max-width: 360px; color: #A39B8E">Bám sát chương trình Lịch sử và Địa lí 12 mới, chia theo chủ đề để ôn chắc từng phần trước khi vào đề.</p>
-</div>
-<div class="mh-grid">
-@for (var i = 0; i < Model.MonHoc.Count; i++)
-{
-    var m = Model.MonHoc[i];
-<article class="mh-card @(i % 2 == 0 ? "from-l" : "from-r")" style="--mau: @m.MauNhan">
-<a asp-controller="Home" asp-action="BaiHoc" asp-route-id="@m.BaiDauId" class="mh-media" tabindex="-1" aria-hidden="true">
-<img src="@m.Anh" alt="" loading="lazy" width="960" height="540">
-<span class="mh-num">@DinhDang.LaMa(i + 1)</span>
-</a>
-<div class="mh-body">
-<p class="mh-label">@m.Nhan</p>
-<h3 class="mh-title">@m.Ten</h3>
-<p class="mh-desc">@m.MoTa</p>
-<ol class="mh-list">
-    @for (var c = 0; c < m.Chuong.Count; c++)
+    var coSu = g.Ten.Contains("Sử", StringComparison.OrdinalIgnoreCase);
+    var coDia = g.Ten.Contains("Địa", StringComparison.OrdinalIgnoreCase);
+    var combo = coSu && coDia;
+    var mon = combo ? null : coSu ? monSu : coDia ? monDia : null;
+    var nhanMon = combo ? $"COMBO · {Model.MonHoc.Count} MÔN" : mon is null ? g.Nhan.ToUpper() : $"{(coSu ? "LỊCH SỬ" : "ĐỊA LÍ")} · {mon.Chuong.Count} CHỦ ĐỀ";
+    var lopMon = combo ? "is-combo" : coSu ? "is-su" : "is-dia";
+<article class="tc-card tc-lift tc-course @lopMon @(g.NoiBat ? "is-best" : "")">
+<div class="tc-cover" aria-hidden="true">
+    @if (combo && monSu is not null && monDia is not null)
     {
-<li><span class="mh-roman">@DinhDang.LaMa(c + 1)</span><span>@m.Chuong[c]</span></li>
+<img src="@monSu.Anh" alt="" loading="lazy" class="tc-cover-half tc-cover-left">
+<img src="@monDia.Anh" alt="" loading="lazy" class="tc-cover-half tc-cover-right">
+<span class="tc-cover-text">Sử + Địa</span>
     }
-</ol>
-<div class="mh-foot">
-<span>@m.Chuong.Count chủ đề</span>
-<a asp-controller="Home" asp-action="BaiHoc" asp-route-id="@m.BaiDauId" class="mh-link">Đọc thử bài đầu tiên<svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></a>
+    else if (mon is not null)
+    {
+<img src="@mon.Anh" alt="" loading="lazy">
+<span class="tc-cover-text">@mon.Ten</span>
+    }
+    else
+    {
+<span class="tc-cover-text">@g.Ten</span>
+    }
+    @if (g.NoiBat)
+    {
+<span class="tc-badge">Phổ biến</span>
+    }
 </div>
+<div class="tc-course-body">
+<p class="tc-course-tag">@nhanMon</p>
+<h3>@g.Ten</h3>
+    @if (mon is not null)
+    {
+<p class="tc-course-desc">@mon.MoTa</p>
+    }
+<ul class="tc-checks">
+    @foreach (var ql in g.QuyenLoi.Take(4))
+    {
+<li><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg>@ql</li>
+    }
+</ul>
+<div class="tc-course-foot">
+<span class="tc-price">@(g.Gia is null ? "Sắp mở bán" : DinhDang.Gia(g.Gia))</span>
+<a asp-controller="ThanhToan" asp-action="Mua" asp-route-id="@g.Id" class="tc-btn @(g.NoiBat ? "tc-btn-primary" : "tc-btn-soft")">Chọn khoá</a>
+</div>
+    @if (mon is not null)
+    {
+<a asp-controller="Home" asp-action="BaiHoc" asp-route-id="@mon.BaiDauId" class="tc-trial">Đọc thử bài đầu tiên →</a>
+    }
 </div>
 </article>
 }
@@ -184,166 +177,110 @@
 </div>
 </section>
 
-<section id="troly" class="depth" style="position: relative">
-<div style="max-width: 1240px; margin: 0 auto; padding: 120px 32px; display: flex; flex-wrap: wrap; gap: 72px; align-items: center">
-<div class="rise sway" style="--sd: 8s; --sdl: -1.5s; flex: 1 1 420px; min-width: 0; background: rgba(20,18,15,0.94); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); padding: 36px 32px">
-<p style="margin: 0 0 20px; font-size: 12px; letter-spacing: 3px; text-transform: uppercase; color: #C8A15A">Trợ lý học tập</p>
-<h2 style="margin: 0 0 24px; font-family: 'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif; font-size: 52px; font-weight: 600; line-height: 1.1; color: #F4EEE2">Mỗi câu trả lời <span style="font-style: italic; color: #C8A15A">đều có chú thích.</span></h2>
-<p style="margin: 0 0 36px; max-width: 460px; color: #BDB5A7">Trợ lý chỉ đọc tài liệu do giáo viên biên soạn cho khoá của bạn. Không có trong tài liệu, trợ lý sẽ nói rõ — không đoán, không bịa.</p>
-<dl style="margin: 0; display: flex; flex-direction: column; border-top: 1px solid #2E2A24">
-<div style="display: flex; gap: 24px; padding: 18px 0; border-bottom: 1px solid #2E2A24"><dt style="min-width: 150px; font-family: 'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif; font-style: italic; color: #C8A15A; font-size: 18px">Chỉ từ tài liệu</dt><dd style="margin: 0; color: #BDB5A7">Không dùng kiến thức trôi nổi bên ngoài.</dd></div>
-<div style="display: flex; gap: 24px; padding: 18px 0; border-bottom: 1px solid #2E2A24"><dt style="min-width: 150px; font-family: 'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif; font-style: italic; color: #C8A15A; font-size: 18px">Luôn ghi nguồn</dt><dd style="margin: 0; color: #BDB5A7">Bấm chú thích để mở đúng mục lý thuyết.</dd></div>
-<div style="display: flex; gap: 24px; padding: 18px 0; border-bottom: 1px solid #2E2A24"><dt style="min-width: 150px; font-family: 'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif; font-style: italic; color: #C8A15A; font-size: 18px">Được kiểm duyệt</dt><dd style="margin: 0; color: #BDB5A7">Số liệu, mốc năm được đối chiếu trước khi hiển thị.</dd></div>
-</dl>
+<section id="giangvien" class="tc-section">
+<div class="tc-wrap">
+<div class="tc-section-head is-center">
+<span class="tc-bar" aria-hidden="true"></span>
+<p class="tc-eyebrow">GIẢNG VIÊN</p>
+<h2>Đội ngũ biên soạn tài liệu</h2>
+<p class="tc-lead">Tài liệu chatbot dùng để trả lời đều do giảng viên biên soạn và kiểm duyệt.</p>
 </div>
-
-<div class="rise s3 sway" style="--sd: 9.5s; --sdl: -4.5s; flex: 1 1 480px; min-width: 0; background: #F4EEE2; color: #1C1915; padding: 44px 48px 36px; box-shadow: 0 30px 80px rgba(0,0,0,0.5)">
-<div style="display: flex; justify-content: space-between; align-items: baseline; gap: 16px; border-bottom: 1px solid #1C1915; padding-bottom: 12px; margin-bottom: 28px">
-<span style="font-size: 11px; letter-spacing: 2.5px; text-transform: uppercase">Địa lí 12 · Trợ lý</span>
-<span style="font-family: 'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif; font-style: italic; color: #5E574D">tr. 34</span>
-</div>
-<p style="margin: 0 0 18px; font-family: 'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif; font-size: 26px; font-style: italic; line-height: 1.3">“Vì sao Tây Nguyên trồng nhiều cà phê?”</p>
-<p style="margin: 0 0 14px; font-size: 16px; line-height: 1.75">Tây Nguyên có đất badan màu mỡ, phân bố tập trung trên các cao nguyên<sup style="color: #7A1F1F; font-weight: 600">1</sup>, cùng khí hậu cận xích đạo với một mùa mưa và một mùa khô rõ rệt, thuận lợi cho việc phơi sấy và bảo quản<sup style="color: #7A1F1F; font-weight: 600">2</sup>.</p>
-<p style="margin: 0 0 28px; font-size: 16px; line-height: 1.75">Vì vậy cà phê là cây công nghiệp lâu năm quan trọng nhất của vùng<sup style="color: #7A1F1F; font-weight: 600">1</sup>.</p>
-<div style="border-top: 1px solid #CFC6B4; padding-top: 12px; display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: #5E574D">
-<span><sup>1</sup> Chương IV · Vùng Tây Nguyên — Thế mạnh cây công nghiệp</span>
-<span><sup>2</sup> Chương IV · Vùng Tây Nguyên — Điều kiện tự nhiên</span>
-</div>
-<div style="margin-top: 24px; display: flex; gap: 12px">
-<label for="hoi" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Đặt câu hỏi</label>
-<input id="hoi" type="text" placeholder="Đặt câu hỏi về bài học…" style="flex: 1 1 auto; min-width: 0; min-height: 48px; padding: 0 2px; border: none; border-bottom: 1px solid #1C1915; background: transparent; font: inherit; color: #1C1915; outline: none">
-<a asp-controller="Home" asp-action="BaiHoc" style="display: inline-flex; align-items: center; min-height: 48px; padding: 0 22px; background: #14120F; color: #F4EEE2; text-decoration: none; font-size: 14px; font-weight: 500">Hỏi</a>
-</div>
-</div>
-</div>
-</section>
-
-<section id="goi" class="depth" style="position: relative">
-<div style="position: relative; max-width: 1240px; margin: 0 auto; padding: 112px 32px">
-<div class="rise" style="text-align: center; margin-bottom: 64px">
-<p style="margin: 0 0 16px; font-size: 12px; letter-spacing: 3px; text-transform: uppercase; color: #C8A15A">Gói học</p>
-<h2 style="margin: 0; font-family: 'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif; font-size: 52px; font-weight: 600; line-height: 1.1; color: #F4EEE2">Chọn hành trang <span style="font-style: italic; color: #C8A15A">cho kỳ thi.</span></h2>
-</div>
-<div class="rise s2" style="display: flex; flex-wrap: wrap; align-items: stretch; gap: 24px">
-
+<div class="tc-teachers">
 @{
-    var sdGoi = new[] { "8s", "9s", "8.5s" };
-    var sdlGoi = new[] { "0s", "-3s", "-5s" };
+    var dsGv = Model.GiangVien.Count > 0
+        ? Model.GiangVien.ToList()
+        : new List<GiangVienTrangChu> { new("[Tên giảng viên]", "Lịch sử"), new("[Tên giảng viên]", "Lịch sử"), new("[Tên giảng viên]", "Địa lí"), new("[Tên giảng viên]", "Địa lí") };
 }
-@for (var i = 0; i < Model.GoiHoc.Count; i++)
+@foreach (var gv in dsGv)
 {
-    var g = Model.GoiHoc[i];
-    var vien = g.NoiBat ? "border: 1px solid #C8A15A; box-shadow: 0 30px 80px rgba(200,161,90,0.12)" : "border: 1px solid #4A443A";
-<div class="sway" style="--sd: @(sdGoi[i % 3]); --sdl: @(sdlGoi[i % 3]); flex: 1 1 300px; display: flex; flex-direction: column; padding: 44px 40px; background: rgba(20,18,15,0.94); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); @vien">
-    @if (g.NoiBat)
-    {
-<div style="display: flex; justify-content: space-between; align-items: baseline; gap: 12px">
-<p style="margin: 0 0 6px; font-size: 11px; letter-spacing: 2.5px; text-transform: uppercase; color: @g.MauNhan">@g.Nhan</p>
-<p style="margin: 0; font-family: 'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif; font-style: italic; color: #C8A15A">Được chọn nhiều nhất</p>
+    var laDia = gv.Mon.StartsWith("Địa");
+<div class="tc-card tc-lift tc-teacher @(laDia ? "is-dia" : "is-su")">
+<div class="tc-avatar" aria-hidden="true">
+<svg viewBox="0 0 120 120" width="120" height="120"><circle cx="60" cy="46" r="22" fill="currentColor" opacity="0.55"></circle><path d="M18 112c4-24 22-38 42-38s38 14 42 38z" fill="currentColor" opacity="0.55"></path></svg>
 </div>
-    }
-    else
-    {
-<p style="margin: 0 0 6px; font-size: 11px; letter-spacing: 2.5px; text-transform: uppercase; color: @g.MauNhan">@g.Nhan</p>
-    }
-<h3 style="margin: 0 0 28px; font-family: 'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif; font-size: 30px; font-weight: 600; color: #F4EEE2">@g.Ten</h3>
-<p style="margin: 0 0 4px; font-family: 'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif; font-size: 40px; font-weight: 600; color: #F4EEE2">@(g.Gia is null ? "Sắp mở bán" : DinhDang.Gia(g.Gia))</p>
-<p style="margin: 0 0 28px; font-size: 14px; color: #A39B8E">cho @(g.SoThang == 12 ? "một năm học" : $"{g.SoThang} tháng học")</p>
-<ul style="margin: 0 0 36px; padding: 0; list-style: none; flex-grow: 1; border-top: 1px solid #2E2A24">
-    @foreach (var ql in g.QuyenLoi)
-    {
-<li style="padding: 12px 0; border-bottom: 1px solid #2E2A24">@ql</li>
-    }
-</ul>
-    @if (g.NoiBat)
-    {
-<a asp-controller="ThanhToan" asp-action="Mua" asp-route-id="@g.Id" style="display: flex; align-items: center; justify-content: center; min-height: 52px; background: #C8A15A; color: #14120F; text-decoration: none; font-weight: 600">Chọn gói</a>
-    }
-    else
-    {
-<a asp-controller="ThanhToan" asp-action="Mua" asp-route-id="@g.Id" style="display: flex; align-items: center; justify-content: center; min-height: 52px; border: 1px solid #F4EEE2; color: #F4EEE2; text-decoration: none; font-weight: 500">Chọn gói</a>
-    }
+<p class="tc-teacher-name">@gv.HoTen</p>
+<span class="tc-pill">@gv.Mon</span>
 </div>
 }
-</div>
-
-<div class="rise" style="margin-top: 56px; overflow-x: auto; background: rgba(20,18,15,0.94); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); padding: 24px 28px">
-<table style="width: 100%; min-width: 640px; border-collapse: collapse; font-size: 15px">
-<caption style="text-align: left; padding-bottom: 16px; font-family: 'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif; font-size: 24px; font-weight: 600; color: #F4EEE2">So sánh chi tiết</caption>
-<thead>
-<tr style="text-align: left; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: #A39B8E; border-top: 1px solid #F4EEE2; border-bottom: 1px solid #F4EEE2">
-<th scope="col" style="padding: 14px 0; font-weight: 500">Quyền lợi</th>
-<th scope="col" style="padding: 14px 16px; font-weight: 500">Học thử</th>
-<th scope="col" style="padding: 14px 16px; font-weight: 500">Một môn</th>
-<th scope="col" style="padding: 14px 16px; font-weight: 500; color: #C8A15A">Trọn bộ</th>
-</tr>
-</thead>
-<tbody>
-@for (var i = 0; i < Model.SoSanh.Count; i++)
-{
-    var d = Model.SoSanh[i];
-    var vien = i == Model.SoSanh.Count - 1 ? "#F4EEE2" : "#2E2A24";
-<tr style="border-bottom: 1px solid @vien"><th scope="row" style="padding: 14px 0; text-align: left; font-weight: 500; color: #F4EEE2">@d.QuyenLoi</th><td style="padding: 14px 16px; color: #A39B8E">@d.HocThu</td><td style="padding: 14px 16px">@d.MotMon</td><td style="padding: 14px 16px; font-weight: 600; color: #F4EEE2">@d.TronBo</td></tr>
-}
-</tbody>
-</table>
 </div>
 </div>
 </section>
 
-<section style="position: relative">
-<div style="position: relative; max-width: 1240px; margin: 0 auto; padding: 112px 32px; text-align: center">
-<p class="rise" style="margin: 0 auto 40px; max-width: 900px; font-family: 'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif; font-size: 56px; font-weight: 500; line-height: 1.15; color: #F4EEE2">Lịch sử không cần học thuộc. <span style="font-style: italic; color: #C8A15A">Cần được hiểu.</span></p>
-<a asp-controller="TaiKhoan" asp-action="DangKy" style="display: inline-flex; align-items: center; min-height: 56px; padding: 0 38px; background: #C8A15A; color: #14120F; text-decoration: none; font-size: 15px; font-weight: 600; letter-spacing: 0.5px">Bắt đầu học miễn phí</a>
+<section id="lotrinh" class="tc-section">
+<div class="tc-wrap tc-plan">
+<div class="tc-card tc-plan-form">
+<div class="tc-section-head">
+<span class="tc-bar" aria-hidden="true"></span>
+<p class="tc-eyebrow">LỘ TRÌNH CÁ NHÂN</p>
+<h2>AI gợi ý lộ trình cho riêng bạn</h2>
+<p class="tc-lead">Chọn vài thông tin, AI sắp xếp bài học theo từng tuần.</p>
+</div>
+<div class="tc-opt-group" data-key="mon"><p>Môn ôn thi</p><div role="group" aria-label="Môn ôn thi">
+<button type="button" data-v="su">Lịch sử</button><button type="button" data-v="dia">Địa lí</button><button type="button" data-v="both" aria-pressed="true">Cả hai môn</button>
+</div></div>
+<div class="tc-opt-group" data-key="diem"><p>Mục tiêu điểm</p><div role="group" aria-label="Mục tiêu điểm">
+<button type="button" data-v="7">7 điểm</button><button type="button" data-v="8" aria-pressed="true">8 điểm</button><button type="button" data-v="9">9+ điểm</button>
+</div></div>
+<div class="tc-opt-group" data-key="thang"><p>Thời gian còn lại</p><div role="group" aria-label="Thời gian còn lại">
+<button type="button" data-v="1">1 tháng</button><button type="button" data-v="3" aria-pressed="true">3 tháng</button><button type="button" data-v="6">6 tháng</button>
+</div></div>
+<div class="tc-opt-group" data-key="phut"><p>Mỗi ngày học</p><div role="group" aria-label="Mỗi ngày học">
+<button type="button" data-v="30">30 phút</button><button type="button" data-v="60" aria-pressed="true">60 phút</button><button type="button" data-v="90">90 phút</button>
+</div></div>
+<button type="button" id="planTao" class="tc-btn tc-btn-primary tc-btn-block"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4z"></path></svg>Tạo lộ trình</button>
+</div>
+
+<div class="tc-plan-panel">
+<div class="tc-plan-body" id="planBody">
+<div class="tc-plan-msg" id="planMsg" hidden>
+<div class="tc-plan-user" id="planUser"></div>
+<div class="tc-plan-reply"><span class="tc-ai-icon" aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4z"></path></svg></span><p id="planReply"></p></div>
+</div>
+<div class="tc-plan-idle" id="planIdle">
+<span class="tc-plan-icon" aria-hidden="true"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3z"></path><path d="M9 3v15"></path><path d="M15 6v15"></path></svg></span>
+<p class="tc-plan-idle-title">Lộ trình của bạn sẽ hiện ở đây</p>
+<p>Chọn thông tin bên trái, hoặc nhắn cho AI ở ô bên dưới.</p>
+</div>
+<div class="tc-plan-loading" id="planLoading" hidden>AI đang phân tích và sắp xếp bài học<span class="tc-dots"><span class="tc-dot"></span><span class="tc-dot"></span><span class="tc-dot"></span></span></div>
+<div id="planResult" hidden>
+<div class="tc-plan-top"><div><p class="tc-eyebrow">LỘ TRÌNH ĐỀ XUẤT</p><p class="tc-plan-title" id="planTitle"></p></div><span class="tc-plan-weeks" id="planWeeks"></span></div>
+<ol class="tc-phases" id="planPhases"></ol>
+<div class="tc-plan-daily"><p class="tc-eyebrow">MỖI NGÀY</p><p id="planDaily"></p></div>
+<a asp-controller="TaiKhoan" asp-action="DangKy" class="tc-btn tc-btn-primary">Lưu lộ trình và bắt đầu học</a>
+</div>
+</div>
+<form id="planForm" class="tc-plan-form-chat">
+<label for="planHoi" class="tc-sr">Nhắn cho AI về lộ trình</label>
+<input id="planHoi" type="text" placeholder="VD: Em còn 2 tháng, muốn 8 điểm Sử, mỗi ngày học 1 tiếng">
+<button type="submit" class="tc-btn tc-btn-primary">Gửi</button>
+</form>
+</div>
 </div>
 </section>
 
-<footer style="position: relative">
-<div style="max-width: 1240px; margin: 0 auto; padding: 64px 32px 32px">
-<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 40px; margin-bottom: 48px">
-<div>
-<p style="margin: 0 0 12px; font-family: 'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif; font-size: 26px; font-weight: 700; color: #F4EEE2">Sử<span style="color: #C8A15A">·</span>Địa</p>
-<p style="margin: 0; font-size: 14px; color: #A39B8E">Học viện ôn thi Lịch sử và Địa lí lớp 12.</p>
-</div>
-<div>
-<p style="margin: 0 0 14px; font-size: 11px; letter-spacing: 2.5px; text-transform: uppercase; color: #C8A15A">Khoá học</p>
-<div style="display: flex; flex-direction: column; gap: 8px; font-size: 14px">
-<a href="#monhoc" style="color: #BDB5A7; text-decoration: none">Lịch sử 12</a>
-<a href="#monhoc" style="color: #BDB5A7; text-decoration: none">Địa lí 12</a>
-<a href="#goi" style="color: #BDB5A7; text-decoration: none">Trọn bộ Sử &amp; Địa</a>
-</div>
-</div>
-<div>
-<p style="margin: 0 0 14px; font-size: 11px; letter-spacing: 2.5px; text-transform: uppercase; color: #C8A15A">Hỗ trợ</p>
-<div style="display: flex; flex-direction: column; gap: 8px; font-size: 14px">
-<a href="#" style="color: #BDB5A7; text-decoration: none">Hướng dẫn thanh toán</a>
-<a href="#" style="color: #BDB5A7; text-decoration: none">Chính sách bảo mật</a>
-</div>
-</div>
-<div>
-<p style="margin: 0 0 14px; font-size: 11px; letter-spacing: 2.5px; text-transform: uppercase; color: #C8A15A">Liên hệ</p>
-<div style="display: flex; flex-direction: column; gap: 8px; font-size: 14px; color: #BDB5A7">
-<span>[EMAIL]</span>
-<span>[SỐ ĐIỆN THOẠI]</span>
-<span>[ĐỊA CHỈ]</span>
-</div>
-</div>
-</div>
-<p style="margin: 0; padding-top: 24px; border-top: 1px solid #2E2A24; font-size: 13px; color: #A39B8E">© 2026 Sử·Địa</p>
+<section class="tc-spacer" aria-hidden="true"></section>
+
+<footer id="lienhe" class="tc-foot">
+<div class="tc-wrap"><div class="tc-foot-line"></div></div>
+<div class="tc-wrap tc-foot-grid">
+<div><p class="tc-logo">SửĐịa<span>.AI</span></p><p>Học tập thông minh với chatbot AI cho Lịch sử &amp; Địa lí 12.</p></div>
+<div><p class="tc-foot-title">Khoá học</p><a href="#khoahoc">Lịch sử 12</a><a href="#khoahoc">Địa lí 12</a><a href="#khoahoc">Trọn bộ Sử &amp; Địa</a></div>
+<div><p class="tc-foot-title">Hỗ trợ</p><a href="#lotrinh">Lộ trình cá nhân</a><a href="#">Hướng dẫn thanh toán</a><a href="#">Chính sách bảo mật</a></div>
+<div><p class="tc-foot-title">Liên hệ</p><span>[EMAIL]</span><span>[SỐ ĐIỆN THOẠI]</span><span>[ĐỊA CHỈ]</span></div>
 </div>
 </footer>
-
 </div>
 
-<template id="tplUser"><div class="msg" style="align-self: flex-end; max-width: 78%; padding: 12px 18px; border-radius: 16px 16px 4px 16px; background: #C8A15A; color: #14120F; font-size: 15px; line-height: 1.55"></div></template>
-<template id="tplAi"><div class="msg" style="align-self: flex-start; display: flex; gap: 12px; max-width: 88%">
-<span aria-hidden="true" style="flex: 0 0 32px; height: 32px; border-radius: 999px; border: 1px solid #C8A15A; display: flex; align-items: center; justify-content: center; font-family: 'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif; font-size: 11px; color: #C8A15A">S·Đ</span>
-<div style="padding: 12px 14px; border-radius: 4px 16px 16px 16px; border: 1px solid #3A352D; background: rgba(255,255,255,0.04)">
-<p style="margin: 0 0 4px; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: #C8A15A" data-f="label"></p>
-<p style="margin: 0; font-size: 15px; line-height: 1.65; color: #EDE6D8; white-space: pre-line"><span data-f="text"></span><sup style="color: #C8A15A; font-weight: 600" data-f="mark"></sup></p>
-<p style="margin: 12px 0 0; padding-top: 10px; border-top: 1px solid #2E2A24; font-size: 13px; color: #A39B8E; white-space: pre-line" data-f="source"></p>
+<template id="tplUser"><div class="tc-msg tc-msg-user"></div></template>
+<template id="tplAi"><div class="tc-msg tc-msg-ai">
+<span class="tc-ai-icon" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4z"></path></svg></span>
+<div class="tc-lg tc-ai-card">
+<p class="tc-ai-label" data-f="label"></p>
+<p class="tc-ai-text"><span data-f="text"></span><sup data-f="mark"></sup><span class="tc-caret" data-f="caret">▍</span></p>
+<p class="tc-ai-source" data-f="source" hidden></p>
 </div>
 </div></template>
+<script type="application/json" id="loTrinhData">@Html.Raw(duLieuLoTrinh)</script>
 @Html.AntiForgeryToken()
 
 @section Scripts {

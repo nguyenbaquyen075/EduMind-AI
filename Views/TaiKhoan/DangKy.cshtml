@@ -6,6 +6,7 @@
 <h1>Đăng ký</h1>
 <p>Tạo tài khoản để bắt đầu học.</p>
 <form asp-action="DangKy" method="post" novalidate>
+<input type="hidden" asp-for="ReturnUrl">
 <div asp-validation-summary="ModelOnly" class="tk-tong-loi" role="alert"></div>
 <div class="tk-truong">
 <label asp-for="HoTen">Họ và tên</label>
@@ -29,4 +30,4 @@
 </div>
 <button type="submit" class="tk-nut">Tạo tài khoản</button>
 </form>
-<p class="tk-duoi">Đã có tài khoản? <a asp-action="DangNhap">Đăng nhập</a></p>
+<p class="tk-duoi">Đã có tài khoản? <a asp-action="DangNhap" asp-route-returnUrl="@Model.ReturnUrl">Đăng nhập</a></p>
