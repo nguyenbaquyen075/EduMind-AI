@@ -50,7 +50,7 @@
       if (current !== version) return;
       if (!data.noiDung) throw new Error('Chưa nhận được câu trả lời. Bạn vui lòng thử lại.');
       message('assistant', data.noiDung, data.nhan || 'Trợ lý AI', data.nguon || '');
-      if (!data.tuChoi) history = [...history, {cauHoi:q, traLoi:data.noiDung}].slice(-6);
+      history = [...history, {cauHoi:q, traLoi:data.noiDung}].slice(-6);
     } catch(e) {
       if (current !== version) return;
       const m = message('assistant', e.name === 'AbortError' ? 'Trợ lý trả lời lâu hơn dự kiến. Bạn vui lòng thử lại.' : e.message, 'Chưa gửi được', '', true);

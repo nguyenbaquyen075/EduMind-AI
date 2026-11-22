@@ -109,7 +109,7 @@
       }
       if (!res.ok) throw new Error(res.status);
       const d = await res.json();
-      if (!d.tuChoi) lichSu.push({ cauHoi: q, traLoi: d.noiDung });
+      lichSu.push({ cauHoi: q, traLoi: d.noiDung });
       return { label: d.nhan, text: d.noiDung, mark: d.danhDau, source: d.nguon };
     } catch {
       return { label: 'Lỗi kết nối', text: 'Không gửi được câu hỏi. Vui lòng thử lại.', mark: '', source: '' };
