@@ -63,12 +63,46 @@ public static class KiemTraCauTraLoi
 
     private static IEnumerable<string> SoKhongCoTrong(string text, IEnumerable<DoanTaiLieu> doan)
     {
+        var nguon = string.Join("\n", doan.Select(d => d.NoiDung));
         text = DongPhuongAn.Replace(text, "");
         text = SoThuTu.Replace(text, "");
-        var soCoTrongNguon = TapConSo(string.Join("\n", doan.Select(d => d.NoiDung)));
+        text = BoKhoangThoiGianHopLe(text, nguon);
+        var soCoTrongNguon = TapConSo(nguon);
         return ConSo.Matches(SoNguon.Replace(text, "")).Select(m => m.Value).Distinct()
             .Where(so => !soCoTrongNguon.Contains(so));
     }
+
+    // "khoảng hơn 2 tháng", "sau 9 năm", "kéo dài 56 ngày": khoảng thời gian tính từ hai mốc có trong tài liệu
+    private static readonly Regex KhoangThoiGian = new(@"\b(\d{1,4})\s*(ngày|tuần|tháng|năm)(?!\s*\d)", RegexOptions.IgnoreCase);
+    private static readonly Regex MocNgay = new(@"\b(?:(\d{1,2})/)?(?:(\d{1,2})/)?(1[0-9]{3}|20[0-9]{2})\b");
+
+    /// <summary>Bỏ khỏi phần kiểm tra các khoảng thời gian khớp (±1 đơn vị) với hiệu của hai mốc ngày / năm trong tài liệu.</summary>
+    private static string BoKhoangThoiGianHopLe(string text, string nguon)
+    {
+        var moc = new List<DateTime>();
+        foreach (Match m in MocNgay.Matches(nguon))
+        {
+            var nam = int.Parse(m.Groups[3].Value);
+            // "21/7/1954" → nhóm 1 = ngày, nhóm 2 = tháng; "7/1954" → nhóm 1 = tháng
+            int ngay = 1, thang = 1;
+            if (m.Groups[2].Success) { ngay = int.Parse(m.Groups[1].Value); thang = int.Parse(m.Groups[2].Value); }
+            else if (m.Groups[1].Success) thang = int.Parse(m.Groups[1].Value);
+            if (thang is >= 1 and <= 12 && ngay >= 1 && ngay <= DateTime.DaysInMonth(nam, thang)) moc.Add(new DateTime(nam, thang, ngay));
+        }
+        if (moc.Count < 2) return text;
+        var hieu = moc.SelectMany(a => moc, (a, b) => Math.Abs((a - b).TotalDays)).Where(d => d > 0).Distinct().ToList();
+        return KhoangThoiGian.Replace(text, m =>
+        {
+            var n = int.Parse(m.Groups[1].Value);
+            var donVi = m.Groups[2].Value.ToLowerInvariant() switch { "ngày" => 1.0, "tuần" => 7.0, "tháng" => 30.44, _ => 365.25 };
+            return hieu.Any(d => Math.Abs(d / donVi - n) <= 1) ? m.Groups[2].Value : m.Value;
+        });
+    }
+
+    private static readonly Regex NguonTrongPhuongAn = new(@"^(\s*[-*]?\s*\**[A-D][.)]\**\s.*?)\s*\[\d+\]\s*$", RegexOptions.Multiline);
+
+    /// <summary>Bỏ [n] gắn vào phương án trắc nghiệm A–D (để không lộ đáp án đúng).</summary>
+    public static string BoNguonTrongPhuongAn(string traLoi) => NguonTrongPhuongAn.Replace(traLoi, "$1");
 
     private static HashSet<string> TapConSo(string text)
     {

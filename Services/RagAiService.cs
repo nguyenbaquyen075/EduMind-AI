@@ -104,7 +104,7 @@ public class RagAiService : IAiService
 
         var dung = kq.NguonDaDung.Select(n => doan[n - 1]).ToList();
         var nguon = string.Join("\n", kq.NguonDaDung.Select(n => $"[{n}] {doan[n - 1].Nguon}"));
-        return new HoiAiResponse("Trợ lý · " + dung[0].Mon, kq.ThanBai, "", nguon, false);
+        return new HoiAiResponse("Trợ lý · " + dung[0].Mon, KiemTraCauTraLoi.BoNguonTrongPhuongAn(kq.ThanBai), "", nguon, false);
     }
 
     // ---------------------------------------------------------------- Gọi model
