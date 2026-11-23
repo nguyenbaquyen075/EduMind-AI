@@ -212,3 +212,16 @@ Tìm kiếm (KhoTaiLieu.TimKiemAsync): âm tiết của câu hỏi ghép OR + c�
 4. **Chuyển tệp cũ:** chạy `dotnet run -- --chuyen-kho-tep` để đưa các tệp đang nằm trên đĩa lên R2. Lệnh kiểm mã băm từng tệp và chỉ xoá bản trên đĩa sau khi đã lên R2. Chạy lại nhiều lần vẫn an toàn.
 
 Dùng AWS S3 thay R2 thì để trống `DiaChi` và đặt `Vung` (ví dụ `ap-southeast-1`). MinIO tự dựng thì `DiaChi` là địa chỉ máy MinIO.
+
+## 11. Lớp học và diễn đàn hỏi đáp
+
+| Bảng | Vai trò | Khoá ngoại / quy tắc xoá |
+| --- | --- | --- |
+| `Lop` | Lớp của một khoá; có `MaThamGia` 6 ký tự (duy nhất), `DangMo` | `KhoaId` → Khoa (RESTRICT) |
+| `LopHocVien` | Thành viên lớp, khoá chính (`LopId`, `NguoiDungId`) | Lop, NguoiDung: CASCADE |
+| `BaiDang` | Chủ đề thảo luận, có `Ghim`, `DaDong` | Lop: CASCADE; NguoiDung: RESTRICT |
+| `TraLoiBaiDang` | Trả lời, có `LaDapAn` | BaiDang: CASCADE; NguoiDung: RESTRICT |
+
+Ràng buộc kiểm tra: tên lớp 1–100 ký tự, tiêu đề 1–200, nội dung 1–4000 (`CK_Lop_Ten`, `CK_BaiDang_*`, `CK_TraLoiBaiDang_NoiDung`).
+
+Quy tắc: giảng viên của khoá (hoặc admin) tạo lớp và quản lý; học viên vào lớp bằng mã nếu đang học khoá của lớp (ghi danh còn hạn); chỉ thành viên và người quản lý mới xem diễn đàn. Mỗi người tối đa 10 bài và 30 trả lời mỗi giờ. Xoá lớp xoá luôn thành viên, bài đăng, trả lời. Kiểm thử: `KiemThu/kiem-tra-lop-hoc.py` (10 nhóm kiểm tra).

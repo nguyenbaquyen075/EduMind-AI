@@ -88,6 +88,7 @@ builder.Services.AddHttpClient<ISoanNoiDungAiService, GeminiSoanNoiDungAiService
 builder.Services.AddScoped<IKhoaHocService, EfKhoaHocService>();
 builder.Services.AddScoped<AdminThongKeService>();
 builder.Services.AddScoped<HocVienService>();
+builder.Services.AddScoped<LopHocService>();
 // Thanh toán PayOS: khoá lưu bằng user-secrets (Development) hoặc biến môi trường PayOS__ClientId…
 builder.Services.Configure<PayOSOptions>(builder.Configuration.GetSection("PayOS"));
 builder.Services.AddHttpClient<PayOSService>(http => http.Timeout = TimeSpan.FromSeconds(20));

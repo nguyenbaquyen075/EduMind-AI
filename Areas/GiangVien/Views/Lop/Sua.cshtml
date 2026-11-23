@@ -1,0 +1,18 @@
+@model SuDia.Web.Models.LopForm
+@{
+    var moi = Model.Id == 0;
+    ViewData["Title"] = (moi ? "Tạo lớp" : "Sửa lớp") + " – Giảng viên";
+    ViewData["TieuDe"] = moi ? "Tạo lớp" : "Sửa lớp";
+    ViewData["Muc"] = "Lop";
+    ViewData["Crumb"] = "<a href=\"/GiangVien/Lop\">Lớp học</a>";
+}
+<form method="post" asp-action="Luu" class="ql-form ql-khoi ql-khoi-than" style="max-width: 640px">
+<input type="hidden" asp-for="Id">
+<div asp-validation-summary="ModelOnly" class="ql-tong-loi"></div>
+<div class="ql-truong"><label asp-for="KhoaId">Khoá học</label>
+<select asp-for="KhoaId" asp-items="(List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>)ViewBag.DsKhoa"><option value="">— Chọn khoá —</option></select><span asp-validation-for="KhoaId" class="ql-loi"></span>
+<small>Chỉ học viên đang học khoá này (ghi danh còn hạn) mới vào được lớp.</small></div>
+<div class="ql-truong"><label asp-for="Ten">Tên lớp</label><input asp-for="Ten" maxlength="100" placeholder="Ví dụ: Lịch sử 12A1 – kỳ 1"><span asp-validation-for="Ten" class="ql-loi"></span></div>
+<div class="ql-truong"><label asp-for="MoTa">Mô tả</label><textarea asp-for="MoTa" rows="3" maxlength="500" placeholder="Lịch học, quy định của lớp…"></textarea><span asp-validation-for="MoTa" class="ql-loi"></span></div>
+<div class="ql-chan"><button class="ql-nut">Lưu lớp</button><a href="/GiangVien/Lop" class="ql-nut phu">Huỷ</a></div>
+</form>

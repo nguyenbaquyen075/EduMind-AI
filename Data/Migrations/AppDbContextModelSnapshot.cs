@@ -202,6 +202,57 @@ namespace SuDia.Web.Data.Migrations
                     b.ToTable("Bai");
                 });
 
+            modelBuilder.Entity("SuDia.Web.Data.BaiDang", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CapNhatLuc")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<bool>("DaDong")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("Ghim")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("LopId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("NgayTao")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("NguoiDungId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("NoiDung")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("TieuDe")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NguoiDungId", "NgayTao");
+
+                    b.HasIndex("LopId", "Ghim", "NgayTao");
+
+                    b.ToTable("BaiDang", t =>
+                        {
+                            t.HasCheckConstraint("CK_BaiDang_NoiDung", "length(btrim(\"NoiDung\")) BETWEEN 1 AND 4000");
+
+                            t.HasCheckConstraint("CK_BaiDang_TieuDe", "length(btrim(\"TieuDe\")) BETWEEN 1 AND 200");
+                        });
+                });
+
             modelBuilder.Entity("SuDia.Web.Data.BaiLam", b =>
                 {
                     b.Property<int>("Id")
@@ -824,6 +875,72 @@ namespace SuDia.Web.Data.Migrations
                     b.ToTable("Khoa");
                 });
 
+            modelBuilder.Entity("SuDia.Web.Data.Lop", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CapNhatLuc")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<bool>("DangMo")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("KhoaId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("MaThamGia")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("MoTa")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("NgayTao")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Ten")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("KhoaId");
+
+                    b.HasIndex("MaThamGia")
+                        .IsUnique();
+
+                    b.ToTable("Lop", t =>
+                        {
+                            t.HasCheckConstraint("CK_Lop_Ten", "length(btrim(\"Ten\")) BETWEEN 1 AND 100");
+                        });
+                });
+
+            modelBuilder.Entity("SuDia.Web.Data.LopHocVien", b =>
+                {
+                    b.Property<int>("LopId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("NguoiDungId")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("NgayVao")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("LopId", "NguoiDungId");
+
+                    b.HasIndex("NguoiDungId");
+
+                    b.ToTable("LopHocVien");
+                });
+
             modelBuilder.Entity("SuDia.Web.Data.LuotLamKiemTra", b =>
                 {
                     b.Property<int>("BaiTapGiaoId")
@@ -1253,6 +1370,43 @@ namespace SuDia.Web.Data.Migrations
                         });
                 });
 
+            modelBuilder.Entity("SuDia.Web.Data.TraLoiBaiDang", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("BaiDangId")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("LaDapAn")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime>("NgayTao")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("NguoiDungId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("NoiDung")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BaiDangId", "NgayTao");
+
+                    b.HasIndex("NguoiDungId", "NgayTao");
+
+                    b.ToTable("TraLoiBaiDang", t =>
+                        {
+                            t.HasCheckConstraint("CK_TraLoiBaiDang_NoiDung", "length(btrim(\"NoiDung\")) BETWEEN 1 AND 4000");
+                        });
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -1313,6 +1467,25 @@ namespace SuDia.Web.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("ChuDe");
+                });
+
+            modelBuilder.Entity("SuDia.Web.Data.BaiDang", b =>
+                {
+                    b.HasOne("SuDia.Web.Data.Lop", "Lop")
+                        .WithMany("BaiDang")
+                        .HasForeignKey("LopId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SuDia.Web.Data.NguoiDung", "NguoiDung")
+                        .WithMany()
+                        .HasForeignKey("NguoiDungId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Lop");
+
+                    b.Navigation("NguoiDung");
                 });
 
             modelBuilder.Entity("SuDia.Web.Data.BaiLam", b =>
@@ -1528,6 +1701,36 @@ namespace SuDia.Web.Data.Migrations
                     b.Navigation("GiangVien");
                 });
 
+            modelBuilder.Entity("SuDia.Web.Data.Lop", b =>
+                {
+                    b.HasOne("SuDia.Web.Data.Khoa", "Khoa")
+                        .WithMany()
+                        .HasForeignKey("KhoaId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Khoa");
+                });
+
+            modelBuilder.Entity("SuDia.Web.Data.LopHocVien", b =>
+                {
+                    b.HasOne("SuDia.Web.Data.Lop", "Lop")
+                        .WithMany("HocVien")
+                        .HasForeignKey("LopId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SuDia.Web.Data.NguoiDung", "NguoiDung")
+                        .WithMany()
+                        .HasForeignKey("NguoiDungId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Lop");
+
+                    b.Navigation("NguoiDung");
+                });
+
             modelBuilder.Entity("SuDia.Web.Data.LuotLamKiemTra", b =>
                 {
                     b.HasOne("SuDia.Web.Data.BaiTapGiao", "BaiTapGiao")
@@ -1650,11 +1853,35 @@ namespace SuDia.Web.Data.Migrations
                     b.Navigation("NguoiDung");
                 });
 
+            modelBuilder.Entity("SuDia.Web.Data.TraLoiBaiDang", b =>
+                {
+                    b.HasOne("SuDia.Web.Data.BaiDang", "BaiDang")
+                        .WithMany("TraLoi")
+                        .HasForeignKey("BaiDangId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("SuDia.Web.Data.NguoiDung", "NguoiDung")
+                        .WithMany()
+                        .HasForeignKey("NguoiDungId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("BaiDang");
+
+                    b.Navigation("NguoiDung");
+                });
+
             modelBuilder.Entity("SuDia.Web.Data.Bai", b =>
                 {
                     b.Navigation("CauHoi");
 
                     b.Navigation("Muc");
+                });
+
+            modelBuilder.Entity("SuDia.Web.Data.BaiDang", b =>
+                {
+                    b.Navigation("TraLoi");
                 });
 
             modelBuilder.Entity("SuDia.Web.Data.BaiLam", b =>
@@ -1685,6 +1912,13 @@ namespace SuDia.Web.Data.Migrations
             modelBuilder.Entity("SuDia.Web.Data.Khoa", b =>
                 {
                     b.Navigation("ChuDe");
+                });
+
+            modelBuilder.Entity("SuDia.Web.Data.Lop", b =>
+                {
+                    b.Navigation("BaiDang");
+
+                    b.Navigation("HocVien");
                 });
 
             modelBuilder.Entity("SuDia.Web.Data.Muc", b =>

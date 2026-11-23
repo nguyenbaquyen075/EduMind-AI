@@ -1,0 +1,39 @@
+@{
+    var l = (SuDia.Web.Data.Lop)ViewBag.Lop;
+    ViewData["Title"] = l.Ten + " – Giảng viên";
+    ViewData["TieuDe"] = l.Ten;
+    ViewData["Muc"] = "Lop";
+    ViewData["Crumb"] = "<a href=\"/GiangVien/Lop\">Lớp học</a>";
+    var hv = (System.Collections.IEnumerable)ViewBag.HocVien;
+}
+@section Actions {
+<a href="/Lop/@l.Id" class="ql-nut">Mở diễn đàn (@ViewBag.SoBaiDang bài)</a>
+<a href="/GiangVien/Lop/Sua/@l.Id" class="ql-nut phu">Sửa lớp</a>
+}
+<section class="ql-khoi">
+<div class="ql-khoi-dau"><h2>Mã tham gia</h2><p>Gửi mã này cho học viên. Học viên phải đang học khoá “@l.Khoa!.Ten”.</p></div>
+<div class="ql-khoi-than">
+<p style="font-size:30px;font-weight:700;letter-spacing:6px;margin:0 0 12px"><code>@l.MaThamGia</code>@if (!l.DangMo) {<span class="ql-chip" style="margin-left:12px;letter-spacing:0">Ngừng nhận học viên</span>}</p>
+<span class="ql-hang-nut">
+<form method="post" asp-action="DoiMa" data-hoi="Đổi mã mới? Mã cũ sẽ không dùng được nữa."><input type="hidden" name="id" value="@l.Id"><button class="ql-nut phu nho">Đổi mã</button></form>
+<form method="post" asp-action="MoDong"><input type="hidden" name="id" value="@l.Id"><button class="ql-nut phu nho">@(l.DangMo ? "Ngừng nhận học viên mới" : "Nhận học viên mới")</button></form>
+<form method="post" asp-action="Xoa" data-hoi="Xoá lớp này cùng toàn bộ diễn đàn của lớp? Không khôi phục được."><input type="hidden" name="id" value="@l.Id"><button class="ql-nut xoa nho">Xoá lớp</button></form>
+</span>
+</div>
+</section>
+<section class="ql-khoi">
+<div class="ql-khoi-dau"><h2>Học viên trong lớp</h2></div>
+<table class="ql-bang">
+<thead><tr><th>Họ tên</th><th>Email</th><th>Vào lớp lúc</th><th></th></tr></thead>
+<tbody>
+@{ var dem = 0; }
+@foreach (dynamic m in hv)
+{
+dem++;
+<tr><td>@m.HoTen</td><td>@m.Email</td><td>@SuDia.Web.Models.DinhDang.GioNgay(((DateTime)m.NgayVao).ToLocalTime())</td>
+<td class="hanh-dong"><form method="post" asp-action="MoiRa" data-hoi="Mời học viên này ra khỏi lớp?"><input type="hidden" name="id" value="@l.Id"><input type="hidden" name="nguoiDungId" value="@m.NguoiDungId"><button class="ql-nut xoa nho">Mời ra</button></form></td></tr>
+}
+@if (dem == 0) {<tr><td colspan="4" class="ql-trong">Chưa có học viên. Gửi mã lớp cho học viên để họ vào.</td></tr>}
+</tbody>
+</table>
+</section>
