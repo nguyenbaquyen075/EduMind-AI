@@ -67,3 +67,43 @@ public class DiemYeuViewModel
     public IReadOnlyList<SuDia.Web.Services.DiemTheoBai> Manh { get; init; } = [];
     public bool CoAi { get; init; }
 }
+
+// ---------------------------------------------------------------- Ra đề theo ma trận
+public class MaTranDong
+{
+    public int BaiId { get; set; }
+    public int De { get; set; }
+    public int TB { get; set; }
+    public int Kho { get; set; }
+    public int Tong => De + TB + Kho;
+}
+
+public class MaTranForm
+{
+    public string KhoaId { get; set; } = "";
+    [System.ComponentModel.DataAnnotations.Required(ErrorMessage = "Nhập tên đề"), System.ComponentModel.DataAnnotations.StringLength(200, ErrorMessage = "Tên đề tối đa 200 ký tự")] public string Ten { get; set; } = "";
+    [System.ComponentModel.DataAnnotations.Range(5, 240, ErrorMessage = "Thời gian từ 5 đến 240 phút")] public int SoPhut { get; set; } = 45;
+    public List<MaTranDong> Dong { get; set; } = [];
+}
+
+public record MaTranBai(int BaiId, int So, string Ten, int SoDe, int SoTB, int SoKho);
+
+public class MaTranViewModel
+{
+    public required SuDia.Web.Data.Khoa Khoa { get; init; }
+    public required IReadOnlyList<MaTranBai> Bai { get; init; }
+    public required MaTranForm Form { get; init; }
+}
+
+// ---------------------------------------------------------------- Chứng chỉ
+public record KhoaChungChi(string KhoaId, string Ten, int DaHoc, int Tong, SuDia.Web.Data.ChungChi? DaCap)
+{
+    public bool DuDieuKien => Tong > 0 && DaHoc >= Tong;
+    public int PhanTram => Tong == 0 ? 0 : (int)Math.Round(DaHoc * 100.0 / Tong);
+}
+
+public class ChungChiViewModel
+{
+    public required MenuTaiKhoan Menu { get; init; }
+    public IReadOnlyList<KhoaChungChi> Khoa { get; init; } = [];
+}

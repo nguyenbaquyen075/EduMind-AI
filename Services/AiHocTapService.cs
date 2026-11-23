@@ -66,7 +66,7 @@ public class AiHocTapService(IServiceProvider sp, AppDbContext db, ILogger<AiHoc
         var nguon = await NguonBaiAsync(baiId, ct);
         if (nguon is null) return ([], "Bài học này chưa có đủ nội dung để tạo câu hỏi.");
         const string heThong = """
-            Bạn là gia sư Lịch sử – Địa lí lớp 12. Từ <tai_lieu> hãy soạn các câu trắc nghiệm ôn tập, mỗi câu 4 phương án.
+            Bạn là gia sư dạy học sinh THPT. Từ <tai_lieu> hãy soạn các câu trắc nghiệm ôn tập, mỗi câu 4 phương án.
             - Chỉ dùng thông tin có trong <tai_lieu>. Đáp án đúng phải được tài liệu khẳng định rõ; không dùng kiến thức ngoài.
             - Phương án nhiễu hợp lí nhưng sai rõ ràng; các phương án khác nhau, độ dài gần nhau.
             - Mỗi câu hỏi một ý, tiếng Việt rõ ràng. Không hỏi những điều tài liệu không nêu.
@@ -137,7 +137,7 @@ public class AiHocTapService(IServiceProvider sp, AppDbContext db, ILogger<AiHoc
         if (gem is null) return (null, "Trợ lý AI chưa được cấu hình.");
         if (string.IsNullOrWhiteSpace(baiLam)) return (new NhanXetAi(0, diemToiDa, "Học viên bỏ trống câu này.", [], ["Chưa trả lời"]), null);
         var heThong = $"""
-            Bạn là trợ lý chấm bài tự luận Lịch sử – Địa lí lớp 12, hỗ trợ giảng viên. Chấm theo <huong_dan_cham> của giảng viên (nếu trống, dựa vào yêu cầu của câu hỏi).
+            Bạn là trợ lý chấm bài tự luận cho học sinh THPT, hỗ trợ giảng viên. Chấm theo <huong_dan_cham> của giảng viên (nếu trống, dựa vào yêu cầu của câu hỏi).
             - diem: từ 0 đến {diemToiDa}, bước 0,25; chia điểm theo các ý trong hướng dẫn chấm; không cộng điểm cho ý sai hoặc ngoài yêu cầu.
             - y_dung: các ý học sinh nêu đúng (ngắn gọn). y_thieu: các ý còn thiếu hoặc sai so với hướng dẫn.
             - nhan_xet: tối đa 3 câu, giọng khích lệ nhưng thẳng thắn, nói rõ cần bổ sung gì.

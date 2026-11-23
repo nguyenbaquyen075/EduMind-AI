@@ -4,7 +4,7 @@
     ViewData["Title"] = Model.TenDe;
     var tong = Model.CauHoi.Count;
     var soSai = tong - Model.SoDung - Model.SoBoTrong;
-    var tenKhoa = Model.KhoaId.StartsWith("dia") ? "Địa lí 12" : "Lịch sử 12";
+    var tenKhoa = string.IsNullOrEmpty(Model.TenKhoa) ? (Model.KhoaId.StartsWith("dia") ? "Địa lí 12" : "Lịch sử 12") : Model.TenKhoa;
 }
 @section Head {
 <link rel="preconnect" href="https://fonts.googleapis.com">

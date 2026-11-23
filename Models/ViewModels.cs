@@ -215,6 +215,7 @@ public class LamDeViewModel
 {
     public int Id { get; init; }
     public string KhoaId { get; init; } = "";
+    public string TenKhoa { get; init; } = "";      // tên khoá hiện trên đầu trang làm bài
     public string TenDe { get; init; } = "";
     public bool LaDeThi { get; init; }
     public int? SoPhut { get; init; }              // đề thi thử có giờ; bài tập không giới hạn

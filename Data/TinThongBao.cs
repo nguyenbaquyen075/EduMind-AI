@@ -10,6 +10,7 @@ public static class LoaiTin
     public const string BaiTapMoi = "BaiTapMoi";     // giảng viên giao bài tập / kiểm tra
     public const string SapHetHan = "SapHetHan";     // ghi danh sắp hết hạn
     public const string SapDenHan = "SapDenHan";     // bài tập sắp đến hạn nộp mà chưa nộp
+    public const string ChungChi = "ChungChi";       // được cấp chứng chỉ hoàn thành khoá
 }
 
 public class TinThongBao

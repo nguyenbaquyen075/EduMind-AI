@@ -89,6 +89,7 @@ builder.Services.AddScoped<IKhoaHocService, EfKhoaHocService>();
 builder.Services.AddScoped<AdminThongKeService>();
 builder.Services.AddScoped<HocVienService>();
 builder.Services.AddScoped<LopHocService>();
+builder.Services.AddScoped<ChungChiService>();
 builder.Services.AddScoped<PhanTichDiemYeuService>();
 builder.Services.AddScoped<AiHocTapService>();
 builder.Services.AddScoped<TinThongBaoService>();

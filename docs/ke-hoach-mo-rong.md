@@ -18,7 +18,7 @@ Thứ tự 1 → 2 → 3 → 4 vì thông báo (2) cần diễn đàn (1), và b
 | 1 | Lớp học + diễn đàn | Xong, kiểm thử `kiem-tra-lop-hoc.py` |
 | 2 | Thống kê, biểu đồ, thông báo | Xong, kiểm thử `kiem-tra-thong-bao.py` |
 | 3 | AI phân tích điểm yếu | Xong phần thống kê, đề ôn riêng, báo cáo giảng viên (`kiem-tra-diem-yeu.py`). Hai tính năng gọi Gemini (AI tạo câu hỏi, AI gợi ý chấm tự luận) đã kiểm tra phần kiểm định bằng code và phần phân quyền; chưa thấy kết quả Gemini thật vì dịch vụ quá tải (503) lúc thử |
-| 4 | Ngân hàng đề, chứng chỉ | Chưa làm |
+| 4 | Ngân hàng đề, chứng chỉ, nhiều môn | Xong: độ khó câu hỏi, ra đề theo ma trận, chứng chỉ (bản in A4 + xác thực công khai), hướng dẫn thêm môn ([them-mon-hoc-moi.md](them-mon-hoc-moi.md)); kiểm thử `kiem-tra-ngan-hang-chung-chi.py`, `kiem-tra-mon-moi.py` |
 
 ## Mảng 3: các phần chính
 

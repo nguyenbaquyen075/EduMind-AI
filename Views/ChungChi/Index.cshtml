@@ -1,0 +1,49 @@
+@model ChungChiViewModel
+@using SuDia.Web.Services
+@{ ViewData["Title"] = "Chứng chỉ · Sử Địa"; }
+@section Head {
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500;1,600&display=swap">
+<link rel="stylesheet" href="~/css/hoc-vien.css" asp-append-version="true">
+}
+<div class="hv-trang">
+<partial name="_MenuTaiKhoan" model="Model.Menu" />
+<main class="hv-main">
+<h1>Chứng chỉ</h1>
+<p class="hv-mo-ta">Học hết mọi bài của một khoá để nhận chứng chỉ hoàn thành. Chứng chỉ có mã để người khác kiểm tra.</p>
+<partial name="_ThongBao" />
+@if (Model.Khoa.Count == 0)
+{
+<section class="hv-khoi"><p class="hv-trong">Bạn chưa ghi danh khoá nào. <a asp-controller="ThanhToan" asp-action="Goi">Xem các gói học</a></p></section>
+}
+else
+{
+<ul class="cc-ds">
+@foreach (var k in Model.Khoa)
+{
+<li class="hv-khoi">
+<div class="dy-dong"><div><b>@k.Ten</b><span class="dy-phu">@k.DaHoc/@k.Tong bài đã học</span></div>
+@if (k.DaCap is not null) { <span class="dy-tile tot">Đã nhận</span> }
+else if (k.DuDieuKien) { <span class="dy-tile tot">Đủ điều kiện</span> }
+else { <span class="dy-tile">@k.PhanTram%</span> }</div>
+<div class="hv-thanh cc-thanh" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="@k.PhanTram" aria-label="Tiến độ khoá @k.Ten"><span style="width: @(k.PhanTram)%"></span></div>
+<div class="dy-nut">
+@if (k.DaCap is not null)
+{
+<a class="hv-nut" href="/ChungChi/In/@k.DaCap.Id">Xem và in chứng chỉ</a>
+<span class="dy-phu" style="align-self:center">Mã @ChungChiService.DinhDangMa(k.DaCap.MaXacThuc) · cấp @k.DaCap.NgayCap.ToLocalTime().ToString("dd/MM/yyyy")</span>
+}
+else if (k.DuDieuKien)
+{
+<form method="post" action="/ChungChi/Nhan"><input type="hidden" name="khoaId" value="@k.KhoaId"><button class="hv-nut">Nhận chứng chỉ</button></form>
+}
+else
+{
+<a class="hv-nut phu" href="/Home/KhoaHoc/@k.KhoaId">Tiếp tục học</a>
+}
+</div>
+</li>
+}
+</ul>
+}
+</main>
+</div>

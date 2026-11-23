@@ -23,6 +23,8 @@
 <div class="ql-truong bt-vi-tri"><label asp-for="ViTri" class="sr-only">Thuộc bài / mục</label>
 <select asp-for="ViTri" asp-items="(List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>)ViewBag.ViTri"><option value="">— Chọn bài / mục —</option></select>
 <span asp-validation-for="ViTri" class="ql-loi"></span></div>
+<div class="ql-truong"><label asp-for="DoKho" class="sr-only">Độ khó</label>
+<select asp-for="DoKho" title="Độ khó (dùng khi ra đề theo ma trận)"><option value="1">Dễ</option><option value="2">Trung bình</option><option value="3">Khó</option></select></div>
 </div>
 
 <label asp-for="NoiDung" class="sr-only">Câu hỏi</label>

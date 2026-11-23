@@ -237,3 +237,12 @@ Bảng `ThongBao` cũ vẫn chỉ dùng cho tin thanh toán (SMS/email, có `Don
 Nguồn tin: học viên hỏi → báo giảng viên của khoá; trả lời → báo người đăng bài; giảng viên đăng bài → báo cả lớp; chọn đáp án → báo người trả lời; giao bài tập/kiểm tra → báo học viên đang học khoá. `NhacHanWorker` chạy sau khi khởi động 1 phút rồi mỗi 6 giờ (`NhacHanService`): khoá còn ≤ 7 ngày, bài tập còn ≤ 48 giờ mà chưa nộp; mỗi việc nhắc một lần và gửi kèm email (Development chỉ ghi log). Chuông: `GET /ThongBao/Dem`, trang `/ThongBao`; link trong tin chỉ nhận đường dẫn nội bộ. Chạy thử nhắc hạn: `GET /ThongBao/nhac-han-thu` (chỉ Development).
 
 Biểu đồ là SVG dựng ở máy chủ (`_BieuDoDuong`, `_BieuDoCot`, `wwwroot/css/bieu-do.css`), có bảng số liệu cho trình đọc màn hình: điểm theo thời gian và tiến độ khoá (Điểm của tôi), phổ điểm lớp (Bài nộp của giảng viên). Kiểm thử: `KiemThu/kiem-tra-thong-bao.py`.
+
+## 13. Ngân hàng đề và chứng chỉ
+
+| Thay đổi | Chi tiết |
+| --- | --- |
+| `CauHoi.DoKho` | 1 dễ, 2 trung bình (mặc định), 3 khó; `CK_CauHoi_DoKho` |
+| `ChungChi` | Một chứng chỉ cho mỗi (người, khoá), duy nhất; `MaXacThuc` 10 ký tự duy nhất (`CK_ChungChi_Ma`); chép `HoTen`, `TenKhoa`, `SoBai` lúc cấp; người dùng / khoá đã có chứng chỉ không xoá được (RESTRICT) |
+
+Ra đề theo ma trận: giảng viên nhập số câu dễ / trung bình / khó cho từng bài, hệ thống bốc ngẫu nhiên không trùng từ ngân hàng câu hỏi của khoá, tạo `DeThi` nháp (đang đóng) tối đa 100 câu. Chứng chỉ cấp khi học viên đã học (`TienDoBai` = DaHoc) hết mọi bài đã xuất bản của khoá; trang `/ChungChi/In/{id}` là bản in A4 ngang (in hoặc lưu PDF từ trình duyệt), `/XacThuc/{mã}` là trang kiểm tra công khai. Kiểm thử: `KiemThu/kiem-tra-ngan-hang-chung-chi.py`, `kiem-tra-mon-moi.py`.
