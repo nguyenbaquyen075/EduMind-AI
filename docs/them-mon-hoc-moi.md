@@ -8,7 +8,7 @@ Hệ thống không gắn cứng vào Lịch sử và Địa lí: mỗi môn là
 2. **Soạn nội dung** (Giảng viên › Khoá học của tôi): tạo chủ đề và bài; nhập từ văn bản, Word hoặc PowerPoint rồi chia mục bằng AI hoặc theo đề mục.
 3. **Soạn câu hỏi** (Giảng viên › Bài tập): mỗi câu gắn với bài, chọn độ khó dễ / trung bình / khó.
 4. **Ra đề** (Giảng viên › Đề thi thử): chọn tay, hoặc "Đề theo ma trận" để hệ thống bốc ngẫu nhiên theo số câu dễ / trung bình / khó của từng bài.
-5. **Mở lớp** (Giảng viên › Lớp học & diễn đàn): tạo lớp, gửi mã cho học viên.
+5. **Mở lớp** (Giảng viên › Lớp học & nhóm chat): tạo lớp, gửi mã cho học viên.
 6. **Kho tài liệu** (Giảng viên › Kho tài liệu): tải tệp để học viên tìm và trợ lý AI đọc.
 
 Nội dung giảng viên nhập tự vào chỉ mục của trợ lý AI (có thể mất vài giây), không cần cấu hình thêm.

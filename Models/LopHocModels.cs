@@ -10,7 +10,7 @@ public class LopForm
     [StringLength(500, ErrorMessage = "Mô tả tối đa 500 ký tự"), Display(Name = "Mô tả")] public string? MoTa { get; set; }
 }
 
-public record LopTomTat(int Id, string Ten, string Khoa, string MaThamGia, bool DangMo, int SoHocVien, int SoBaiDang, bool QuanLy);
+public record LopTomTat(int Id, string Ten, string Khoa, string MaThamGia, bool DangMo, int SoHocVien, long SoTinNhan, bool QuanLy);
 
 public class LopCuaToiViewModel
 {
@@ -19,38 +19,19 @@ public class LopCuaToiViewModel
     public string? MaNhap { get; init; }
 }
 
-public record BaiDangTomTat(int Id, string TieuDe, string TacGia, bool TacGiaLaGiangVien, DateTime NgayTao, int SoTraLoi, bool Ghim, bool DaDong, bool CoDapAn, DateTime HoatDongCuoi);
+/// <summary>Một tin nhắn gửi xuống trình duyệt (cả lịch sử lẫn tin mới theo thời gian thực).</summary>
+public record TinNhanDto(long Id, string NguoiDungId, string TacGia, bool LaGiangVien, string NoiDung, DateTime NgayTao);
 
-public class DienDanViewModel
+public class NhomChatViewModel
 {
     public required MenuTaiKhoan Menu { get; init; }
     public required LopTomTat Lop { get; init; }
     public string MoTa { get; init; } = "";
     public bool QuanLy { get; init; }
-    public IReadOnlyList<BaiDangTomTat> BaiDang { get; init; } = [];
-    public string? TieuDeNhap { get; init; }
-    public string? NoiDungNhap { get; init; }
-}
-
-public record TraLoiHienThi(int Id, string TacGia, bool TacGiaLaGiangVien, string NoiDung, DateTime NgayTao, bool LaDapAn, bool CoTheXoa);
-
-public class BaiDangViewModel
-{
-    public required MenuTaiKhoan Menu { get; init; }
-    public required int LopId { get; init; }
-    public required string LopTen { get; init; }
-    public required int Id { get; init; }
-    public required string TieuDe { get; init; }
-    public required string NoiDung { get; init; }
-    public required string TacGia { get; init; }
-    public bool TacGiaLaGiangVien { get; init; }
-    public DateTime NgayTao { get; init; }
-    public bool Ghim { get; init; }
-    public bool DaDong { get; init; }
-    public bool QuanLy { get; init; }
-    public bool LaTacGia { get; init; }
-    public IReadOnlyList<TraLoiHienThi> TraLoi { get; init; } = [];
-    public string? TraLoiNhap { get; init; }
+    public required string NguoiDungId { get; init; }
+    public IReadOnlyList<TinNhanDto> TinNhan { get; init; } = [];
+    public bool CoTinCu { get; init; }
+    public IReadOnlyList<string> ThanhVien { get; init; } = [];
 }
 
 public class TinThongBaoViewModel

@@ -213,18 +213,19 @@ Tìm kiếm (KhoTaiLieu.TimKiemAsync): âm tiết của câu hỏi ghép OR + c�
 
 Dùng AWS S3 thay R2 thì để trống `DiaChi` và đặt `Vung` (ví dụ `ap-southeast-1`). MinIO tự dựng thì `DiaChi` là địa chỉ máy MinIO.
 
-## 11. Lớp học và diễn đàn hỏi đáp
+## 11. Lớp học và nhóm chat
 
 | Bảng | Vai trò | Khoá ngoại / quy tắc xoá |
 | --- | --- | --- |
 | `Lop` | Lớp của một khoá; có `MaThamGia` 6 ký tự (duy nhất), `DangMo` | `KhoaId` → Khoa (RESTRICT) |
 | `LopHocVien` | Thành viên lớp, khoá chính (`LopId`, `NguoiDungId`) | Lop, NguoiDung: CASCADE |
-| `BaiDang` | Chủ đề thảo luận, có `Ghim`, `DaDong` | Lop: CASCADE; NguoiDung: RESTRICT |
-| `TraLoiBaiDang` | Trả lời, có `LaDapAn` | BaiDang: CASCADE; NguoiDung: RESTRICT |
+| `TinNhanLop` | Tin nhắn trong nhóm chat của lớp (`Id` bigint) | Lop: CASCADE; NguoiDung: RESTRICT; index (`LopId`, `Id`) |
 
-Ràng buộc kiểm tra: tên lớp 1–100 ký tự, tiêu đề 1–200, nội dung 1–4000 (`CK_Lop_Ten`, `CK_BaiDang_*`, `CK_TraLoiBaiDang_NoiDung`).
+Ràng buộc kiểm tra: tên lớp 1–100 ký tự, tin nhắn 1–2000 ký tự (`CK_Lop_Ten`, `CK_TinNhanLop_NoiDung`). Bảng diễn đàn cũ (`BaiDang`, `TraLoiBaiDang`) đã bỏ ở migration `NhomChatLop`.
 
-Quy tắc: giảng viên của khoá (hoặc admin) tạo lớp và quản lý; học viên vào lớp bằng mã nếu đang học khoá của lớp (ghi danh còn hạn); chỉ thành viên và người quản lý mới xem diễn đàn. Mỗi người tối đa 10 bài và 30 trả lời mỗi giờ. Xoá lớp xoá luôn thành viên, bài đăng, trả lời. Kiểm thử: `KiemThu/kiem-tra-lop-hoc.py` (10 nhóm kiểm tra).
+Quy tắc: giảng viên của khoá (hoặc admin) tạo lớp và quản lý; học viên vào lớp bằng mã nếu đang học khoá của lớp (ghi danh còn hạn); chỉ thành viên và người quản lý mới đọc / nhắn. Mỗi người tối đa 20 tin mỗi phút. Người gửi xoá được tin của mình, giảng viên xoá được tin của mọi người. Xoá lớp xoá luôn thành viên và tin nhắn.
+
+Thời gian thực: hub SignalR `/hub/lop?lopId=…` (`LopChatHub`) chỉ nhận người trong lớp vào nhóm; tin gửi và xoá đi qua POST có chống giả mạo form rồi được phát tới nhóm (`LopChatService`). Trang chat nạp 50 tin gần nhất, "Xem tin cũ hơn" nạp thêm; mất kết nối thì tự nối lại và bù tin còn thiếu. Thư viện trình duyệt đặt cục bộ ở `wwwroot/js/signalr.min.js` (không phụ thuộc CDN). Người không mở lớp được báo bằng chuông, tối đa một thông báo mỗi giờ cho mỗi lớp theo từng chiều. Kiểm thử: `KiemThu/kiem-tra-lop-hoc.py` (gồm cả thử SignalR bằng long polling).
 
 ## 12. Thông báo trong web, biểu đồ và nhắc hạn
 
@@ -234,7 +235,7 @@ Quy tắc: giảng viên của khoá (hoặc admin) tạo lớp và quản lý; 
 
 Bảng `ThongBao` cũ vẫn chỉ dùng cho tin thanh toán (SMS/email, có `DonHangId`).
 
-Nguồn tin: học viên hỏi → báo giảng viên của khoá; trả lời → báo người đăng bài; giảng viên đăng bài → báo cả lớp; chọn đáp án → báo người trả lời; giao bài tập/kiểm tra → báo học viên đang học khoá. `NhacHanWorker` chạy sau khi khởi động 1 phút rồi mỗi 6 giờ (`NhacHanService`): khoá còn ≤ 7 ngày, bài tập còn ≤ 48 giờ mà chưa nộp; mỗi việc nhắc một lần và gửi kèm email (Development chỉ ghi log). Chuông: `GET /ThongBao/Dem`, trang `/ThongBao`; link trong tin chỉ nhận đường dẫn nội bộ. Chạy thử nhắc hạn: `GET /ThongBao/nhac-han-thu` (chỉ Development).
+Nguồn tin: học viên nhắn trong nhóm chat → báo giảng viên của khoá; giảng viên nhắn → báo cả lớp (mỗi lớp tối đa một tin mỗi giờ theo từng chiều); giao bài tập/kiểm tra → báo học viên đang học khoá. `NhacHanWorker` chạy sau khi khởi động 1 phút rồi mỗi 6 giờ (`NhacHanService`): khoá còn ≤ 7 ngày, bài tập còn ≤ 48 giờ mà chưa nộp; mỗi việc nhắc một lần và gửi kèm email (Development chỉ ghi log). Chuông: `GET /ThongBao/Dem`, trang `/ThongBao`; link trong tin chỉ nhận đường dẫn nội bộ. Chạy thử nhắc hạn: `GET /ThongBao/nhac-han-thu` (chỉ Development).
 
 Biểu đồ là SVG dựng ở máy chủ (`_BieuDoDuong`, `_BieuDoCot`, `wwwroot/css/bieu-do.css`), có bảng số liệu cho trình đọc màn hình: điểm theo thời gian và tiến độ khoá (Điểm của tôi), phổ điểm lớp (Bài nộp của giảng viên). Kiểm thử: `KiemThu/kiem-tra-thong-bao.py`.
 

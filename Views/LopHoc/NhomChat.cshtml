@@ -1,0 +1,50 @@
+@model NhomChatViewModel
+@{ ViewData["Title"] = Model.Lop.Ten + " · Nhóm chat"; }
+@section Head {
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500;1,600&display=swap">
+<link rel="stylesheet" href="~/css/hoc-vien.css" asp-append-version="true">
+<link rel="stylesheet" href="~/css/nhom-chat.css" asp-append-version="true">
+}
+<div class="hv-trang">
+<partial name="_MenuTaiKhoan" model="Model.Menu" />
+<main class="hv-main nc-main">
+<p class="dd-crumb"><a asp-action="Index">Lớp học</a> › @Model.Lop.Ten</p>
+<div class="nc-dau">
+<div><h1>@Model.Lop.Ten</h1>
+<p class="hv-mo-ta">@Model.Lop.Khoa · @Model.Lop.SoHocVien học viên@(string.IsNullOrWhiteSpace(Model.MoTa) ? "" : " · " + Model.MoTa)</p></div>
+<span class="nc-trang-thai" data-nc-trang-thai role="status" aria-live="polite">Đang kết nối…</span>
+</div>
+<partial name="_ThongBao" />
+@if (Model.QuanLy)
+{
+<p class="hv-ghi-chu">Mã lớp: <b class="dd-ma">@Model.Lop.MaThamGia</b>@(Model.Lop.DangMo ? "" : " (đang ngừng nhận học viên)") · <a href="/GiangVien/Lop/ChiTiet/@Model.Lop.Id">Quản lý lớp</a></p>
+}
+@Html.AntiForgeryToken()
+
+<div class="nc-khung" data-nc data-lop="@Model.Lop.Id" data-toi="@Model.NguoiDungId" data-quan-ly="@(Model.QuanLy ? "1" : "0")" data-toi-da="@GioiHanChat.NoiDung">
+<section class="nc-chat" aria-label="Tin nhắn của lớp">
+<div class="nc-ds" data-nc-ds role="log" aria-live="polite" tabindex="0">
+@if (Model.CoTinCu) { <button type="button" class="nc-cu" data-nc-cu>Xem tin cũ hơn</button> }
+<p class="nc-trong" data-nc-trong @(Model.TinNhan.Count > 0 ? "hidden" : "")>Chưa có tin nhắn. Hãy chào cả lớp nhé!</p>
+</div>
+<form class="nc-gui" data-nc-form autocomplete="off">
+<label for="ncNoiDung" class="hv-an">Nhập tin nhắn</label>
+<textarea id="ncNoiDung" data-nc-nhap rows="1" maxlength="@GioiHanChat.NoiDung" placeholder="Nhập tin nhắn… (Enter để gửi, Shift+Enter xuống dòng)" required></textarea>
+<button type="submit" class="hv-nut" data-nc-nut>Gửi</button>
+</form>
+<p class="nc-loi" data-nc-loi role="alert" hidden></p>
+</section>
+<aside class="nc-thanh-vien" aria-label="Thành viên">
+<h2>Thành viên (@Model.ThanhVien.Count)</h2>
+<ul>@foreach (var t in Model.ThanhVien) { <li>@t</li> }</ul>
+</aside>
+</div>
+@if (!Model.QuanLy)
+{
+<form method="post" asp-action="Roi" asp-route-id="@Model.Lop.Id" onsubmit="return confirm('Rời lớp này?')"><button class="hv-nut phu">Rời lớp</button></form>
+}
+</main>
+</div>
+<script id="ncLichSu" type="application/json">@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.TinNhan, new System.Text.Json.JsonSerializerOptions(System.Text.Json.JsonSerializerDefaults.Web) { Encoder = System.Text.Encodings.Web.JavaScriptEncoder.Default }))</script>
+<script src="~/js/signalr.min.js"></script>
+<script src="~/js/nhom-chat.js" asp-append-version="true"></script>

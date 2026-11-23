@@ -30,8 +30,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
     public DbSet<ChungChi> ChungChi => Set<ChungChi>();
     public DbSet<Lop> Lop => Set<Lop>();
     public DbSet<LopHocVien> LopHocVien => Set<LopHocVien>();
-    public DbSet<BaiDang> BaiDang => Set<BaiDang>();
-    public DbSet<TraLoiBaiDang> TraLoiBaiDang => Set<TraLoiBaiDang>();
+    public DbSet<TinNhanLop> TinNhanLop => Set<TinNhanLop>();
     public DbSet<BaiTapGiao> BaiTapGiao => Set<BaiTapGiao>();
     public DbSet<BaiNopGiao> BaiNopGiao => Set<BaiNopGiao>();
     public DbSet<LuotLamKiemTra> LuotLamKiemTra => Set<LuotLamKiemTra>();
@@ -139,20 +138,12 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
         b.Entity<LopHocVien>().HasOne(x => x.Lop).WithMany(l => l.HocVien).HasForeignKey(x => x.LopId).OnDelete(DeleteBehavior.Cascade);
         b.Entity<LopHocVien>().HasOne(x => x.NguoiDung).WithMany().HasForeignKey(x => x.NguoiDungId).OnDelete(DeleteBehavior.Cascade);
         b.Entity<LopHocVien>().HasIndex(x => x.NguoiDungId);
-        b.Entity<BaiDang>().HasOne(x => x.Lop).WithMany(l => l.BaiDang).HasForeignKey(x => x.LopId).OnDelete(DeleteBehavior.Cascade);
-        b.Entity<BaiDang>().HasOne(x => x.NguoiDung).WithMany().HasForeignKey(x => x.NguoiDungId).OnDelete(DeleteBehavior.Restrict);
-        b.Entity<BaiDang>().HasIndex(x => new { x.LopId, x.Ghim, x.NgayTao });
-        b.Entity<BaiDang>().HasIndex(x => new { x.NguoiDungId, x.NgayTao });
-        b.Entity<BaiDang>().ToTable(t =>
-        {
-            t.HasCheckConstraint("CK_BaiDang_TieuDe", "length(btrim(\"TieuDe\")) BETWEEN 1 AND 200");
-            t.HasCheckConstraint("CK_BaiDang_NoiDung", "length(btrim(\"NoiDung\")) BETWEEN 1 AND 4000");
-        });
-        b.Entity<TraLoiBaiDang>().HasOne(x => x.BaiDang).WithMany(p => p.TraLoi).HasForeignKey(x => x.BaiDangId).OnDelete(DeleteBehavior.Cascade);
-        b.Entity<TraLoiBaiDang>().HasOne(x => x.NguoiDung).WithMany().HasForeignKey(x => x.NguoiDungId).OnDelete(DeleteBehavior.Restrict);
-        b.Entity<TraLoiBaiDang>().HasIndex(x => new { x.BaiDangId, x.NgayTao });
-        b.Entity<TraLoiBaiDang>().HasIndex(x => new { x.NguoiDungId, x.NgayTao });
-        b.Entity<TraLoiBaiDang>().ToTable(t => t.HasCheckConstraint("CK_TraLoiBaiDang_NoiDung", "length(btrim(\"NoiDung\")) BETWEEN 1 AND 4000"));
+        // Nhóm chat của lớp: xoá lớp xoá luôn tin nhắn; người dùng đã nhắn thì không xoá được (giữ nội dung trò chuyện)
+        b.Entity<TinNhanLop>().HasOne(x => x.Lop).WithMany(l => l.TinNhan).HasForeignKey(x => x.LopId).OnDelete(DeleteBehavior.Cascade);
+        b.Entity<TinNhanLop>().HasOne(x => x.NguoiDung).WithMany().HasForeignKey(x => x.NguoiDungId).OnDelete(DeleteBehavior.Restrict);
+        b.Entity<TinNhanLop>().HasIndex(x => new { x.LopId, x.Id });
+        b.Entity<TinNhanLop>().HasIndex(x => new { x.NguoiDungId, x.NgayTao });
+        b.Entity<TinNhanLop>().ToTable(t => t.HasCheckConstraint("CK_TinNhanLop_NoiDung", "length(btrim(\"NoiDung\")) BETWEEN 1 AND 2000"));
         b.Entity<BaiTapGiao>().HasOne(x => x.BuoiHoc).WithMany().HasForeignKey(x => x.BuoiHocId).OnDelete(DeleteBehavior.SetNull);
         b.Entity<BaiTapGiao>().Property(x => x.NoiDungJson).HasColumnType("jsonb");
         b.Entity<BaiNopGiao>().HasIndex(x => new { x.BaiTapGiaoId, x.NguoiDungId }).IsUnique();

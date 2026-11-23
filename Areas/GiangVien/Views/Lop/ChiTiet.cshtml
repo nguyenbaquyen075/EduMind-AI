@@ -7,7 +7,7 @@
     var hv = (System.Collections.IEnumerable)ViewBag.HocVien;
 }
 @section Actions {
-<a href="/Lop/@l.Id" class="ql-nut">Mở diễn đàn (@ViewBag.SoBaiDang bài)</a>
+<a href="/Lop/@l.Id" class="ql-nut">Mở nhóm chat (@ViewBag.SoTinNhan tin)</a>
 <a href="/GiangVien/Lop/Sua/@l.Id" class="ql-nut phu">Sửa lớp</a>
 }
 <section class="ql-khoi">
@@ -17,7 +17,7 @@
 <span class="ql-hang-nut">
 <form method="post" asp-action="DoiMa" data-hoi="Đổi mã mới? Mã cũ sẽ không dùng được nữa."><input type="hidden" name="id" value="@l.Id"><button class="ql-nut phu nho">Đổi mã</button></form>
 <form method="post" asp-action="MoDong"><input type="hidden" name="id" value="@l.Id"><button class="ql-nut phu nho">@(l.DangMo ? "Ngừng nhận học viên mới" : "Nhận học viên mới")</button></form>
-<form method="post" asp-action="Xoa" data-hoi="Xoá lớp này cùng toàn bộ diễn đàn của lớp? Không khôi phục được."><input type="hidden" name="id" value="@l.Id"><button class="ql-nut xoa nho">Xoá lớp</button></form>
+<form method="post" asp-action="Xoa" data-hoi="Xoá lớp này cùng toàn bộ tin nhắn của lớp? Không khôi phục được."><input type="hidden" name="id" value="@l.Id"><button class="ql-nut xoa nho">Xoá lớp</button></form>
 </span>
 </div>
 </section>

@@ -88,7 +88,9 @@ builder.Services.AddHttpClient<ISoanNoiDungAiService, GeminiSoanNoiDungAiService
 builder.Services.AddScoped<IKhoaHocService, EfKhoaHocService>();
 builder.Services.AddScoped<AdminThongKeService>();
 builder.Services.AddScoped<HocVienService>();
+builder.Services.AddSignalR();
 builder.Services.AddScoped<LopHocService>();
+builder.Services.AddScoped<LopChatService>();
 builder.Services.AddScoped<ChungChiService>();
 builder.Services.AddScoped<PhanTichDiemYeuService>();
 builder.Services.AddScoped<AiHocTapService>();
@@ -163,6 +165,7 @@ app.UseAuthorization();
 app.MapGet("/healthz", async (AppDbContext db, CancellationToken ct) =>
     await db.Database.CanConnectAsync(ct) ? Results.Text("ok") : Results.StatusCode(503));
 
+app.MapHub<SuDia.Web.Services.LopChatHub>("/hub/lop");
 app.MapControllerRoute(name: "areas", pattern: "{area:exists}/{controller=TongQuan}/{action=Index}/{id?}");
 app.MapControllerRoute(name: "default", pattern: "{controller=Home}/{action=Index}/{id?}");
 
