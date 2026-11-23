@@ -5,7 +5,7 @@ using SuDia.Web.Models;
 
 namespace SuDia.Web.Areas.GiangVien.Controllers;
 
-public class GiaoBaiController(AppDbContext db) : GiangVienControllerBase(db)
+public class GiaoBaiController(AppDbContext db, SuDia.Web.Services.TinThongBaoService tin) : GiangVienControllerBase(db)
 {
     public async Task<IActionResult> Tao(int? bai, bool kiemTra = false, string? khoa = null, int? deThi = null)
     {
@@ -71,6 +71,7 @@ public class GiaoBaiController(AppDbContext db) : GiangVienControllerBase(db)
         var loi = NoiDungBaiTap.KiemTra(f.Cau, f.DaGiao);
         if (loi is not null) return BadRequest(new { loi });
         if (f.LaKiemTra && f.SoPhut is < 5 or > 240) return BadRequest(new { loi = "Thời gian làm bài từ 5 đến 240 phút." });
+        var truocDaGiao = cu?.DaGiao ?? false;
         var bt = cu ?? new BaiTapGiao();
         if (cu is null) Db.BaiTapGiao.Add(bt);
         bt.BaiId = f.BaiId;
@@ -90,6 +91,13 @@ public class GiaoBaiController(AppDbContext db) : GiangVienControllerBase(db)
             de.Ten = bt.Ten; de.SoPhut = f.SoPhut; de.DangMo = f.DaGiao; de.BaiTapGiao = bt;
         }
         await Db.SaveChangesAsync();
+        if (f.DaGiao && !truocDaGiao)
+        {
+            // Báo học viên đang học khoá này
+            var hocVien = await Db.GhiDanh.Where(g => g.KhoaId == khoaId && (g.HanDen == null || g.HanDen >= DateTime.UtcNow)).Select(g => g.NguoiDungId).ToListAsync();
+            await tin.GuiAsync(hocVien, LoaiTin.BaiTapMoi, (f.LaKiemTra ? "Bài kiểm tra mới: " : "Bài tập mới: ") + bt.Ten,
+                bt.HanNop is DateTime han ? $"Hạn nộp {han.ToLocalTime():HH:mm dd/MM/yyyy}." : "Chưa đặt hạn nộp.", $"/BaiTap/Lam/{bt.Id}");
+        }
         ThongBao(f.DaGiao ? (f.LaKiemTra ? "Đã xuất bản bài kiểm tra." : "Đã giao bài tập cho học viên của bài học.") : "Đã lưu nháp.");
         return Json(new { url = f.LaKiemTra ? Url.Action("Index", "DeThi") : Url.Action("Index", "CauHoi", new { bai = f.BaiId }), id = bt.Id });
     }

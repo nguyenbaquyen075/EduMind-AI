@@ -1370,6 +1370,57 @@ namespace SuDia.Web.Data.Migrations
                         });
                 });
 
+            modelBuilder.Entity("SuDia.Web.Data.TinThongBao", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<bool>("DaDoc")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("KhoaDuyNhat")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Link")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Loai")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("NgayTao")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("NguoiDungId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("NoiDung")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("TieuDe")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NguoiDungId", "KhoaDuyNhat")
+                        .IsUnique()
+                        .HasFilter("\"KhoaDuyNhat\" IS NOT NULL");
+
+                    b.HasIndex("NguoiDungId", "DaDoc", "NgayTao");
+
+                    b.ToTable("TinThongBao", t =>
+                        {
+                            t.HasCheckConstraint("CK_TinThongBao_TieuDe", "length(btrim(\"TieuDe\")) BETWEEN 1 AND 200");
+                        });
+                });
+
             modelBuilder.Entity("SuDia.Web.Data.TraLoiBaiDang", b =>
                 {
                     b.Property<int>("Id")
@@ -1849,6 +1900,17 @@ namespace SuDia.Web.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Bai");
+
+                    b.Navigation("NguoiDung");
+                });
+
+            modelBuilder.Entity("SuDia.Web.Data.TinThongBao", b =>
+                {
+                    b.HasOne("SuDia.Web.Data.NguoiDung", "NguoiDung")
+                        .WithMany()
+                        .HasForeignKey("NguoiDungId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("NguoiDung");
                 });

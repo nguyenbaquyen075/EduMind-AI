@@ -1,0 +1,8 @@
+/* Biểu đồ SVG dựng ở máy chủ (đường + cột), dùng chung trang học viên và giảng viên */
+.bd{margin:0}.bd-svg{display:block;width:100%;height:auto;max-height:280px}
+.bd-luoi{stroke:#E5E7EB;stroke-width:1}.bd-truc{fill:#6B7280;font:500 11.5px Inter,system-ui,sans-serif}.bd-so{fill:#111827;font:700 12px Inter,system-ui,sans-serif}
+.bd-duong{fill:none;stroke:#0E7C66;stroke-width:2.5;stroke-linejoin:round;stroke-linecap:round}.bd-diem{fill:#FFFFFF;stroke:#0E7C66;stroke-width:2.5}.bd-diem:hover{fill:#0E7C66}
+.bd-cot{fill:#0E7C66}.bd-cot:hover{fill:#0B5F4E}
+.bd-bang{margin-top:8px;font-size:13px;color:#4B5563}.bd-bang summary{cursor:pointer;color:#6B7280}
+.bd-bang table{border-collapse:collapse;margin-top:6px}.bd-bang th,.bd-bang td{padding:5px 14px 5px 0;text-align:left;border-bottom:1px solid #EDEFF2}
+.bd-trong{margin:0;color:#6B7280;font-size:14px}

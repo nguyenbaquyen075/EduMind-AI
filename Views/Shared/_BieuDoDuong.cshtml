@@ -1,0 +1,37 @@
+@model BieuDoModel
+@using Microsoft.AspNetCore.Html
+@* Biểu đồ đường: điểm theo thời gian. SVG dựng ở máy chủ, có bảng số liệu cho người dùng trình đọc màn hình *@
+@{
+    const double W = 640, H = 230, L = 40, R = 16, T = 14, B = 34;
+    var n = Model.Diem.Count;
+    double X(int i) => n == 1 ? L + (W - L - R) / 2 : L + i * (W - L - R) / (n - 1);
+    double Y(double v) => T + (H - T - B) * (1 - Math.Clamp(v / Model.Max, 0, 1));
+    IHtmlContent Chu(string lop, double x, double y, string can, string noiDung) => new HtmlString($"<text class=\"{lop}\" x=\"{F(x)}\" y=\"{F(y)}\" text-anchor=\"{can}\">{System.Net.WebUtility.HtmlEncode(noiDung)}</text>");
+    string F(double d) => d.ToString("0.#", System.Globalization.CultureInfo.InvariantCulture);
+    var moc = new[] { 0.0, Model.Max / 2, Model.Max };
+    var buoc = Math.Max(1, (int)Math.Ceiling(n / 8.0));
+    var duong = string.Join(" ", Model.Diem.Select((d, i) => $"{(i == 0 ? "M" : "L")}{F(X(i))} {F(Y(d.Gia))}"));
+}
+<figure class="bd">
+<svg class="bd-svg" viewBox="0 0 @F(W) @F(H)" role="img" aria-label="@Model.MoTa">
+@foreach (var m in moc)
+{
+<line class="bd-luoi" x1="@F(L)" x2="@F(W - R)" y1="@F(Y(m))" y2="@F(Y(m))"></line>
+@Chu("bd-truc", L - 8, Y(m) + 4, "end", F(m))
+}
+@if (n > 1) { <path class="bd-duong" d="@duong"></path> }
+@for (var i = 0; i < n; i++)
+{
+var d = Model.Diem[i];
+<circle class="bd-diem" cx="@F(X(i))" cy="@F(Y(d.Gia))" r="4.5"><title>@d.Nhan: @F(d.Gia)@(string.IsNullOrEmpty(Model.DonVi) ? "" : " " + Model.DonVi)@(d.ChuThich is null ? "" : " · " + d.ChuThich)</title></circle>
+@if (i % buoc == 0 || i == n - 1)
+{
+@Chu("bd-truc", X(i), H - 10, "middle", d.Nhan)
+}
+}
+</svg>
+<details class="bd-bang"><summary>Xem bảng số liệu</summary>
+<table><thead><tr><th>Thời điểm</th><th>@Model.CotGiaTri</th><th>Ghi chú</th></tr></thead><tbody>
+@foreach (var d in Model.Diem) { <tr><td>@d.Nhan</td><td>@F(d.Gia)</td><td>@d.ChuThich</td></tr> }
+</tbody></table></details>
+</figure>

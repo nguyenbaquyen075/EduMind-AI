@@ -10,7 +10,7 @@ namespace SuDia.Web.Controllers;
 
 // Lớp học của tôi + diễn đàn hỏi đáp trong lớp. Giảng viên của khoá và admin cũng vào được để trả lời / điều hành
 [Authorize, Route("Lop")]
-public class LopHocController(AppDbContext db, LopHocService svc, HocVienService hv, IKhoaHocService khoaHoc) : Controller
+public class LopHocController(AppDbContext db, LopHocService svc, HocVienService hv, IKhoaHocService khoaHoc, TinThongBaoService tin) : Controller
 {
     private string Uid => User.FindFirstValue(ClaimTypes.NameIdentifier)!;
     private bool LaAdmin => User.IsInRole(VaiTro.Admin);
@@ -79,7 +79,7 @@ public class LopHocController(AppDbContext db, LopHocService svc, HocVienService
     [HttpPost("{id:int}/DangBai"), ValidateAntiForgeryToken]
     public async Task<IActionResult> DangBai(int id, string? tieuDe, string? noiDung, CancellationToken ct)
     {
-        var (lop, _, _) = await svc.QuyenAsync(id, Uid, LaAdmin, LaGiangVien, ct);
+        var (lop, quanLy, _) = await svc.QuyenAsync(id, Uid, LaAdmin, LaGiangVien, ct);
         if (lop is null) return NotFound();
         tieuDe = (tieuDe ?? "").Trim(); noiDung = (noiDung ?? "").Trim();
         string? loi = tieuDe.Length is 0 or > GioiHanDienDan.TieuDe ? $"Tiêu đề cần từ 1 đến {GioiHanDienDan.TieuDe} ký tự."
@@ -93,6 +93,12 @@ public class LopHocController(AppDbContext db, LopHocService svc, HocVienService
         var b = new BaiDang { LopId = id, NguoiDungId = Uid, TieuDe = tieuDe, NoiDung = noiDung };
         db.BaiDang.Add(b);
         await db.SaveChangesAsync(ct);
+        var ten = await db.Users.Where(u => u.Id == Uid).Select(u => u.HoTen).FirstAsync(ct);
+        if (quanLy)   // giảng viên đăng: báo cả lớp
+            await tin.GuiAsync(await db.LopHocVien.Where(m => m.LopId == id && m.NguoiDungId != Uid).Select(m => m.NguoiDungId).ToListAsync(ct),
+                LoaiTin.BaiMoiCuaGv, $"Bài mới trong lớp {lop.Ten}", $"{ten}: {tieuDe}", $"/Lop/BaiDang/{b.Id}", ct: ct);
+        else          // học viên hỏi: báo giảng viên của khoá
+            await tin.GuiAsync([lop.Khoa!.GiangVienId], LoaiTin.CauHoiMoi, $"Câu hỏi mới trong lớp {lop.Ten}", $"{ten}: {tieuDe}", $"/Lop/BaiDang/{b.Id}", ct: ct);
         ThongBao("Đã đăng bài.");
         return RedirectToAction(nameof(BaiDangChiTiet), new { id = b.Id });
     }
@@ -133,7 +139,17 @@ public class LopHocController(AppDbContext db, LopHocService svc, HocVienService
             : noiDung.Length is 0 or > GioiHanDienDan.NoiDung ? $"Nội dung cần từ 1 đến {GioiHanDienDan.NoiDung:N0} ký tự."
             : await svc.QuaNhieuTraLoiAsync(Uid, ct) ? "Bạn trả lời hơi nhiều trong một giờ. Vui lòng thử lại sau." : null;
         if (loi is not null) { BaoLoi(loi); TempData["TraLoiNhap"] = noiDung; }
-        else { db.TraLoiBaiDang.Add(new TraLoiBaiDang { BaiDangId = id, NguoiDungId = Uid, NoiDung = noiDung }); await db.SaveChangesAsync(ct); ThongBao("Đã gửi trả lời."); }
+        else
+        {
+            db.TraLoiBaiDang.Add(new TraLoiBaiDang { BaiDangId = id, NguoiDungId = Uid, NoiDung = noiDung });
+            await db.SaveChangesAsync(ct);
+            if (b.NguoiDungId != Uid)
+            {
+                var ten = await db.Users.Where(u => u.Id == Uid).Select(u => u.HoTen).FirstAsync(ct);
+                await tin.GuiAsync([b.NguoiDungId], LoaiTin.TraLoi, $"{ten} đã trả lời bài của bạn", b.TieuDe, $"/Lop/BaiDang/{id}", ct: ct);
+            }
+            ThongBao("Đã gửi trả lời.");
+        }
         return RedirectToAction(nameof(BaiDangChiTiet), new { id });
     }
 
@@ -168,6 +184,8 @@ public class LopHocController(AppDbContext db, LopHocService svc, HocVienService
         if (t is null) return NotFound();
         if (!t.LaDapAn) await db.TraLoiBaiDang.Where(x => x.BaiDangId == id && x.LaDapAn).ExecuteUpdateAsync(s => s.SetProperty(x => x.LaDapAn, false), ct);
         t.LaDapAn = !t.LaDapAn; await db.SaveChangesAsync(ct);
+        if (t.LaDapAn && t.NguoiDungId != Uid)
+            await tin.GuiAsync([t.NguoiDungId], LoaiTin.DapAn, "Trả lời của bạn được chọn làm đáp án", b.TieuDe, $"/Lop/BaiDang/{id}", ct: ct);
         return RedirectToAction(nameof(BaiDangChiTiet), new { id });
     }
 

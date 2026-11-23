@@ -10,7 +10,7 @@
 <a asp-controller="Home" asp-action="Index" class="hv-global-brand" aria-label="Sử Địa"><b>Sử<span>·</span>Địa</b></a>
 <div class="hv-global-search-wrap" data-global-search><label class="hv-global-search"><svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg><input type="search" placeholder="Tìm trang, chức năng…" aria-label="Tìm trang và chức năng"></label><div class="hv-ket-qua-tim" role="listbox" hidden></div></div>
 <div class="hv-global-tools">
-<button class="hv-thong-bao-nut" type="button" aria-label="Thông báo" title="Thông báo"><svg aria-hidden="true" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg></button>
+<a class="hv-thong-bao-nut" href="/ThongBao" aria-label="Thông báo" title="Thông báo"><svg aria-hidden="true" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg><span class="tb-so" data-tb-dem hidden></span></a>
 <details class="hv-head-tai-khoan">
 <summary title="@nd?.Email" aria-label="Mở menu tài khoản"><span class="hv-avatar" aria-hidden="true">@((nd?.HoTen ?? "?").Split(' ', StringSplitOptions.RemoveEmptyEntries).LastOrDefault()?[..1].ToUpper())</span></summary>
 <div class="hv-head-menu-tai-khoan" role="menu"><a asp-controller="TaiKhoan" asp-action="HoSo" role="menuitem">Thông tin cá nhân</a><a asp-controller="TaiKhoan" asp-action="HoSo" asp-fragment="doi-mat-khau" role="menuitem">Bảo mật</a></div>
@@ -68,6 +68,7 @@
 <div class="hv-thanh" role="progressbar" aria-label="Lượt hỏi AI đã dùng" aria-valuemin="0" aria-valuemax="@Model.LuotHoiToiDa" aria-valuenow="@Model.LuotHoiDaDung"><span style="width: @(Model.LuotHoiPhanTram)%"></span></div>
 </div>
 </aside>
+<script src="~/js/chuong-thong-bao.js" asp-append-version="true" defer></script>
 <script>(() => { const a = document.querySelector('.hv-link.dang-mo'); const n = a?.parentElement;
   if (n && n.scrollWidth > n.clientWidth) n.scrollLeft += a.getBoundingClientRect().left - n.getBoundingClientRect().left - (n.clientWidth - a.offsetWidth) / 2;
   document.addEventListener('click', (e) => document.querySelectorAll('details.hv-tai-khoan[open]').forEach((d) => { if (!d.contains(e.target)) d.open = false; }));
