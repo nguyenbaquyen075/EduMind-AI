@@ -89,6 +89,8 @@ builder.Services.AddScoped<IKhoaHocService, EfKhoaHocService>();
 builder.Services.AddScoped<AdminThongKeService>();
 builder.Services.AddScoped<HocVienService>();
 builder.Services.AddScoped<LopHocService>();
+builder.Services.AddScoped<TinThongBaoService>();
+builder.Services.AddScoped<NhacHanService>();
 // Thanh toán PayOS: khoá lưu bằng user-secrets (Development) hoặc biến môi trường PayOS__ClientId…
 builder.Services.Configure<PayOSOptions>(builder.Configuration.GetSection("PayOS"));
 builder.Services.AddHttpClient<PayOSService>(http => http.Timeout = TimeSpan.FromSeconds(20));
@@ -102,6 +104,7 @@ builder.Services.Configure<EmailOptions>(builder.Configuration.GetSection("Email
 if (builder.Environment.IsDevelopment()) builder.Services.AddSingleton<IEmailSender, LogEmailSender>();
 else builder.Services.AddSingleton<IEmailSender, ChuaCoEmailSender>();
 builder.Services.AddHostedService<ThongBaoWorker>();
+builder.Services.AddHostedService<NhacHanWorker>();
 builder.Services.AddHostedService<DoiSoatDonWorker>();
 builder.Services.Configure<HocOnlineOptions>(builder.Configuration.GetSection("HocOnline"));
 

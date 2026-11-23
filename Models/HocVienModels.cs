@@ -22,6 +22,9 @@ public record LuotLamCuaToi(string Ten, string Khoa, bool LaDeThi, int SoDung, i
 
 public record HuyHieu(string Ten, string MoTa, bool DatDuoc);
 
+/// <summary>Số bài đã học / tổng số bài đang mở của một khoá học viên còn hạn.</summary>
+public record TienDoKhoa(string Ten, int DaHoc, int Tong);
+
 public class DiemCuaToiViewModel
 {
     public required MenuTaiKhoan Menu { get; init; }
@@ -31,6 +34,7 @@ public class DiemCuaToiViewModel
     public decimal? DiemBaiTapTb { get; init; }
     public decimal? DiemThiTb { get; init; }
     public int? TiLeDungLuyenTap { get; init; }
+    public IReadOnlyList<TienDoKhoa> TienDo { get; init; } = [];
 }
 
 /// <summary>Câu học viên làm sai ở lần gần nhất, để ôn lại.</summary>

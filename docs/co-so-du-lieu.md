@@ -225,3 +225,15 @@ Dùng AWS S3 thay R2 thì để trống `DiaChi` và đặt `Vung` (ví dụ `ap
 Ràng buộc kiểm tra: tên lớp 1–100 ký tự, tiêu đề 1–200, nội dung 1–4000 (`CK_Lop_Ten`, `CK_BaiDang_*`, `CK_TraLoiBaiDang_NoiDung`).
 
 Quy tắc: giảng viên của khoá (hoặc admin) tạo lớp và quản lý; học viên vào lớp bằng mã nếu đang học khoá của lớp (ghi danh còn hạn); chỉ thành viên và người quản lý mới xem diễn đàn. Mỗi người tối đa 10 bài và 30 trả lời mỗi giờ. Xoá lớp xoá luôn thành viên, bài đăng, trả lời. Kiểm thử: `KiemThu/kiem-tra-lop-hoc.py` (10 nhóm kiểm tra).
+
+## 12. Thông báo trong web, biểu đồ và nhắc hạn
+
+| Bảng | Vai trò | Quy tắc |
+| --- | --- | --- |
+| `TinThongBao` | Tin hiện ở chuông (Id kiểu bigint) | `NguoiDungId` → NguoiDung (CASCADE); `KhoaDuyNhat` duy nhất theo (người, khoá) để không gửi trùng; `CK_TinThongBao_TieuDe` |
+
+Bảng `ThongBao` cũ vẫn chỉ dùng cho tin thanh toán (SMS/email, có `DonHangId`).
+
+Nguồn tin: học viên hỏi → báo giảng viên của khoá; trả lời → báo người đăng bài; giảng viên đăng bài → báo cả lớp; chọn đáp án → báo người trả lời; giao bài tập/kiểm tra → báo học viên đang học khoá. `NhacHanWorker` chạy sau khi khởi động 1 phút rồi mỗi 6 giờ (`NhacHanService`): khoá còn ≤ 7 ngày, bài tập còn ≤ 48 giờ mà chưa nộp; mỗi việc nhắc một lần và gửi kèm email (Development chỉ ghi log). Chuông: `GET /ThongBao/Dem`, trang `/ThongBao`; link trong tin chỉ nhận đường dẫn nội bộ. Chạy thử nhắc hạn: `GET /ThongBao/nhac-han-thu` (chỉ Development).
+
+Biểu đồ là SVG dựng ở máy chủ (`_BieuDoDuong`, `_BieuDoCot`, `wwwroot/css/bieu-do.css`), có bảng số liệu cho trình đọc màn hình: điểm theo thời gian và tiến độ khoá (Điểm của tôi), phổ điểm lớp (Bài nộp của giảng viên). Kiểm thử: `KiemThu/kiem-tra-thong-bao.py`.

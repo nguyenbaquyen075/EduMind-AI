@@ -76,9 +76,15 @@ public class HocVienService(AppDbContext db)
         var thi = luot.Where(l => l.LaDeThi && l.SoCau > 0).ToList();
         var luyen = luot.Where(l => !l.LaDeThi).ToList();
         var daHoc = await db.TienDoBai.CountAsync(t => t.NguoiDungId == uid && t.TrangThai == TrangThaiHoc.DaHoc);
+        var khoaConHan = await khoa.ToListAsync();
+        var tongBai = await db.Bai.AsNoTracking().Where(b => b.DaXuatBan && khoaConHan.Contains(b.ChuDe!.KhoaId)).GroupBy(b => b.ChuDe!.KhoaId).Select(g => new { Khoa = g.Key, N = g.Count() }).ToListAsync();
+        var daHocTheoKhoa = await db.TienDoBai.AsNoTracking().Where(t => t.NguoiDungId == uid && t.TrangThai == TrangThaiHoc.DaHoc && khoaConHan.Contains(t.Bai!.ChuDe!.KhoaId))
+            .GroupBy(t => t.Bai!.ChuDe!.KhoaId).Select(g => new { Khoa = g.Key, N = g.Count() }).ToListAsync();
+        var tenKhoaTD = await db.Khoa.AsNoTracking().Where(k => khoaConHan.Contains(k.Id)).OrderBy(k => k.ThuTu).Select(k => new { k.Id, k.Ten }).ToListAsync();
+        var tienDo = tenKhoaTD.Select(k => new TienDoKhoa(k.Ten, daHocTheoKhoa.FirstOrDefault(x => x.Khoa == k.Id)?.N ?? 0, tongBai.FirstOrDefault(x => x.Khoa == k.Id)?.N ?? 0)).Where(t => t.Tong > 0).ToList();
         return new DiemCuaToiViewModel
         {
-            Menu = menu, BaiTap = baiTap, LuotLam = luot.Take(30).ToList(),
+            Menu = menu, BaiTap = baiTap, LuotLam = luot.Take(30).ToList(), TienDo = tienDo,
             DiemBaiTapTb = coDiem.Count == 0 ? null : Math.Round(coDiem.Average(), 1),
             DiemThiTb = thi.Count == 0 ? null : Math.Round(thi.Average(t => t.Diem10), 1),
             TiLeDungLuyenTap = luyen.Sum(l => l.SoCau) == 0 ? null : (int)Math.Round(luyen.Sum(l => l.SoDung) * 100.0 / luyen.Sum(l => l.SoCau)),

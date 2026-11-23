@@ -26,6 +26,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
     public DbSet<BaiLam> BaiLam => Set<BaiLam>();
     public DbSet<CauTraLoi> CauTraLoi => Set<CauTraLoi>();
     public DbSet<BuoiHoc> BuoiHoc => Set<BuoiHoc>();
+    public DbSet<TinThongBao> TinThongBao => Set<TinThongBao>();
     public DbSet<Lop> Lop => Set<Lop>();
     public DbSet<LopHocVien> LopHocVien => Set<LopHocVien>();
     public DbSet<BaiDang> BaiDang => Set<BaiDang>();
@@ -112,6 +113,12 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
 
         // ------------------------------------------------ Học online, bài tập giao
         b.Entity<BuoiHoc>().HasIndex(x => x.BaiId);
+
+        // Thông báo trong web: xoá người dùng xoá luôn tin; (người, khoá) duy nhất để không gửi trùng
+        b.Entity<TinThongBao>().HasOne(x => x.NguoiDung).WithMany().HasForeignKey(x => x.NguoiDungId).OnDelete(DeleteBehavior.Cascade);
+        b.Entity<TinThongBao>().HasIndex(x => new { x.NguoiDungId, x.DaDoc, x.NgayTao });
+        b.Entity<TinThongBao>().HasIndex(x => new { x.NguoiDungId, x.KhoaDuyNhat }).IsUnique().HasFilter("\"KhoaDuyNhat\" IS NOT NULL");
+        b.Entity<TinThongBao>().ToTable(t => t.HasCheckConstraint("CK_TinThongBao_TieuDe", "length(btrim(\"TieuDe\")) BETWEEN 1 AND 200"));
 
         // Lớp học và diễn đàn: xoá lớp xoá luôn thành viên + bài đăng; người dùng / khoá đang có lớp thì không xoá được
         b.Entity<Lop>().HasOne(x => x.Khoa).WithMany().HasForeignKey(x => x.KhoaId).OnDelete(DeleteBehavior.Restrict);

@@ -52,3 +52,9 @@ public class BaiDangViewModel
     public IReadOnlyList<TraLoiHienThi> TraLoi { get; init; } = [];
     public string? TraLoiNhap { get; init; }
 }
+
+public class TinThongBaoViewModel
+{
+    public required MenuTaiKhoan Menu { get; init; }
+    public IReadOnlyList<SuDia.Web.Data.TinThongBao> Tin { get; init; } = [];
+}

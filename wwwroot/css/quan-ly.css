@@ -405,3 +405,8 @@ a{color:var(--nhan,#4F46E5)}
 .gv-tl b{font-size:13px;white-space:nowrap}
 .bd-ht-ray{flex:1;display:block;height:7px;border-radius:4px;background:#E5E7EB;overflow:hidden}
 .bd-ht-thanh{display:block;height:100%;border-radius:4px;background:var(--nhan,#4F46E5)}
+
+/* Chuông thông báo: huy hiệu số tin chưa đọc (cùng kiểu với hoc-vien.css) */
+.ql-thong-bao-nut{position:relative;text-decoration:none}
+.tb-so{position:absolute;top:-4px;right:-4px;min-width:18px;height:18px;padding:0 5px;box-sizing:border-box;border-radius:99px;background:#DC2626;color:#FFFFFF;font:700 11px/14px Inter,system-ui,sans-serif;text-align:center;border:2px solid #FFFFFF}
+.tb-so[hidden]{display:none}
