@@ -1,0 +1,43 @@
+@model LopCuaToiViewModel
+@{ ViewData["Title"] = "Lớp học · Sử Địa"; }
+@section Head {
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500;1,600&display=swap">
+<link rel="stylesheet" href="~/css/hoc-vien.css" asp-append-version="true">
+}
+<div class="hv-trang">
+<partial name="_MenuTaiKhoan" model="Model.Menu" />
+<main class="hv-main">
+<h1>Lớp học</h1>
+<p class="hv-mo-ta">Vào lớp bằng mã giảng viên gửi để hỏi đáp và thảo luận cùng cả lớp.</p>
+<partial name="_ThongBao" />
+
+<section class="hv-khoi">
+<div class="hv-khoi-dau"><h2>Vào lớp bằng mã</h2></div>
+<form method="post" asp-action="Vao" class="dd-vao">
+<label for="maLop" class="hv-an">Mã lớp</label>
+<input id="maLop" name="ma" value="@Model.MaNhap" maxlength="12" placeholder="Ví dụ: K7M2QX" autocomplete="off" autocapitalize="characters" required>
+<button class="hv-nut">Vào lớp</button>
+</form>
+<p class="hv-ghi-chu">Bạn cần đang học khoá của lớp (ghi danh còn hạn).</p>
+</section>
+
+<section class="hv-khoi">
+<div class="hv-khoi-dau"><h2>Lớp của tôi</h2></div>
+@if (Model.Lop.Count == 0)
+{
+<p class="hv-trong">Bạn chưa vào lớp nào. Nhập mã lớp ở trên để bắt đầu.</p>
+}
+else
+{
+<ul class="dd-lop">
+@foreach (var l in Model.Lop)
+{
+<li><a class="dd-lop-the" asp-action="DienDan" asp-route-id="@l.Id">
+<b>@l.Ten</b><span>@l.Khoa</span>
+<small>@l.SoHocVien học viên · @l.SoBaiDang bài thảo luận@(l.QuanLy ? " · bạn là giảng viên" : "")</small></a></li>
+}
+</ul>
+}
+</section>
+</main>
+</div>

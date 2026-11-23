@@ -26,6 +26,10 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
     public DbSet<BaiLam> BaiLam => Set<BaiLam>();
     public DbSet<CauTraLoi> CauTraLoi => Set<CauTraLoi>();
     public DbSet<BuoiHoc> BuoiHoc => Set<BuoiHoc>();
+    public DbSet<Lop> Lop => Set<Lop>();
+    public DbSet<LopHocVien> LopHocVien => Set<LopHocVien>();
+    public DbSet<BaiDang> BaiDang => Set<BaiDang>();
+    public DbSet<TraLoiBaiDang> TraLoiBaiDang => Set<TraLoiBaiDang>();
     public DbSet<BaiTapGiao> BaiTapGiao => Set<BaiTapGiao>();
     public DbSet<BaiNopGiao> BaiNopGiao => Set<BaiNopGiao>();
     public DbSet<LuotLamKiemTra> LuotLamKiemTra => Set<LuotLamKiemTra>();
@@ -108,6 +112,30 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
 
         // ------------------------------------------------ Học online, bài tập giao
         b.Entity<BuoiHoc>().HasIndex(x => x.BaiId);
+
+        // Lớp học và diễn đàn: xoá lớp xoá luôn thành viên + bài đăng; người dùng / khoá đang có lớp thì không xoá được
+        b.Entity<Lop>().HasOne(x => x.Khoa).WithMany().HasForeignKey(x => x.KhoaId).OnDelete(DeleteBehavior.Restrict);
+        b.Entity<Lop>().HasIndex(x => x.MaThamGia).IsUnique();
+        b.Entity<Lop>().HasIndex(x => x.KhoaId);
+        b.Entity<Lop>().ToTable(t => t.HasCheckConstraint("CK_Lop_Ten", "length(btrim(\"Ten\")) BETWEEN 1 AND 100"));
+        b.Entity<LopHocVien>().HasKey(x => new { x.LopId, x.NguoiDungId });
+        b.Entity<LopHocVien>().HasOne(x => x.Lop).WithMany(l => l.HocVien).HasForeignKey(x => x.LopId).OnDelete(DeleteBehavior.Cascade);
+        b.Entity<LopHocVien>().HasOne(x => x.NguoiDung).WithMany().HasForeignKey(x => x.NguoiDungId).OnDelete(DeleteBehavior.Cascade);
+        b.Entity<LopHocVien>().HasIndex(x => x.NguoiDungId);
+        b.Entity<BaiDang>().HasOne(x => x.Lop).WithMany(l => l.BaiDang).HasForeignKey(x => x.LopId).OnDelete(DeleteBehavior.Cascade);
+        b.Entity<BaiDang>().HasOne(x => x.NguoiDung).WithMany().HasForeignKey(x => x.NguoiDungId).OnDelete(DeleteBehavior.Restrict);
+        b.Entity<BaiDang>().HasIndex(x => new { x.LopId, x.Ghim, x.NgayTao });
+        b.Entity<BaiDang>().HasIndex(x => new { x.NguoiDungId, x.NgayTao });
+        b.Entity<BaiDang>().ToTable(t =>
+        {
+            t.HasCheckConstraint("CK_BaiDang_TieuDe", "length(btrim(\"TieuDe\")) BETWEEN 1 AND 200");
+            t.HasCheckConstraint("CK_BaiDang_NoiDung", "length(btrim(\"NoiDung\")) BETWEEN 1 AND 4000");
+        });
+        b.Entity<TraLoiBaiDang>().HasOne(x => x.BaiDang).WithMany(p => p.TraLoi).HasForeignKey(x => x.BaiDangId).OnDelete(DeleteBehavior.Cascade);
+        b.Entity<TraLoiBaiDang>().HasOne(x => x.NguoiDung).WithMany().HasForeignKey(x => x.NguoiDungId).OnDelete(DeleteBehavior.Restrict);
+        b.Entity<TraLoiBaiDang>().HasIndex(x => new { x.BaiDangId, x.NgayTao });
+        b.Entity<TraLoiBaiDang>().HasIndex(x => new { x.NguoiDungId, x.NgayTao });
+        b.Entity<TraLoiBaiDang>().ToTable(t => t.HasCheckConstraint("CK_TraLoiBaiDang_NoiDung", "length(btrim(\"NoiDung\")) BETWEEN 1 AND 4000"));
         b.Entity<BaiTapGiao>().HasOne(x => x.BuoiHoc).WithMany().HasForeignKey(x => x.BuoiHocId).OnDelete(DeleteBehavior.SetNull);
         b.Entity<BaiTapGiao>().Property(x => x.NoiDungJson).HasColumnType("jsonb");
         b.Entity<BaiNopGiao>().HasIndex(x => new { x.BaiTapGiaoId, x.NguoiDungId }).IsUnique();
