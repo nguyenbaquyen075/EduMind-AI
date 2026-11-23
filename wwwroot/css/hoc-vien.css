@@ -124,3 +124,6 @@
 .dy-tile{flex:none;min-width:56px;padding:4px 12px;border-radius:99px;text-align:center;font-weight:700;font-size:14px;background:#F3F4F6}
 .dy-tile.sai{background:#FEE2E2;color:#991B1B}.dy-tile.tot{background:#D1FAE5;color:#065F46}
 .dy-nut{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}.dy-cau{margin-top:10px}.dy-cau:empty{display:none}
+
+/* Chứng chỉ */
+.cc-ds{list-style:none;margin:0;padding:0}.cc-thanh{margin:12px 0 4px}

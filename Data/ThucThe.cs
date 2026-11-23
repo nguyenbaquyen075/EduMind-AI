@@ -119,7 +119,14 @@ public class CauHoi : ICoCapNhat
     public string GiaiThich { get; set; } = "";
     public int? Muc { get; set; }
     public string NguonHienThi { get; set; } = "";
+    public int DoKho { get; set; } = 2;               // 1 dễ, 2 trung bình, 3 khó (dùng để ra đề theo ma trận)
     public DateTime CapNhatLuc { get; set; } = DateTime.UtcNow;
+}
+
+public static class DoKhoCau
+{
+    public const int De = 1, TrungBinh = 2, Kho = 3;
+    public static string Ten(int d) => d switch { 1 => "Dễ", 3 => "Khó", _ => "Trung bình" };
 }
 
 public class DeThi : ICoCapNhat

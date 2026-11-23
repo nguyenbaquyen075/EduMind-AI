@@ -1,0 +1,29 @@
+@model ChungChi
+@using SuDia.Web.Services
+@{ Layout = null; var link = (string)ViewBag.LinkXacThuc; }
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chứng chỉ · @Model.TenKhoa · @Model.HoTen</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap">
+<link rel="stylesheet" href="~/css/chung-chi.css" asp-append-version="true">
+</head>
+<body>
+<div class="cc-thanh-cu"><a href="/ChungChi">← Về chứng chỉ</a><button type="button" onclick="window.print()">In / Lưu thành PDF</button></div>
+<main class="cc-trang">
+<div class="cc-vien">
+<p class="cc-thuong">Sử<span>·</span>Địa</p>
+<h1>Chứng nhận hoàn thành khoá học</h1>
+<p class="cc-nho">Chứng nhận rằng</p>
+<p class="cc-ten">@Model.HoTen</p>
+<p class="cc-nho">đã hoàn thành toàn bộ @Model.SoBai bài học của khoá</p>
+<p class="cc-khoa">@Model.TenKhoa</p>
+<div class="cc-chan">
+<div><span>Ngày cấp</span><b>@Model.NgayCap.ToLocalTime().ToString("dd/MM/yyyy")</b></div>
+<div class="cc-ma"><span>Mã xác thực</span><b>@ChungChiService.DinhDangMa(Model.MaXacThuc)</b><small>Kiểm tra tại @link</small></div>
+</div>
+</div>
+</main>
+</body>
+</html>

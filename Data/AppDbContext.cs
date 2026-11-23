@@ -27,6 +27,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
     public DbSet<CauTraLoi> CauTraLoi => Set<CauTraLoi>();
     public DbSet<BuoiHoc> BuoiHoc => Set<BuoiHoc>();
     public DbSet<TinThongBao> TinThongBao => Set<TinThongBao>();
+    public DbSet<ChungChi> ChungChi => Set<ChungChi>();
     public DbSet<Lop> Lop => Set<Lop>();
     public DbSet<LopHocVien> LopHocVien => Set<LopHocVien>();
     public DbSet<BaiDang> BaiDang => Set<BaiDang>();
@@ -60,6 +61,15 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbCo
         // Câu hỏi đang nằm trong đề thì không xoá được (trước đây xoá câu là đề tự hụt câu)
         b.Entity<DeThiCau>().HasOne(x => x.CauHoi).WithMany().HasForeignKey(x => x.CauHoiId).OnDelete(DeleteBehavior.Restrict);
         b.Entity<CauHoi>().HasIndex(x => new { x.BaiId, x.ThuTu });
+        b.Entity<CauHoi>().Property(x => x.DoKho).HasDefaultValue(2);
+        b.Entity<CauHoi>().ToTable(t => t.HasCheckConstraint("CK_CauHoi_DoKho", "\"DoKho\" BETWEEN 1 AND 3"));
+
+        // Chứng chỉ: mỗi người một chứng chỉ cho mỗi khoá; xoá người dùng / khoá đã có chứng chỉ thì bị chặn
+        b.Entity<ChungChi>().HasOne(x => x.NguoiDung).WithMany().HasForeignKey(x => x.NguoiDungId).OnDelete(DeleteBehavior.Restrict);
+        b.Entity<ChungChi>().HasOne(x => x.Khoa).WithMany().HasForeignKey(x => x.KhoaId).OnDelete(DeleteBehavior.Restrict);
+        b.Entity<ChungChi>().HasIndex(x => x.MaXacThuc).IsUnique();
+        b.Entity<ChungChi>().HasIndex(x => new { x.NguoiDungId, x.KhoaId }).IsUnique();
+        b.Entity<ChungChi>().ToTable(t => t.HasCheckConstraint("CK_ChungChi_Ma", "length(\"MaXacThuc\") = 10"));
 
         // Kho tài liệu: xoá bài thì tài liệu còn (bỏ gắn bài); khoá còn tài liệu thì không xoá được
         b.Entity<TaiLieuKhoa>().HasOne(x => x.Khoa).WithMany().HasForeignKey(x => x.KhoaId).OnDelete(DeleteBehavior.Restrict);

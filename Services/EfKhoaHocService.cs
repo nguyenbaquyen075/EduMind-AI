@@ -261,7 +261,7 @@ public class EfKhoaHocService : IKhoaHocService
         {
             var cau = !khoa.DaMo ? [] : _db.DeThiCau.AsNoTracking().Where(x => x.DeThiId == ma).OrderBy(x => x.ThuTu)
                 .Select(x => x.CauHoi!).ToList().Select(Doi).ToList();
-            return new LamDeViewModel { Id = ma, KhoaId = khoa.Id, TenDe = de.Ten, LaDeThi = true, SoPhut = de.SoPhut, CauHoi = cau, DaChon = daChon };
+            return new LamDeViewModel { Id = ma, KhoaId = khoa.Id, TenKhoa = khoa.Ten, TenDe = de.Ten, LaDeThi = true, SoPhut = de.SoPhut, CauHoi = cau, DaChon = daChon };
         }
 
         var khoaBai = danhMuc.FirstOrDefault(k => k.TatCaBai.Any(b => b.Id == ma)) ?? danhMuc.First();
@@ -269,7 +269,7 @@ public class EfKhoaHocService : IKhoaHocService
         var cauBai = bai is null || bai.BiKhoa ? [] : _db.CauHoi.AsNoTracking().Where(c => c.BaiId == ma).OrderBy(c => c.ThuTu).ToList().Select(Doi).ToList();
         return new LamDeViewModel
         {
-            Id = ma, KhoaId = khoaBai.Id, TenDe = bai is null ? "Bài tập" : $"Luyện tập · Bài {bai.So}",
+            Id = ma, KhoaId = khoaBai.Id, TenKhoa = khoaBai.Ten, TenDe = bai is null ? "Bài tập" : $"Luyện tập · Bài {bai.So}",
             CauHoi = cauBai, DaChon = daChon,
         };
     }

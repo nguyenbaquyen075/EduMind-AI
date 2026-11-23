@@ -19,7 +19,7 @@ public class CauHoiController(AppDbContext db) : GiangVienControllerBase(db)
             ViewBag.Bai = b;
             ViewBag.BaiTapGiao = await Db.BaiTapGiao.AsNoTracking().Include(x => x.BuoiHoc).Where(x => x.BaiId == b.Id && x.DeThi == null).OrderByDescending(x => x.NgayTao).ToListAsync();
             var cau = await Db.CauHoi.AsNoTracking().Where(c => c.BaiId == b.Id).OrderBy(c => c.ThuTu).ThenBy(c => c.Id)
-                .Select(c => new { c.Id, c.NoiDung, c.PhuongAn, c.DapAnDung, c.GiaiThich, c.NguonHienThi,
+                .Select(c => new { c.Id, c.NoiDung, c.PhuongAn, c.DapAnDung, c.GiaiThich, c.NguonHienThi, c.DoKho,
                     Lam = Db.CauTraLoi.Count(t => t.CauHoiId == c.Id), Dung = Db.CauTraLoi.Count(t => t.CauHoiId == c.Id && t.Dung) })
                 .ToListAsync();
             ViewBag.Cau = cau;
@@ -71,7 +71,7 @@ public class CauHoiController(AppDbContext db) : GiangVienControllerBase(db)
         return View(new CauHoiForm
         {
             Id = c.Id, ViTri = c.Muc is null ? $"{c.BaiId}" : $"{c.BaiId}:{c.Muc}", NoiDung = c.NoiDung,
-            A = pa[0], B = pa[1], C = pa[2], D = pa[3], DapAn = c.DapAnDung, GiaiThich = c.GiaiThich,
+            A = pa[0], B = pa[1], C = pa[2], D = pa[3], DapAn = c.DapAnDung, GiaiThich = c.GiaiThich, DoKho = c.DoKho,
         });
     }
 
@@ -111,6 +111,7 @@ public class CauHoiController(AppDbContext db) : GiangVienControllerBase(db)
         c.PhuongAn = [f.A.Trim(), f.B.Trim(), f.C.Trim(), f.D.Trim()];
         c.DapAnDung = f.DapAn;
         c.GiaiThich = f.GiaiThich.Trim();
+        c.DoKho = f.DoKho;
         c.NguonHienThi = muc is null ? $"Bài {bai!.So} — {bai.Ten}" : $"Bài {bai!.So} · Mục {muc.So} — {muc.Ten}";
         await Db.SaveChangesAsync();
         ThongBao(f.Id == 0 ? "Đã thêm câu hỏi." : "Đã lưu câu hỏi.");

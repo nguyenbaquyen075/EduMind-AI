@@ -74,6 +74,7 @@ public class CauHoiForm
     [Required(ErrorMessage = "Nhập phương án D")] public string D { get; set; } = "";
     [Required(ErrorMessage = "Chọn đáp án đúng")] [RegularExpression("^[ABCD]$")] public string DapAn { get; set; } = "";
     [Required(ErrorMessage = "Nhập lời giải thích")] public string GiaiThich { get; set; } = "";
+    [Range(1, 3, ErrorMessage = "Độ khó từ 1 đến 3")] public int DoKho { get; set; } = 2;
 }
 
 public class DeThiForm
