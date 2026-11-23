@@ -58,3 +58,12 @@ public class TinThongBaoViewModel
     public required MenuTaiKhoan Menu { get; init; }
     public IReadOnlyList<SuDia.Web.Data.TinThongBao> Tin { get; init; } = [];
 }
+
+public class DiemYeuViewModel
+{
+    public required MenuTaiKhoan Menu { get; init; }
+    public IReadOnlyList<SuDia.Web.Services.DiemTheoBai> TatCa { get; init; } = [];
+    public IReadOnlyList<SuDia.Web.Services.DiemTheoBai> Yeu { get; init; } = [];
+    public IReadOnlyList<SuDia.Web.Services.DiemTheoBai> Manh { get; init; } = [];
+    public bool CoAi { get; init; }
+}

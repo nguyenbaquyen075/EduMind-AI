@@ -43,7 +43,9 @@ else
 @foreach (var c in tuLuan)
 {
 <div class="gb-question"><b>@c.NoiDung · @c.Diem điểm</b><p class="gb-pre">@(string.IsNullOrWhiteSpace(traLoi.GetValueOrDefault(c.Id)) ? "Học viên bỏ trống" : traLoi.GetValueOrDefault(c.Id))</p>
-<details><summary>Hướng dẫn chấm</summary><p class="gb-pre">@c.LoiGiai</p></details></div>
+<details><summary>Hướng dẫn chấm</summary><p class="gb-pre">@c.LoiGiai</p></details>
+<button type="button" class="ql-nut phu nho" data-ai-cham data-nop="@n.Id" data-cau="@c.Id" data-toi-da="@c.Diem.ToString(System.Globalization.CultureInfo.InvariantCulture)">AI gợi ý chấm</button>
+<div class="gb-ai" data-ket-qua></div></div>
 }
 @if (tuLuan.Count > 0)
 {
@@ -52,3 +54,29 @@ else
 </article>
 }
 </div>
+<script>
+(() => {
+  const token = document.querySelector('input[name=__RequestVerificationToken]')?.value;
+  const dong = (nhan, ds) => { const p = document.createElement('p'); const b = document.createElement('b'); b.textContent = nhan + ' '; p.append(b, ds.length ? ds.join('; ') : '—'); return p; };
+  document.querySelectorAll('[data-ai-cham]').forEach(nut => nut.addEventListener('click', async () => {
+    const kq = nut.parentElement.querySelector('[data-ket-qua]');
+    nut.disabled = true; nut.textContent = 'AI đang chấm…'; kq.replaceChildren();
+    try {
+      const r = await fetch('/GiangVien/GiaoBai/AiNhanXet', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded', RequestVerificationToken: token }, body: `nopId=${nut.dataset.nop}&cauId=${encodeURIComponent(nut.dataset.cau)}` });
+      if (r.status === 429) throw new Error('Thao tác hơi nhanh, đợi một phút rồi thử lại.');
+      if (!r.ok) throw new Error('Không gọi được AI. Tải lại trang rồi thử lại.');
+      const d = await r.json(); if (d.loi) throw new Error(d.loi);
+      nut.dataset.diem = d.kq.diem;
+      const hop = document.createElement('div'); hop.className = 'gb-ai-kq';
+      const t = document.createElement('p'); t.innerHTML = ''; const b = document.createElement('b'); b.textContent = `Gợi ý: ${d.kq.diem}/${d.kq.toiDa} điểm`; t.append(b, ' · AI chỉ gợi ý, thầy/cô quyết định điểm'); hop.append(t);
+      const nx = document.createElement('p'); nx.textContent = d.kq.nhanXet; hop.append(nx, dong('Ý đúng:', d.kq.yDung), dong('Còn thiếu:', d.kq.yThieu));
+      kq.append(hop);
+      const the = nut.closest('article'), tong = [...the.querySelectorAll('[data-ai-cham]')].filter(x => x.dataset.diem !== undefined);
+      const o = the.querySelector('input[name=diem], input[id^=diem-]'), cong = tong.reduce((s, x) => s + parseFloat(x.dataset.diem), 0);
+      if (o) { let g = the.querySelector('.gb-ai-tong'); if (!g) { g = document.createElement('button'); g.type = 'button'; g.className = 'ql-nut phu nho gb-ai-tong'; o.after(g); }
+        g.textContent = `Điền tổng AI gợi ý: ${cong} (${tong.length} câu)`; g.onclick = () => { o.value = cong; o.focus(); }; }
+    } catch (e) { const p = document.createElement('p'); p.className = 'ql-loi'; p.textContent = e.message; kq.append(p); }
+    finally { nut.disabled = false; nut.textContent = 'AI gợi ý chấm lại'; }
+  }));
+})();
+</script>

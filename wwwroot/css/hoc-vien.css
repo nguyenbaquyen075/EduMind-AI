@@ -117,3 +117,10 @@
 .tb-tin:hover{background:#F6F8FA}.tb-cham{flex:none;width:9px;height:9px;margin-top:7px;border-radius:50%;background:#0E7C66}
 .tb-da-doc .tb-cham{background:transparent;border:1px solid #D1D5DB}.tb-da-doc .tb-tieu-de{font-weight:500;color:#4B5563}
 .tb-tieu-de{display:block;font-weight:700;color:#111827}.tb-noi-dung{display:block;margin-top:2px;color:#4B5563;font-size:13.5px}.tb-gio{display:block;margin-top:4px;color:#9CA3AF;font-size:12px}
+
+/* Điểm yếu */
+.dy-ds{list-style:none;margin:0;padding:0}.dy-ds>li{padding:14px 0;border-top:1px solid #EDEFF2}.dy-ds>li:first-child{border-top:0}
+.dy-dong{display:flex;align-items:center;justify-content:space-between;gap:12px}.dy-dong b{display:block}.dy-phu{display:block;margin-top:2px;color:#6B7280;font-size:13px}
+.dy-tile{flex:none;min-width:56px;padding:4px 12px;border-radius:99px;text-align:center;font-weight:700;font-size:14px;background:#F3F4F6}
+.dy-tile.sai{background:#FEE2E2;color:#991B1B}.dy-tile.tot{background:#D1FAE5;color:#065F46}
+.dy-nut{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}.dy-cau{margin-top:10px}.dy-cau:empty{display:none}

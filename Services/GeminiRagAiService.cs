@@ -346,7 +346,7 @@ public class GeminiRagAiService(HttpClient http, KhoTaiLieu kho, PromptTroLy pro
     // ---------------------------------------------------------------- Gọi Gemini
 
     // Thử model chính rồi lần lượt các model dự phòng khi Google báo quá tải (503), hết lượt (429) hay model ngừng (404)
-    private async Task<string?> GoiAsync(string model, string heThong, string tinNhan, int maxTokens, JsonObject? schema, CancellationToken ct)
+    internal async Task<string?> GoiAsync(string model, string heThong, string tinNhan, int maxTokens, JsonObject? schema, CancellationToken ct)
     {
         LoiGemini? loiCuoi = null;
         foreach (var m in new[] { model }.Concat(_opt.ModelGeminiDuPhong).Distinct())

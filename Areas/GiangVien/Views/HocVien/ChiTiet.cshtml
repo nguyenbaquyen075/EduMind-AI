@@ -42,6 +42,29 @@ else
 }
 </section>
 
+@{ var dtb = (List<SuDia.Web.Services.DiemTheoBai>)ViewBag.DiemTheoBai; var yeu = SuDia.Web.Services.PhanTichDiemYeuService.Yeu(dtb).ToList(); var manh = SuDia.Web.Services.PhanTichDiemYeuService.Manh(dtb).ToList(); }
+<section class="ql-khoi">
+<div class="ql-khoi-dau"><h2>Điểm mạnh và điểm yếu</h2><p>Theo tỉ lệ làm đúng từng bài (120 ngày gần đây, cần từ @SuDia.Web.Services.PhanTichDiemYeuService.SoCauToiThieu câu mỗi bài).</p></div>
+@if (dtb.Count == 0)
+{
+<p class="ql-trong">Học viên chưa làm câu luyện tập nào nên chưa phân tích được.</p>
+}
+else
+{
+<div class="lh-bang"><table class="ql-bang">
+<thead><tr><th>Bài</th><th class="so">Câu đúng</th><th class="so">Tỉ lệ đúng</th><th>Nhận định</th></tr></thead>
+<tbody>
+@foreach (var d in dtb)
+{
+    var du = d.SoCau >= SuDia.Web.Services.PhanTichDiemYeuService.SoCauToiThieu;
+<tr><td>@d.Nhan</td><td class="so">@d.SoDung/@d.SoCau</td><td class="so"><span class="ql-chip @(d.TiLe >= 80 ? "xanh" : d.TiLe >= 60 ? "vang" : "do")">@d.TiLe.ToString("0")%</span></td>
+<td>@(!du ? "Chưa đủ dữ liệu" : d.TiLe < 60 ? "Yếu – nên ôn lại" : d.TiLe >= 80 ? "Mạnh" : "Trung bình")</td></tr>
+}
+</tbody></table></div>
+<p class="ql-phu" style="margin-top:10px">@yeu.Count bài yếu · @manh.Count bài mạnh</p>
+}
+</section>
+
 <div class="ql-luoi">
 <section class="ql-khoi">
 <div class="ql-khoi-dau"><h2>Luyện tập & thi thử</h2><span>@ViewBag.BaiLam.Count lượt</span></div>

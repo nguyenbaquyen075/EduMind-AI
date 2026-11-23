@@ -10,3 +10,18 @@ Mỗi mảng làm trên một nhánh riêng, có migration, kiểm thử trong `
 | 4 | Nhiều môn, ngân hàng đề, chứng chỉ | `feat/ngan-hang-de-chung-chi` | Ngân hàng đề dùng chung có độ khó, sinh đề ngẫu nhiên theo ma trận; chứng nhận hoàn thành khoá (PDF); hướng dẫn thêm môn mới. |
 
 Thứ tự 1 → 2 → 3 → 4 vì thông báo (2) cần diễn đàn (1), và báo cáo điểm yếu (3) dùng biểu đồ của (2).
+
+## Trạng thái
+
+| # | Mảng | Trạng thái |
+| --- | --- | --- |
+| 1 | Lớp học + diễn đàn | Xong, kiểm thử `kiem-tra-lop-hoc.py` |
+| 2 | Thống kê, biểu đồ, thông báo | Xong, kiểm thử `kiem-tra-thong-bao.py` |
+| 3 | AI phân tích điểm yếu | Xong phần thống kê, đề ôn riêng, báo cáo giảng viên (`kiem-tra-diem-yeu.py`). Hai tính năng gọi Gemini (AI tạo câu hỏi, AI gợi ý chấm tự luận) đã kiểm tra phần kiểm định bằng code và phần phân quyền; chưa thấy kết quả Gemini thật vì dịch vụ quá tải (503) lúc thử |
+| 4 | Ngân hàng đề, chứng chỉ | Chưa làm |
+
+## Mảng 3: các phần chính
+
+- `PhanTichDiemYeuService`: tỉ lệ đúng theo bài từ `CauTraLoi` (120 ngày gần nhất, cần từ 5 câu mới kết luận: dưới 60% là yếu, từ 80% là mạnh), đề ôn riêng 10 câu từ 3 bài yếu nhất (câu sai trước, chưa làm sau), bài cả lớp hay sai (cần từ 10 câu).
+- `AiHocTapService` dùng chung đường gọi Gemini của trợ lý: tạo 5 câu trắc nghiệm từ nội dung bài (số liệu trong câu hỏi, đáp án đúng, lời giải phải có trong bài, phương án được xáo, không lưu), và gợi ý nhận xét + điểm cho câu tự luận (điểm bị chặn trong khoảng 0 đến điểm tối đa, bài làm của học sinh bị coi là dữ liệu, giảng viên quyết định điểm).
+- Học viên: `/DiemYeu`, `/DiemYeu/DeOn`. Giảng viên: bảng mạnh/yếu trong chi tiết học viên, "Bài cả lớp hay sai" ở trang Học viên & điểm, nút "AI gợi ý chấm" ở trang bài nộp.

@@ -6,7 +6,7 @@ using SuDia.Web.Models;
 namespace SuDia.Web.Areas.GiangVien.Controllers;
 
 // Lớp học của giảng viên: học viên từng khoá, tiến độ học, điểm bài tập, thi thử và luyện tập
-public class HocVienController(AppDbContext db) : GiangVienControllerBase(db)
+public class HocVienController(AppDbContext db, SuDia.Web.Services.PhanTichDiemYeuService phanTich) : GiangVienControllerBase(db)
 {
     public async Task<IActionResult> Index(string? khoa, string? q, string? sx)
     {
@@ -21,6 +21,7 @@ public class HocVienController(AppDbContext db) : GiangVienControllerBase(db)
 
         var ds = await BangDiem(chon.Id);
         ViewBag.TatCa = ds;
+        ViewBag.BaiHaySai = await phanTich.BaiLopHaySaiAsync(chon.Id);
         if (!string.IsNullOrWhiteSpace(q))
         {
             var tu = q.Trim().ToLowerInvariant();
@@ -43,6 +44,7 @@ public class HocVienController(AppDbContext db) : GiangVienControllerBase(db)
         var baiIds = await Db.Bai.Where(b => b.ChuDe!.KhoaId == khoa).Select(b => b.Id).ToListAsync();
         var deIds = await Db.DeThi.Where(d => d.KhoaId == khoa).Select(d => d.Id).ToListAsync();
 
+        ViewBag.DiemTheoBai = await phanTich.TheoBaiAsync(id, [khoa]);
         ViewBag.NguoiDung = nd;
         ViewBag.Khoa = await Db.Khoa.AsNoTracking().FirstAsync(k => k.Id == khoa);
         ViewBag.TomTat = (await BangDiem(khoa, id)).FirstOrDefault();

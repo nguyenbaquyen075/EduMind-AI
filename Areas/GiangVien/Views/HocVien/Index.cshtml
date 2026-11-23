@@ -45,6 +45,21 @@ else { <b>@chon.Ten</b> }
 <div class="ql-the"><p>Cần chú ý</p><b>@canChu</b><small>không hoạt động 7 ngày</small></div>
 </div>
 
+@{ var haySai = (List<SuDia.Web.Services.BaiLopHaySai>)ViewBag.BaiHaySai; }
+@if (haySai.Count > 0)
+{
+<section class="ql-khoi">
+<div class="ql-khoi-dau"><h2>Bài cả lớp hay sai</h2><p>Gộp mọi câu học viên đã làm trong 120 ngày gần đây (cần từ 10 câu mỗi bài). Nên giảng lại hoặc giao thêm bài ở các bài này.</p></div>
+<div class="lh-bang"><table class="ql-bang">
+<thead><tr><th>Bài</th><th class="so">Số học viên</th><th class="so">Số câu đã làm</th><th class="so">Tỉ lệ đúng</th></tr></thead>
+<tbody>
+@foreach (var b in haySai)
+{
+<tr><td><b>Bài @b.BaiSo.</b> @b.BaiTen</td><td class="so">@b.SoHocVien</td><td class="so">@b.SoCau</td><td class="so"><span class="ql-chip @(b.TiLe >= 80 ? "xanh" : b.TiLe >= 60 ? "vang" : "do")">@b.TiLe.ToString("0")%</span></td></tr>
+}
+</tbody></table></div>
+</section>
+}
 <section class="ql-khoi">
 <form method="get" class="lh-loc">
 <input type="hidden" name="khoa" value="@chon.Id">
