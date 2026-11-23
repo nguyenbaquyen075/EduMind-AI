@@ -7,7 +7,7 @@ using SuDia.Web.Services;
 
 namespace SuDia.Web.Areas.GiangVien.Controllers;
 
-// Lớp học: giảng viên tạo lớp cho khoá mình phụ trách, chia sẻ mã để học viên vào; diễn đàn của lớp mở ở trang học viên (/Lop/{id})
+// Lớp học: giảng viên tạo lớp cho khoá mình phụ trách, chia sẻ mã để học viên vào; nhóm chat của lớp mở ở /Lop/{id}
 public class LopController(AppDbContext db, LopHocService lopSvc) : GiangVienControllerBase(db)
 {
     private IQueryable<Lop> LopCuaToi() => Db.Lop.Where(l => LaAdmin || l.Khoa!.GiangVienId == Uid);
@@ -15,7 +15,7 @@ public class LopController(AppDbContext db, LopHocService lopSvc) : GiangVienCon
     public async Task<IActionResult> Index()
     {
         ViewBag.Lop = await LopCuaToi().AsNoTracking().OrderBy(l => l.Khoa!.ThuTu).ThenBy(l => l.Ten)
-            .Select(l => new LopTomTat(l.Id, l.Ten, l.Khoa!.Ten, l.MaThamGia, l.DangMo, l.HocVien.Count, l.BaiDang.Count, true)).ToListAsync();
+            .Select(l => new LopTomTat(l.Id, l.Ten, l.Khoa!.Ten, l.MaThamGia, l.DangMo, l.HocVien.Count, l.TinNhan.LongCount(), true)).ToListAsync();
         return View();
     }
 
@@ -72,7 +72,7 @@ public class LopController(AppDbContext db, LopHocService lopSvc) : GiangVienCon
         ViewBag.Lop = l;
         ViewBag.HocVien = await Db.LopHocVien.AsNoTracking().Where(m => m.LopId == id).OrderBy(m => m.NguoiDung!.HoTen)
             .Select(m => new { m.NguoiDungId, m.NguoiDung!.HoTen, m.NguoiDung.Email, m.NgayVao }).ToListAsync();
-        ViewBag.SoBaiDang = await Db.BaiDang.CountAsync(b => b.LopId == id);
+        ViewBag.SoTinNhan = await Db.TinNhanLop.LongCountAsync(t => t.LopId == id);
         return View();
     }
 
@@ -103,7 +103,7 @@ public class LopController(AppDbContext db, LopHocService lopSvc) : GiangVienCon
     {
         if (!await LopCuaToi().AnyAsync(x => x.Id == id, ct)) return NotFound();
         var n = await Db.LopHocVien.Where(m => m.LopId == id && m.NguoiDungId == nguoiDungId).ExecuteDeleteAsync(ct);
-        if (n > 0) ThongBao("Đã mời học viên ra khỏi lớp. Bài đã đăng của họ vẫn giữ nguyên.");
+        if (n > 0) ThongBao("Đã mời học viên ra khỏi lớp. Tin nhắn họ đã gửi vẫn giữ nguyên.");
         return RedirectToAction(nameof(ChiTiet), new { id });
     }
 
@@ -114,7 +114,7 @@ public class LopController(AppDbContext db, LopHocService lopSvc) : GiangVienCon
         if (l is null) return NotFound();
         Db.Lop.Remove(l);                       // thành viên, bài đăng, trả lời xoá theo (CASCADE)
         await Db.SaveChangesAsync(ct);
-        ThongBao("Đã xoá lớp cùng diễn đàn của lớp.");
+        ThongBao("Đã xoá lớp cùng toàn bộ tin nhắn của lớp.");
         return RedirectToAction(nameof(Index));
     }
 

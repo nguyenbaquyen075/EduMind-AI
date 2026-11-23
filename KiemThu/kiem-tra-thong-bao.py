@@ -1,4 +1,4 @@
-# Kiểm tra Thông báo + biểu đồ + nhắc hạn: diễn đàn/giao bài sinh thông báo, chuông, đọc/đọc hết, phổ điểm, nhắc hạn không gửi trùng.
+# Kiểm tra Thông báo + biểu đồ + nhắc hạn: nhóm chat/giao bài sinh thông báo, chuông, đọc/đọc hết, phổ điểm, nhắc hạn không gửi trùng.
 # Chạy trên web cục bộ + database Development; tự xoá đúng dữ liệu thử mang mã riêng.
 # SUDIA_TEST_URL=http://localhost:5280 python3 KiemThu/kiem-tra-thong-bao.py
 import html, http.cookiejar, io, json, os, re, ssl, subprocess, urllib.error, urllib.parse, urllib.request, uuid, zipfile
@@ -60,30 +60,26 @@ try:
     assert '/DangNhap' in req(client(), '/ThongBao/Dem')[1] and isinstance(dem(hv), int)
     print('PASS: /ThongBao/Dem cần đăng nhập và trả số tin chưa đọc')
 
-    # 1. Diễn đàn sinh thông báo
+    # 1. Nhóm chat sinh thông báo (mỗi lớp tối đa một thông báo mỗi giờ theo từng chiều)
     t = tk(gv, '/GiangVien/Lop/Tao')
     s, u, b = req(gv, '/GiangVien/Lop/Luu', {'Id': '0', 'KhoaId': KHOA, 'Ten': ma, 'MoTa': '', '__RequestVerificationToken': t})
     lop_id = int(re.search(r'/GiangVien/Lop/ChiTiet/(\d+)', u)[1]); ma_lop = re.search(r'<code>([A-Z0-9]{6})</code>', text(b))[1]
     req(hv, '/Lop/Vao', {'ma': ma_lop, '__RequestVerificationToken': tk(hv, '/Lop')})
     req(hv01, '/Lop/Vao', {'ma': ma_lop, '__RequestVerificationToken': tk(hv01, '/Lop')})
-    s, u, b = req(hv, f'/Lop/{lop_id}/DangBai', {'tieuDe': 'Hỏi ' + ma, 'noiDung': 'nội dung', '__RequestVerificationToken': tk(hv, f'/Lop/{lop_id}')})
-    bai = int(re.search(r'/Lop/BaiDang/(\d+)', u)[1])
-    assert tin('giangvien@sudia.vn', ma) == 1 and tin('hocvien@sudia.vn', ma) == 0, 'học viên hỏi → chỉ giảng viên được báo'
-    req(gv, f'/Lop/BaiDang/{bai}/TraLoi', {'noiDung': 'trả lời', '__RequestVerificationToken': tk(gv, f'/Lop/BaiDang/{bai}')})
-    assert tin('hocvien@sudia.vn', ma) == 1, 'trả lời → người hỏi được báo'
-    req(gv, f'/Lop/{lop_id}/DangBai', {'tieuDe': 'GV ' + ma, 'noiDung': 'thông báo lớp', '__RequestVerificationToken': tk(gv, f'/Lop/{lop_id}')})
-    assert tin('hv01@sudia.vn', 'GV ' + ma) == 1 and tin('giangvien@sudia.vn', 'GV ' + ma) == 0, 'giảng viên đăng → cả lớp (trừ mình) được báo'
-    tl = int(sql(f'SELECT "Id" FROM "TraLoiBaiDang" WHERE "BaiDangId"={bai}'))
-    req(hv, f'/Lop/BaiDang/{bai}/DapAn/{tl}', {'__RequestVerificationToken': tk(hv, f'/Lop/BaiDang/{bai}')})
-    assert int(sql(f"SELECT count(*) FROM \"TinThongBao\" WHERE \"NguoiDungId\"='{uid('giangvien@sudia.vn')}' AND \"Loai\"='DapAn' AND \"NoiDung\" LIKE '%{ma}%'")) == 1
-    print('PASS: hỏi → báo giảng viên; trả lời → báo người hỏi; giảng viên đăng → báo cả lớp; chọn đáp án → báo người trả lời')
+    gui = lambda c, nd: req(c, f'/Lop/{lop_id}/Gui', {'noiDung': nd}, headers={'RequestVerificationToken': tk(c, f'/Lop/{lop_id}')})
+    assert gui(hv, 'câu hỏi đầu')[0] == 200 and gui(hv, 'câu hỏi thứ hai')[0] == 200
+    assert tin('giangvien@sudia.vn', ma) == 1 and tin('hocvien@sudia.vn', ma) == 0 and tin('hv01@sudia.vn', ma) == 0, 'học viên nhắn → chỉ giảng viên được báo, và chỉ một thông báo'
+    assert gui(gv, 'thầy trả lời')[0] == 200 and gui(gv, 'thầy nhắn thêm')[0] == 200
+    assert tin('hocvien@sudia.vn', ma) == 1 and tin('hv01@sudia.vn', ma) == 1 and int(sql(f"SELECT count(*) FROM \"TinThongBao\" WHERE \"NguoiDungId\"='{uid('giangvien@sudia.vn')}' AND \"Loai\"='ChatGiangVien'")) == 0, 'giảng viên nhắn → cả lớp (trừ mình) được báo, một thông báo'
+    bai = lop_id
+    print('PASS: học viên nhắn → báo giảng viên; giảng viên nhắn → báo cả lớp; nhắn nhiều tin trong một giờ chỉ có một thông báo')
 
     # 2. Đọc, mở, đọc hết, người khác không mở được
     truoc = dem(hv); assert truoc >= 1
-    trang = text(req(hv, '/ThongBao')[2]); assert 'đã trả lời bài của bạn' in trang
-    tid = int(sql(f"SELECT \"Id\" FROM \"TinThongBao\" WHERE \"NguoiDungId\"='{uid('hocvien@sudia.vn')}' AND \"NoiDung\" LIKE '%{ma}%' LIMIT 1"))
+    trang = text(req(hv, '/ThongBao')[2]); assert 'Tin nhắn mới trong lớp' in trang
+    tid = int(sql(f"SELECT \"Id\" FROM \"TinThongBao\" WHERE \"NguoiDungId\"='{uid('hocvien@sudia.vn')}' AND \"TieuDe\" LIKE '%{ma}%' LIMIT 1"))
     assert req(hv01, f'/ThongBao/Mo/{tid}', {'__RequestVerificationToken': tk(hv01, '/ThongBao')})[0] == 404
-    s, u, _ = req(hv, f'/ThongBao/Mo/{tid}', {'__RequestVerificationToken': tk(hv, '/ThongBao')}); assert f'/Lop/BaiDang/{bai}' in u, u
+    s, u, _ = req(hv, f'/ThongBao/Mo/{tid}', {'__RequestVerificationToken': tk(hv, '/ThongBao')}); assert f'/Lop/{lop_id}' in u, u
     assert sql(f'SELECT "DaDoc"::text FROM "TinThongBao" WHERE "Id"={tid}') == 'true' and dem(hv) == truoc - 1
     req(hv, '/ThongBao/DocHet', {'__RequestVerificationToken': tk(hv, '/ThongBao')}); assert dem(hv) == 0
     sql(f"UPDATE \"TinThongBao\" SET \"Link\"='https://example.com/x' WHERE \"Id\"={tid}")

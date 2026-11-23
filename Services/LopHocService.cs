@@ -4,7 +4,7 @@ using SuDia.Web.Data;
 
 namespace SuDia.Web.Services;
 
-/// <summary>Quy tắc dùng chung cho lớp học và diễn đàn (quyền truy cập, mã tham gia, chống spam).</summary>
+/// <summary>Quy tắc dùng chung cho lớp học (quyền truy cập, mã tham gia).</summary>
 public class LopHocService(AppDbContext db)
 {
     private const string BangMa = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";   // bỏ I, O, 0, 1 cho khỏi nhầm
@@ -29,18 +29,5 @@ public class LopHocService(AppDbContext db)
         var quanLy = laAdmin || (laGiangVien && lop.Khoa!.GiangVienId == uid);
         var thanhVien = await db.LopHocVien.AnyAsync(m => m.LopId == lopId && m.NguoiDungId == uid, ct);
         return quanLy || thanhVien ? (lop, quanLy, thanhVien) : (null, false, false);
-    }
-
-    /// <summary>Đăng bài / trả lời quá nhiều trong một giờ thì chặn (chống spam).</summary>
-    public async Task<bool> QuaNhieuBaiAsync(string uid, CancellationToken ct = default)
-    {
-        var tu = DateTime.UtcNow.AddHours(-1);
-        return await db.BaiDang.CountAsync(b => b.NguoiDungId == uid && b.NgayTao >= tu, ct) >= GioiHanDienDan.BaiMoiMoiGio;
-    }
-
-    public async Task<bool> QuaNhieuTraLoiAsync(string uid, CancellationToken ct = default)
-    {
-        var tu = DateTime.UtcNow.AddHours(-1);
-        return await db.TraLoiBaiDang.CountAsync(b => b.NguoiDungId == uid && b.NgayTao >= tu, ct) >= GioiHanDienDan.TraLoiMoiGio;
     }
 }
