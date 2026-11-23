@@ -1,0 +1,36 @@
+@model BieuDoModel
+@using Microsoft.AspNetCore.Html
+@* Biểu đồ cột (tiến độ theo khoá, phổ điểm): SVG dựng ở máy chủ, có bảng số liệu *@
+@{
+    const double W = 640, H = 230, L = 40, R = 16, T = 18, B = 40;
+    var n = Math.Max(1, Model.Diem.Count);
+    var max = Math.Max(1, Model.Max);
+    double Y(double v) => T + (H - T - B) * (1 - Math.Clamp(v / max, 0, 1));
+    IHtmlContent Chu(string lop, double x, double y, string can, string noiDung) => new HtmlString($"<text class=\"{lop}\" x=\"{F(x)}\" y=\"{F(y)}\" text-anchor=\"{can}\">{System.Net.WebUtility.HtmlEncode(noiDung)}</text>");
+    string F(double d) => d.ToString("0.#", System.Globalization.CultureInfo.InvariantCulture);
+    var rong = (W - L - R) / n;
+    var cot = Math.Min(64, rong * 0.6);
+    var moc = new[] { 0.0, max / 2, max };
+}
+<figure class="bd">
+<svg class="bd-svg" viewBox="0 0 @F(W) @F(H)" role="img" aria-label="@Model.MoTa">
+@foreach (var m in moc)
+{
+<line class="bd-luoi" x1="@F(L)" x2="@F(W - R)" y1="@F(Y(m))" y2="@F(Y(m))"></line>
+@Chu("bd-truc", L - 8, Y(m) + 4, "end", F(m))
+}
+@for (var i = 0; i < Model.Diem.Count; i++)
+{
+var d = Model.Diem[i];
+var x = L + i * rong + (rong - cot) / 2;
+var y = Y(d.Gia);
+<rect class="bd-cot" x="@F(x)" y="@F(y)" width="@F(cot)" height="@F(Math.Max(0, Y(0) - y))" rx="4"><title>@d.Nhan: @F(d.Gia)@(string.IsNullOrEmpty(Model.DonVi) ? "" : " " + Model.DonVi)@(d.ChuThich is null ? "" : " · " + d.ChuThich)</title></rect>
+@if (Model.NhanGiaTriTrenCot && d.Gia > 0) { @Chu("bd-so", x + cot / 2, y - 5, "middle", F(d.Gia)) }
+@Chu("bd-truc", L + i * rong + rong / 2, H - 16, "middle", d.Nhan.Length > 16 ? d.Nhan[..15] + "…" : d.Nhan)
+}
+</svg>
+<details class="bd-bang"><summary>Xem bảng số liệu</summary>
+<table><thead><tr><th>Nhóm</th><th>@Model.CotGiaTri</th><th>Ghi chú</th></tr></thead><tbody>
+@foreach (var d in Model.Diem) { <tr><td>@d.Nhan</td><td>@F(d.Gia)</td><td>@d.ChuThich</td></tr> }
+</tbody></table></details>
+</figure>

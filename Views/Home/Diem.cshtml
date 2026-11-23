@@ -10,6 +10,7 @@
 @section Head {
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500;1,600&display=swap">
 <link rel="stylesheet" href="~/css/hoc-vien.css" asp-append-version="true">
+<link rel="stylesheet" href="~/css/bieu-do.css" asp-append-version="true">
 }
 <div class="hv-trang">
 <partial name="_MenuTaiKhoan" model="Model.Menu" />
@@ -23,6 +24,42 @@
 <div><p>Bài tập đã nộp</p><b>@daNop<small>/@Model.BaiTap.Count</small></b></div>
 <div><p>Luyện tập đúng</p><b>@(Model.TiLeDungLuyenTap is int t ? t + "%" : "—")</b></div>
 </div>
+
+@{
+    // Điểm theo thời gian: bài tập đã có điểm + đề thi thử, 20 lần gần nhất
+    var diemTheoGio = Model.BaiTap.Where(b => b.Diem is not null && b.NopLuc is not null).Select(b => (Gio: b.NopLuc!.Value, Diem: (double)b.Diem!.Value, Ten: b.Ten))
+        .Concat(Model.LuotLam.Where(l => l.LaDeThi && l.SoCau > 0).Select(l => (Gio: l.NopLuc, Diem: (double)l.Diem10, Ten: l.Ten)))
+        .OrderByDescending(x => x.Gio).Take(20).OrderBy(x => x.Gio).ToList();
+    var bdDiem = diemTheoGio.Count == 0 ? null : new BieuDoModel
+    {
+        MoTa = $"Biểu đồ điểm {diemTheoGio.Count} lần gần nhất, từ {diemTheoGio.Min(x => x.Diem):0.#} đến {diemTheoGio.Max(x => x.Diem):0.#} điểm",
+        DonVi = "điểm", CotGiaTri = "Điểm",
+        Diem = diemTheoGio.Select(x => new DiemBieuDo(x.Gio.ToLocalTime().ToString("dd/MM"), x.Diem, x.Ten)).ToList(),
+    };
+    var bdTienDo = Model.TienDo.Count == 0 ? null : new BieuDoModel
+    {
+        MoTa = "Số bài đã học trong từng khoá", DonVi = "bài đã học", CotGiaTri = "Đã học", Max = Model.TienDo.Max(t => t.Tong),
+        Diem = Model.TienDo.Select(t => new DiemBieuDo(t.Ten, t.DaHoc, $"trên {t.Tong} bài")).ToList(),
+    };
+}
+<section class="hv-khoi">
+<div class="hv-khoi-dau"><h2>Điểm theo thời gian</h2><span>Bài tập đã chấm và đề thi thử (thang 10)</span></div>
+@if (diemTheoGio.Count == 0)
+{
+<p class="bd-trong">Chưa có điểm nào để vẽ biểu đồ. Nộp bài tập hoặc làm một đề thi thử nhé.</p>
+}
+else
+{
+<partial name="_BieuDoDuong" model="bdDiem" />
+}
+</section>
+@if (Model.TienDo.Count > 0)
+{
+<section class="hv-khoi">
+<div class="hv-khoi-dau"><h2>Tiến độ học theo khoá</h2><span>Số bài đã học trên tổng số bài đang mở</span></div>
+<partial name="_BieuDoCot" model="bdTienDo" />
+</section>
+}
 
 <section class="hv-khoi">
 <div class="hv-khoi-dau"><h2>Bài tập & bài kiểm tra</h2><span>@Model.BaiTap.Count bài được giao</span></div>

@@ -1,0 +1,20 @@
+/* Chứng chỉ hoàn thành khoá: A4 ngang, in hoặc lưu thành PDF từ trình duyệt */
+*{box-sizing:border-box}body{margin:0;background:#EEF1F4;font-family:"Be Vietnam Pro",system-ui,sans-serif;color:#1F2937}
+.cc-thanh-cu{display:flex;justify-content:space-between;align-items:center;max-width:1123px;margin:0 auto;padding:14px 16px}
+.cc-thanh-cu a{color:#0B5F4E;text-decoration:none;font-weight:600}.cc-thanh-cu button{padding:10px 18px;border:0;border-radius:10px;background:#0E7C66;color:#fff;font:600 14px inherit;cursor:pointer}
+.cc-trang{width:100%;max-width:1123px;margin:0 auto 32px;aspect-ratio:297/210;background:#FFFFFF;padding:22px;box-shadow:0 8px 30px rgba(17,24,39,.12)}
+.cc-vien{height:100%;border:3px double #0E7C66;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:24px 48px;text-align:center;background:radial-gradient(circle at 50% 0,#F0FBF8,#FFFFFF 60%)}
+.cc-thuong{margin:0;font:700 24px "Playfair Display",serif;color:#0E7C66}.cc-thuong span{color:#D97706;margin:0 3px}
+.cc-vien h1{margin:6px 0 14px;font:700 clamp(22px,4.2vw,44px)/1.15 "Playfair Display",serif;color:#0F2F2A;letter-spacing:.5px;text-transform:uppercase}
+.cc-nho{margin:0;color:#4B5563;font-size:clamp(12px,1.6vw,17px)}
+.cc-ten{margin:8px 0;font:700 clamp(26px,5vw,52px)/1.2 "Playfair Display",serif;color:#0E7C66;border-bottom:2px solid #D1D5DB;padding:0 28px 6px}
+.cc-khoa{margin:6px 0 0;font:700 clamp(18px,3vw,32px) "Be Vietnam Pro",sans-serif;color:#111827}
+.cc-chan{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;width:100%;margin-top:auto;padding-top:20px;text-align:left}
+.cc-chan span{display:block;color:#6B7280;font-size:12px;text-transform:uppercase;letter-spacing:1px}.cc-chan b{font-size:clamp(14px,1.8vw,20px)}
+.cc-ma{text-align:right}.cc-ma small{display:block;margin-top:2px;color:#6B7280;font-size:11px;overflow-wrap:anywhere}
+@page{size:A4 landscape;margin:0}
+@media print{body{background:#fff}.cc-thanh-cu{display:none}.cc-trang{max-width:none;margin:0;width:297mm;height:210mm;padding:8mm;box-shadow:none;aspect-ratio:auto}}
+/* Trang xác thực công khai */
+.xt{display:grid;place-items:center;min-height:100vh;padding:20px}.xt-hop{width:100%;max-width:520px;padding:32px;border-radius:18px;background:#fff;box-shadow:0 8px 30px rgba(17,24,39,.1);text-align:center}
+.xt-hop h1{margin:6px 0 16px;font-size:24px}.xt-ket-qua{margin:0 0 18px;padding:12px;border-radius:12px;font-weight:700}.xt-ket-qua.co{background:#D1FAE5;color:#065F46}.xt-ket-qua.khong{background:#FEE2E2;color:#991B1B}
+.xt dl{display:grid;grid-template-columns:auto 1fr;gap:8px 16px;margin:0;text-align:left}.xt dt{color:#6B7280}.xt dd{margin:0;font-weight:600}

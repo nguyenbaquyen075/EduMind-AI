@@ -7,12 +7,10 @@
   const typing = document.getElementById('aiDangTraLoi');
   const sendButton = document.getElementById('aiGui');
   const subject = document.getElementById('aiKhoa');
-  const maxLength = input.maxLength;
   const suggestions = [...document.querySelectorAll('#aiGoiY button')];
   let history = [], controller = null, version = 0, busy = false;
   function update() {
-    sendButton.disabled = busy || !input.value.trim() || input.value.length > maxLength;
-    document.getElementById('aiDem').textContent = `${input.value.length}/${maxLength} ký tự`;
+    sendButton.disabled = busy || !input.value.trim();
     suggestions.forEach(b => { b.disabled = busy; b.hidden = !!subject.value && b.dataset.mon !== subject.value; });
     list.setAttribute('aria-busy', String(busy));
   }
@@ -32,7 +30,7 @@
   }
   async function send(raw, retryRow) {
     const q = String(raw || '').trim();
-    if (!q || q.length > maxLength || busy) return;
+    if (!q || busy) return;
     const current = version;
     welcome.hidden = true;
     if (retryRow) retryRow.remove(); else message('user', q);
@@ -43,7 +41,7 @@
     try {
       const res = await fetch('/api/tro-ly/hoi', { method:'POST', signal:requestController.signal, headers: {
         'Content-Type':'application/json', 'RequestVerificationToken':form.querySelector('[name=__RequestVerificationToken]').value
-      }, body:JSON.stringify({cauHoi:q, khoaId:subject.value || null, lichSu:history.slice(-3)}) });
+      }, body:JSON.stringify({cauHoi:q, khoaId:subject.value || null, lichSu:history.slice(-6)}) });
       if (current !== version) return;
       if (res.status === 429) throw new Error('Bạn hỏi hơi nhanh. Vui lòng đợi khoảng một phút rồi thử lại.');
       if (res.status === 400) throw new Error('Không gửi được câu hỏi. Vui lòng tải lại trang rồi thử lại.');
@@ -52,7 +50,7 @@
       if (current !== version) return;
       if (!data.noiDung) throw new Error('Chưa nhận được câu trả lời. Bạn vui lòng thử lại.');
       message('assistant', data.noiDung, data.nhan || 'Trợ lý AI', data.nguon || '');
-      if (!data.tuChoi) history = [...history, {cauHoi:q, traLoi:data.noiDung}].slice(-3);
+      history = [...history, {cauHoi:q, traLoi:data.noiDung}].slice(-6);
     } catch(e) {
       if (current !== version) return;
       const m = message('assistant', e.name === 'AbortError' ? 'Trợ lý trả lời lâu hơn dự kiến. Bạn vui lòng thử lại.' : e.message, 'Chưa gửi được', '', true);

@@ -63,12 +63,12 @@ public class HocVienService(AppDbContext db)
             return new DiemBaiTapCuaToi(g.Id, g.Ten, g.Khoa, g.Bai, g.HanNop, n?.NopLuc, diem, n is not null && coTuLuan && n.DiemTuLuan is null, g.LaKiemTra);
         }).ToList();
 
-        // Đề thi thử (BaiLam.MaDe = DeThi.Id) và luyện tập theo bài (BaiLam.MaDe = Bai.Id)
+        // Đề thi thử (BaiLam.DeThiId) và luyện tập theo bài (BaiLam.BaiId)
         var khoa = KhoaConHan(uid);
         var tenDe = await db.DeThi.AsNoTracking().Where(d => khoa.Contains(d.KhoaId)).Select(d => new { d.Id, Khoa = d.Khoa!.Ten }).ToDictionaryAsync(d => d.Id, d => d.Khoa);
         var tenBai = await db.Bai.AsNoTracking().Where(b => khoa.Contains(b.ChuDe!.KhoaId)).Select(b => new { b.Id, Khoa = b.ChuDe!.Khoa!.Ten }).ToDictionaryAsync(b => b.Id, b => b.Khoa);
         var lam = await db.BaiLam.AsNoTracking().Where(b => b.NguoiDungId == uid).OrderByDescending(b => b.NopLuc).Take(200)
-            .Select(b => new { b.MaDe, b.LaDeThi, b.TenDe, b.SoDung, b.SoCau, b.NopLuc }).ToListAsync();
+            .Select(b => new { MaDe = b.LaDeThi ? b.DeThiId!.Value : b.BaiId!.Value, b.LaDeThi, b.TenDe, b.SoDung, b.SoCau, b.NopLuc }).ToListAsync();
         var luot = lam.Where(b => b.LaDeThi ? tenDe.ContainsKey(b.MaDe) : tenBai.ContainsKey(b.MaDe))
             .Select(b => new LuotLamCuaToi(b.TenDe, b.LaDeThi ? tenDe[b.MaDe] : tenBai[b.MaDe], b.LaDeThi, b.SoDung, b.SoCau, b.NopLuc)).ToList();
 
@@ -76,9 +76,15 @@ public class HocVienService(AppDbContext db)
         var thi = luot.Where(l => l.LaDeThi && l.SoCau > 0).ToList();
         var luyen = luot.Where(l => !l.LaDeThi).ToList();
         var daHoc = await db.TienDoBai.CountAsync(t => t.NguoiDungId == uid && t.TrangThai == TrangThaiHoc.DaHoc);
+        var khoaConHan = await khoa.ToListAsync();
+        var tongBai = await db.Bai.AsNoTracking().Where(b => b.DaXuatBan && khoaConHan.Contains(b.ChuDe!.KhoaId)).GroupBy(b => b.ChuDe!.KhoaId).Select(g => new { Khoa = g.Key, N = g.Count() }).ToListAsync();
+        var daHocTheoKhoa = await db.TienDoBai.AsNoTracking().Where(t => t.NguoiDungId == uid && t.TrangThai == TrangThaiHoc.DaHoc && khoaConHan.Contains(t.Bai!.ChuDe!.KhoaId))
+            .GroupBy(t => t.Bai!.ChuDe!.KhoaId).Select(g => new { Khoa = g.Key, N = g.Count() }).ToListAsync();
+        var tenKhoaTD = await db.Khoa.AsNoTracking().Where(k => khoaConHan.Contains(k.Id)).OrderBy(k => k.ThuTu).Select(k => new { k.Id, k.Ten }).ToListAsync();
+        var tienDo = tenKhoaTD.Select(k => new TienDoKhoa(k.Ten, daHocTheoKhoa.FirstOrDefault(x => x.Khoa == k.Id)?.N ?? 0, tongBai.FirstOrDefault(x => x.Khoa == k.Id)?.N ?? 0)).Where(t => t.Tong > 0).ToList();
         return new DiemCuaToiViewModel
         {
-            Menu = menu, BaiTap = baiTap, LuotLam = luot.Take(30).ToList(),
+            Menu = menu, BaiTap = baiTap, LuotLam = luot.Take(30).ToList(), TienDo = tienDo,
             DiemBaiTapTb = coDiem.Count == 0 ? null : Math.Round(coDiem.Average(), 1),
             DiemThiTb = thi.Count == 0 ? null : Math.Round(thi.Average(t => t.Diem10), 1),
             TiLeDungLuyenTap = luyen.Sum(l => l.SoCau) == 0 ? null : (int)Math.Round(luyen.Sum(l => l.SoDung) * 100.0 / luyen.Sum(l => l.SoCau)),
@@ -117,7 +123,7 @@ public class HocVienService(AppDbContext db)
     {
         var tenKhoa = await db.DeThi.AsNoTracking().Select(d => new { d.Id, Khoa = d.Khoa!.Ten }).ToDictionaryAsync(d => d.Id, d => d.Khoa);
         var lam = await db.BaiLam.AsNoTracking().Where(b => b.NguoiDungId == uid && b.LaDeThi).OrderByDescending(b => b.NopLuc).Take(50)
-            .Select(b => new { b.MaDe, b.TenDe, b.SoDung, b.SoCau, b.NopLuc }).ToListAsync();
+            .Select(b => new { MaDe = b.DeThiId!.Value, b.TenDe, b.SoDung, b.SoCau, b.NopLuc }).ToListAsync();
         return lam.Select(b => new LuotLamCuaToi(b.TenDe, tenKhoa.GetValueOrDefault(b.MaDe, ""), true, b.SoDung, b.SoCau, b.NopLuc)).ToList();
     }
 

@@ -5,7 +5,7 @@ using SuDia.Web.Models;
 
 namespace SuDia.Web.Areas.GiangVien.Controllers;
 
-public class GiaoBaiController(AppDbContext db) : GiangVienControllerBase(db)
+public class GiaoBaiController(AppDbContext db, SuDia.Web.Services.TinThongBaoService tin) : GiangVienControllerBase(db)
 {
     public async Task<IActionResult> Tao(int? bai, bool kiemTra = false, string? khoa = null, int? deThi = null)
     {
@@ -16,7 +16,7 @@ public class GiaoBaiController(AppDbContext db) : GiangVienControllerBase(db)
             if (d is null) return NotFound();
             if (d.BaiTapGiaoId is int id) return RedirectToAction(nameof(Sua), new { id });
             await LuaChon(d.KhoaId);
-            ViewBag.DaCoBaiNop = await Db.BaiLam.AnyAsync(x => x.LaDeThi && x.MaDe == d.Id);
+            ViewBag.DaCoBaiNop = await Db.BaiLam.AnyAsync(x => x.DeThiId == d.Id);
             return View("Soan", new GiaoBaiForm { LaKiemTra = true, DeThiId = d.Id, Ten = d.Ten,
                 SoPhut = d.SoPhut, DaGiao = d.DangMo, BaiId = d.Cau.FirstOrDefault()?.CauHoi?.BaiId ?? 0,
                 Cau = d.Cau.OrderBy(x => x.ThuTu).Select(x => new CauBaiTap { Id = $"cu-{x.ThuTu}", Kieu = "TN",
@@ -60,7 +60,7 @@ public class GiaoBaiController(AppDbContext db) : GiangVienControllerBase(db)
             if (!f.LaKiemTra || (cu is not null && cu.DeThi?.Id != f.DeThiId)) return NotFound();
             de = await Db.DeThi.FirstOrDefaultAsync(d => d.Id == f.DeThiId && d.KhoaId == khoaId && (LaAdmin || d.Khoa!.GiangVienId == Uid));
             if (de is null || (de.BaiTapGiaoId is not null && de.BaiTapGiaoId != cu?.Id)) return NotFound();
-            if (await Db.BaiLam.AnyAsync(b => b.LaDeThi && b.MaDe == de.Id))
+            if (await Db.BaiLam.AnyAsync(b => b.DeThiId == de.Id))
                 return BadRequest(new { loi = "Đề cũ đã có bài làm. Nội dung và kết quả được giữ nguyên; hãy tạo đề mới." });
         }
         if (de is not null && de.KhoaId != khoaId) return NotFound();
@@ -71,6 +71,7 @@ public class GiaoBaiController(AppDbContext db) : GiangVienControllerBase(db)
         var loi = NoiDungBaiTap.KiemTra(f.Cau, f.DaGiao);
         if (loi is not null) return BadRequest(new { loi });
         if (f.LaKiemTra && f.SoPhut is < 5 or > 240) return BadRequest(new { loi = "Thời gian làm bài từ 5 đến 240 phút." });
+        var truocDaGiao = cu?.DaGiao ?? false;
         var bt = cu ?? new BaiTapGiao();
         if (cu is null) Db.BaiTapGiao.Add(bt);
         bt.BaiId = f.BaiId;
@@ -84,16 +85,19 @@ public class GiaoBaiController(AppDbContext db) : GiangVienControllerBase(db)
         {
             if (de is null)
             {
-                var thuTu = await Db.Khoa.Where(k => k.Id == khoaId).Select(k => k.ThuTu).FirstAsync();
-                var coSo = (thuTu + 1) * 1000;
-                var ma = (await Db.DeThi.Where(d => d.Id > coSo && d.Id < coSo + 1000).MaxAsync(d => (int?)d.Id) ?? coSo) + 1;
-                if (ma >= coSo + 1000) return BadRequest(new { loi = "Khoá đã đạt giới hạn mã đề thi." });
-                de = new DeThi { Id = ma, KhoaId = khoaId };
+                de = new DeThi { KhoaId = khoaId };
                 Db.DeThi.Add(de);
             }
             de.Ten = bt.Ten; de.SoPhut = f.SoPhut; de.DangMo = f.DaGiao; de.BaiTapGiao = bt;
         }
         await Db.SaveChangesAsync();
+        if (f.DaGiao && !truocDaGiao)
+        {
+            // Báo học viên đang học khoá này
+            var hocVien = await Db.GhiDanh.Where(g => g.KhoaId == khoaId && (g.HanDen == null || g.HanDen >= DateTime.UtcNow)).Select(g => g.NguoiDungId).ToListAsync();
+            await tin.GuiAsync(hocVien, LoaiTin.BaiTapMoi, (f.LaKiemTra ? "Bài kiểm tra mới: " : "Bài tập mới: ") + bt.Ten,
+                bt.HanNop is DateTime han ? $"Hạn nộp {han.ToLocalTime():HH:mm dd/MM/yyyy}." : "Chưa đặt hạn nộp.", $"/BaiTap/Lam/{bt.Id}");
+        }
         ThongBao(f.DaGiao ? (f.LaKiemTra ? "Đã xuất bản bài kiểm tra." : "Đã giao bài tập cho học viên của bài học.") : "Đã lưu nháp.");
         return Json(new { url = f.LaKiemTra ? Url.Action("Index", "DeThi") : Url.Action("Index", "CauHoi", new { bai = f.BaiId }), id = bt.Id });
     }
@@ -114,6 +118,20 @@ public class GiaoBaiController(AppDbContext db) : GiangVienControllerBase(db)
         var bt = new BaiTapGiao { Ten = string.IsNullOrWhiteSpace(f.Ten) ? "(Chưa đặt tên)" : f.Ten.Trim(), HuongDan = f.HuongDan ?? "",
             HanNop = f.HanNop?.UtcDateTime, DeThi = f.LaKiemTra ? new DeThi { SoPhut = f.SoPhut } : null };
         return View("~/Views/BaiTap/Lam.cshtml", new LamBaiGiaoViewModel { BaiTap = bt, Cau = f.Cau, XemTruoc = true });
+    }
+
+    // AI gợi ý nhận xét + điểm cho một câu tự luận của một bài nộp (chỉ là gợi ý, giảng viên quyết định điểm)
+    [HttpPost, ValidateAntiForgeryToken, Microsoft.AspNetCore.RateLimiting.EnableRateLimiting("tro-ly")]
+    public async Task<IActionResult> AiNhanXet(int nopId, string cauId, [FromServices] SuDia.Web.Services.AiHocTapService ai, CancellationToken ct)
+    {
+        var n = await Db.BaiNopGiao.AsNoTracking().FirstOrDefaultAsync(x => x.Id == nopId, ct);
+        if (n is null || !await CuaToi().AnyAsync(b => b.Id == n.BaiTapGiaoId, ct)) return NotFound();
+        var bt = await Db.BaiTapGiao.AsNoTracking().FirstAsync(b => b.Id == n.BaiTapGiaoId, ct);
+        var cau = NoiDungBaiTap.Doc(bt.NoiDungJson).FirstOrDefault(c => c.Id == cauId && c.Kieu == "TL");
+        if (cau is null) return NotFound();
+        var traLoi = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, string>>(n.TraLoiJson) ?? new();
+        var (kq, loi) = await ai.NhanXetTuLuanAsync(cau.NoiDung, cau.LoiGiai, cau.Diem, traLoi.GetValueOrDefault(cauId, ""), ct);
+        return Json(new { loi, kq });
     }
 
     public async Task<IActionResult> BaiNop(int id)

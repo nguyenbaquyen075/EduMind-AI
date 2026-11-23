@@ -1,0 +1,34 @@
+@model ChungChi?
+@using SuDia.Web.Services
+@{ Layout = null; }
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Xác thực chứng chỉ · Sử Địa</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="~/css/chung-chi.css" asp-append-version="true">
+</head>
+<body class="xt">
+<main class="xt-hop">
+<p class="cc-thuong">Sử<span>·</span>Địa</p>
+<h1>Xác thực chứng chỉ</h1>
+@if (Model is null)
+{
+<p class="xt-ket-qua khong">Không tìm thấy chứng chỉ với mã này. Kiểm tra lại mã (10 ký tự trên chứng chỉ).</p>
+}
+else
+{
+<p class="xt-ket-qua co">Chứng chỉ hợp lệ</p>
+<dl>
+<dt>Họ tên</dt><dd>@Model.HoTen</dd>
+<dt>Khoá học</dt><dd>@Model.TenKhoa</dd>
+<dt>Số bài đã hoàn thành</dt><dd>@Model.SoBai</dd>
+<dt>Ngày cấp</dt><dd>@Model.NgayCap.ToLocalTime().ToString("dd/MM/yyyy")</dd>
+<dt>Mã xác thực</dt><dd>@ChungChiService.DinhDangMa(Model.MaXacThuc)</dd>
+</dl>
+}
+</main>
+</body>
+</html>

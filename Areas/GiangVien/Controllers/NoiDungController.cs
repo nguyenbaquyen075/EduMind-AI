@@ -10,7 +10,8 @@ namespace SuDia.Web.Areas.GiangVien.Controllers;
 public class NoiDungController(AppDbContext db, ISoanNoiDungAiService ai, KhoBanNhapNoiDung banNhap) : GiangVienControllerBase(db)
 {
     [HttpPost, ValidateAntiForgeryToken, RequestSizeLimit(22 * 1024 * 1024)]
-    public async Task<IActionResult> NhapTaiLieu(IFormFile? taiLieu, CancellationToken ct)
+    public async Task<IActionResult> NhapTaiLieu(IFormFile? taiLieu, string? khoaId, int? baiId,
+        [FromServices] TaiLieuKhoaService kho, CancellationToken ct)
     {
         if (taiLieu is null || taiLieu.Length == 0 || taiLieu.Length > DocTaiLieuOffice.ToiDaByte)
             return BadRequest(new { loi = "Anh chọn tài liệu Word hoặc PowerPoint, tối đa 20 MB." });
@@ -22,7 +23,15 @@ public class NoiDungController(AppDbContext db, ISoanNoiDungAiService ai, KhoBan
             using var buffer = new MemoryStream();
             await taiLieu.CopyToAsync(buffer, ct);
             buffer.Position = 0;
-            return Json(DocTaiLieuOffice.Doc(buffer, extension, taiLieu.FileName));
+            var ketQua = DocTaiLieuOffice.Doc(buffer, extension, taiLieu.FileName);
+
+            // Lưu luôn tệp gốc vào kho tài liệu của khoá đang soạn (để học viên tìm, AI đọc), nếu biết khoá
+            var daLuuKho = false;
+            if (baiId is not null)
+                khoaId = await BaiCuaToi().Where(b => b.Id == baiId).Select(b => b.ChuDe!.KhoaId).FirstOrDefaultAsync(ct);
+            if (!string.IsNullOrEmpty(khoaId) && await KhoaCuaToi().AnyAsync(k => k.Id == khoaId, ct))
+                daLuuKho = (await kho.LuuAsync(taiLieu, khoaId, baiId, null, Uid, ct)).Loi is null;
+            return Json(new { ketQua.TenBai, ketQua.NoiDung, ketQua.CanhBao, daLuuKho });
         }
         catch (Exception ex) when (ex is InvalidDataException or System.Xml.XmlException or ArgumentException or UriFormatException)
         {
@@ -261,9 +270,8 @@ public class NoiDungController(AppDbContext db, ISoanNoiDungAiService ai, KhoBan
             var thuTuChuDe = await Db.ChuDe.CountAsync(c => c.KhoaId == khoaId, ct);
             cd = new ChuDe { KhoaId = khoaId, Ten = $"Chủ đề {thuTuChuDe + 1} · {tenChuDe!.Trim()}", ThuTu = thuTuChuDe };
         }
-        var maMoi = (await Db.Bai.Where(b => b.Id < 1000).MaxAsync(b => (int?)b.Id, ct) ?? 0) + 1;
         var thuTuBai = chuDeMoi ? 0 : await Db.Bai.CountAsync(b => b.ChuDeId == cd!.Id, ct);
-        var bai = new Bai { Id = maMoi, So = soBai.Value, Ten = tenBai.Trim(), ThuTu = thuTuBai, DaXuatBan = false };
+        var bai = new Bai { So = soBai.Value, Ten = tenBai.Trim(), ThuTu = thuTuBai, DaXuatBan = false };
         cd!.Bai.Add(bai);
         if (chuDeMoi) Db.ChuDe.Add(cd); else Db.Bai.Add(bai);
         await Db.SaveChangesAsync(ct);
@@ -315,11 +323,10 @@ public class NoiDungController(AppDbContext db, ISoanNoiDungAiService ai, KhoBan
             cd = new ChuDe { KhoaId = khoa.Id, Ten = $"Chủ đề {draft.SoChuDe ?? thuTu + 1} · {tenChuDe!.Trim()}", ThuTu = thuTu };
             Db.ChuDe.Add(cd);
         }
-        var maMoi = (await Db.Bai.Where(b => b.Id < 1000).MaxAsync(b => (int?)b.Id, ct) ?? 0) + 1;
         var thuTuBai = cd.Id == 0 ? 0 : await Db.Bai.CountAsync(b => b.ChuDeId == cd.Id, ct);
         foreach (var (goc, sua) in chon)
         {
-            var b = new Bai { Id = maMoi++, So = sua.So, Ten = sua.Ten.Trim(), ThuTu = thuTuBai++, DaXuatBan = false };
+            var b = new Bai { So = sua.So, Ten = sua.Ten.Trim(), ThuTu = thuTuBai++, DaXuatBan = false };
             var so = 1;
             foreach (var m in goc.Muc.Where(m => !string.IsNullOrWhiteSpace(m.Ten)))
             {
@@ -377,7 +384,7 @@ public class NoiDungController(AppDbContext db, ISoanNoiDungAiService ai, KhoBan
             return "câu hỏi của chủ đề đang nằm trong đề thi thử";
         if (await Db.BaiNopGiao.AnyAsync(n => baiIds.Contains(n.BaiTapGiao!.BaiId)))
             return "học viên đã nộp bài tập của chủ đề";
-        if (await Db.BaiLam.AnyAsync(b => !b.LaDeThi && baiIds.Contains(b.MaDe))
+        if (await Db.BaiLam.AnyAsync(b => b.BaiId != null && baiIds.Contains(b.BaiId.Value))
             || await Db.TienDoBai.AnyAsync(t => baiIds.Contains(t.BaiId)))
             return "học viên đã học hoặc luyện tập bài trong chủ đề";
         return null;
@@ -388,12 +395,12 @@ public class NoiDungController(AppDbContext db, ISoanNoiDungAiService ai, KhoBan
     {
         var cd = await Db.ChuDe.Include(c => c.Bai).FirstOrDefaultAsync(c => c.Id == chuDeId && (LaAdmin || c.Khoa!.GiangVienId == Uid));
         if (cd is null || string.IsNullOrWhiteSpace(ten) || soBai < 1) return BadRequest();
-        // Mã đường dẫn tự sinh, số bài hiển thị do giảng viên nhập.
-        var maMoi = (await Db.Bai.Where(b => b.Id < 1000).MaxAsync(b => (int?)b.Id) ?? 0) + 1;
-        Db.Bai.Add(new Bai { Id = maMoi, ChuDeId = cd.Id, So = soBai, Ten = ten.Trim(), ThuTu = cd.Bai.Count, DaXuatBan = false });
+        // Mã đường dẫn do CSDL tự tăng, số bài hiển thị do giảng viên nhập.
+        var baiMoi = new Bai { ChuDeId = cd.Id, So = soBai, Ten = ten.Trim(), ThuTu = cd.Bai.Count, DaXuatBan = false };
+        Db.Bai.Add(baiMoi);
         await Db.SaveChangesAsync();
         ThongBao($"Đã tạo Bài {soBai} (đang ở dạng nháp). Thêm mục để soạn nội dung.");
-        return RedirectToAction(nameof(SoanBai), new { id = maMoi });
+        return RedirectToAction(nameof(SoanBai), new { id = baiMoi.Id });
     }
 
     // Soạn một bài: thông tin bài + danh sách mục

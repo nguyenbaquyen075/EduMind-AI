@@ -1,0 +1,15 @@
+bin/
+obj/
+.git/
+.vs/
+.vscode/
+.idea/
+App_Data/
+output/
+claude-sessions/
+KiemThu/
+deploy/.env
+appsettings.Development.json
+appsettings.*.local.json
+*.env
+**/*.dump

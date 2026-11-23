@@ -6,9 +6,34 @@
     ViewData["TieuDe"] = "Bài nộp · " + bt.Ten;
     ViewData["Muc"] = bt.DeThi is null ? "CauHoi" : "DeThi";
 }
-@section Head { <link rel="stylesheet" href="~/css/giao-bai.css" asp-append-version="true"> }
+@section Head { <link rel="stylesheet" href="~/css/giao-bai.css" asp-append-version="true"><link rel="stylesheet" href="~/css/bieu-do.css" asp-append-version="true"> }
+@{
+    // Điểm tổng mỗi bài nộp (thang 10); bài còn tự luận chưa chấm thì chưa có điểm
+    var tongDiem = cau.Sum(c => c.TongDiem);
+    var diemCuaLop = tongDiem <= 0 ? [] : Model.Where(n => !(tuLuan.Count > 0 && n.DiemTuLuan is null)).Select(n => (double)((n.DiemTuDong + (n.DiemTuLuan ?? 0)) * 10 / tongDiem)).ToList();
+    var choCham = Model.Count - diemCuaLop.Count;
+    var khoang = new[] { ("0–<2", 0.0, 2.0), ("2–<4", 2.0, 4.0), ("4–<6", 4.0, 6.0), ("6–<8", 6.0, 8.0), ("8–10", 8.0, 10.01) };
+    var bdPho = new BieuDoModel
+    {
+        MoTa = $"Phổ điểm: {diemCuaLop.Count} bài nộp theo 5 khoảng điểm", DonVi = "bài", CotGiaTri = "Số bài",
+        Max = Math.Max(2, khoang.Max(k => diemCuaLop.Count(d => d >= k.Item2 && d < k.Item3))),
+        Diem = khoang.Select(k => new DiemBieuDo(k.Item1, diemCuaLop.Count(d => d >= k.Item2 && d < k.Item3))).ToList(),
+    };
+}
 @section Actions { <a class="ql-nut phu" href="@(bt.DeThi is null ? $"/GiangVien/CauHoi?bai={bt.BaiId}" : "/GiangVien/DeThi")">← Về danh sách</a> }
 @if (Model.Count == 0) { <p class="ql-trong">Chưa có học viên nộp bài.</p> }
+else
+{
+<section class="ql-khoi"><div class="ql-khoi-dau"><h2>Phổ điểm của lớp</h2>
+<p>@diemCuaLop.Count bài đã có điểm@(choCham > 0 ? $" · {choCham} bài chờ chấm tự luận" : "")@(diemCuaLop.Count > 0 ? $" · trung bình {diemCuaLop.Average():0.0} · cao nhất {diemCuaLop.Max():0.0} · thấp nhất {diemCuaLop.Min():0.0}" : "")</p></div>
+<div class="ql-khoi-than">
+@if (diemCuaLop.Count == 0) { <p class="bd-trong">Chưa có bài nào được chấm xong.</p> }
+else
+{
+<partial name="_BieuDoCot" model="bdPho" />
+}
+</div></section>
+}
 <div class="gb gb-submissions">
 @foreach (var n in Model)
 {
@@ -18,7 +43,9 @@
 @foreach (var c in tuLuan)
 {
 <div class="gb-question"><b>@c.NoiDung · @c.Diem điểm</b><p class="gb-pre">@(string.IsNullOrWhiteSpace(traLoi.GetValueOrDefault(c.Id)) ? "Học viên bỏ trống" : traLoi.GetValueOrDefault(c.Id))</p>
-<details><summary>Hướng dẫn chấm</summary><p class="gb-pre">@c.LoiGiai</p></details></div>
+<details><summary>Hướng dẫn chấm</summary><p class="gb-pre">@c.LoiGiai</p></details>
+<button type="button" class="ql-nut phu nho" data-ai-cham data-nop="@n.Id" data-cau="@c.Id" data-toi-da="@c.Diem.ToString(System.Globalization.CultureInfo.InvariantCulture)">AI gợi ý chấm</button>
+<div class="gb-ai" data-ket-qua></div></div>
 }
 @if (tuLuan.Count > 0)
 {
@@ -27,3 +54,29 @@
 </article>
 }
 </div>
+<script>
+(() => {
+  const token = document.querySelector('input[name=__RequestVerificationToken]')?.value;
+  const dong = (nhan, ds) => { const p = document.createElement('p'); const b = document.createElement('b'); b.textContent = nhan + ' '; p.append(b, ds.length ? ds.join('; ') : '—'); return p; };
+  document.querySelectorAll('[data-ai-cham]').forEach(nut => nut.addEventListener('click', async () => {
+    const kq = nut.parentElement.querySelector('[data-ket-qua]');
+    nut.disabled = true; nut.textContent = 'AI đang chấm…'; kq.replaceChildren();
+    try {
+      const r = await fetch('/GiangVien/GiaoBai/AiNhanXet', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded', RequestVerificationToken: token }, body: `nopId=${nut.dataset.nop}&cauId=${encodeURIComponent(nut.dataset.cau)}` });
+      if (r.status === 429) throw new Error('Thao tác hơi nhanh, đợi một phút rồi thử lại.');
+      if (!r.ok) throw new Error('Không gọi được AI. Tải lại trang rồi thử lại.');
+      const d = await r.json(); if (d.loi) throw new Error(d.loi);
+      nut.dataset.diem = d.kq.diem;
+      const hop = document.createElement('div'); hop.className = 'gb-ai-kq';
+      const t = document.createElement('p'); t.innerHTML = ''; const b = document.createElement('b'); b.textContent = `Gợi ý: ${d.kq.diem}/${d.kq.toiDa} điểm`; t.append(b, ' · AI chỉ gợi ý, thầy/cô quyết định điểm'); hop.append(t);
+      const nx = document.createElement('p'); nx.textContent = d.kq.nhanXet; hop.append(nx, dong('Ý đúng:', d.kq.yDung), dong('Còn thiếu:', d.kq.yThieu));
+      kq.append(hop);
+      const the = nut.closest('article'), tong = [...the.querySelectorAll('[data-ai-cham]')].filter(x => x.dataset.diem !== undefined);
+      const o = the.querySelector('input[name=diem], input[id^=diem-]'), cong = tong.reduce((s, x) => s + parseFloat(x.dataset.diem), 0);
+      if (o) { let g = the.querySelector('.gb-ai-tong'); if (!g) { g = document.createElement('button'); g.type = 'button'; g.className = 'ql-nut phu nho gb-ai-tong'; o.after(g); }
+        g.textContent = `Điền tổng AI gợi ý: ${cong} (${tong.length} câu)`; g.onclick = () => { o.value = cong; o.focus(); }; }
+    } catch (e) { const p = document.createElement('p'); p.className = 'ql-loi'; p.textContent = e.message; kq.append(p); }
+    finally { nut.disabled = false; nut.textContent = 'AI gợi ý chấm lại'; }
+  }));
+})();
+</script>

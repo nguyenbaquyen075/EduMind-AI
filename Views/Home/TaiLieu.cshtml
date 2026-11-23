@@ -1,0 +1,80 @@
+@model TaiLieuHocVienViewModel
+@{
+    ViewData["Title"] = "Tài liệu · Sử Địa";
+    string Co(long b) => b >= 1024 * 1024 ? $"{b / 1024d / 1024:0.#} MB" : $"{Math.Max(1, b / 1024)} KB";
+    var chonKhoa = Model.KhoaId is null ? "" : $"&khoa={Model.KhoaId}";
+}
+@section Head {
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500;1,600&display=swap">
+<link rel="stylesheet" href="~/css/hoc-vien.css" asp-append-version="true">
+}
+<div class="hv-trang">
+<partial name="_MenuTaiKhoan" model="Model.Menu" />
+<main class="hv-main">
+<h1>Tài liệu</h1>
+<p class="hv-mo-ta">Tìm trong bài học và tài liệu giảng viên đưa lên của các khoá bạn đang học. Trợ lý AI cũng trả lời dựa trên đúng kho này.</p>
+
+@if (Model.DsKhoa.Count == 0)
+{
+<section class="hv-khoi"><p class="hv-trong">Bạn chưa có khoá nào đang học nên chưa xem được tài liệu. <a asp-controller="ThanhToan" asp-action="Goi">Xem các gói học</a></p></section>
+}
+else
+{
+<form method="get" class="hv-tim" role="search">
+<label for="q" class="hv-an">Tìm tài liệu</label>
+<input id="q" name="q" type="search" value="@Model.TuKhoa" placeholder="Ví dụ: chiến dịch Điện Biên Phủ, đô thị hoá…" autocomplete="off">
+@if (Model.KhoaId is not null) { <input type="hidden" name="khoa" value="@Model.KhoaId"> }
+<button type="submit" class="hv-nut">Tìm</button>
+</form>
+@if (Model.DsKhoa.Count > 1)
+{
+<nav class="hv-loc" aria-label="Lọc theo khoá">
+<a href="/Home/TaiLieu?q=@Uri.EscapeDataString(Model.TuKhoa ?? "")" aria-current="@(Model.KhoaId is null ? "page" : null)">Tất cả khoá</a>
+@foreach (var k in Model.DsKhoa) { <a href="/Home/TaiLieu?khoa=@k.Id&q=@Uri.EscapeDataString(Model.TuKhoa ?? "")" aria-current="@(Model.KhoaId == k.Id ? "page" : null)">@k.Ten</a> }
+</nav>
+}
+
+@if (!string.IsNullOrWhiteSpace(Model.TuKhoa))
+{
+<section class="hv-khoi">
+<div class="hv-khoi-dau"><h2>Kết quả cho “@Model.TuKhoa”</h2><a class="hv-nut phu" href="/Home/HoiAi?hoi=@Uri.EscapeDataString(Model.TuKhoa)">Hỏi AI về nội dung này</a></div>
+@if (Model.KetQua.Count == 0)
+{
+<p class="hv-trong">Không tìm thấy nội dung khớp. Thử từ khoá khác (gõ không dấu cũng được), hoặc hỏi AI.</p>
+}
+else
+{
+<ol class="hv-ket-qua">
+@foreach (var k in Model.KetQua)
+{
+<li>
+<p class="hv-ket-qua-dau"><span class="hv-chip @(k.Loai == "Tài liệu" ? "tim" : "")">@k.Loai</span>
+@if (k.Lien is not null) { <a href="@k.Lien" target="@(k.Loai == "Tài liệu" ? "_blank" : null)">@k.Nguon</a> } else { <b>@k.Nguon</b> }</p>
+<p class="hv-ket-qua-khuc">@k.Khuc</p>
+</li>
+}
+</ol>
+}
+</section>
+}
+
+<section class="hv-khoi">
+<div class="hv-khoi-dau"><h2>Tệp tài liệu của khoá</h2><span class="hv-phu">@Model.TaiLieu.Count tệp</span></div>
+@if (Model.TaiLieu.Count == 0)
+{
+<p class="hv-trong">Giảng viên chưa đưa tài liệu nào lên. Bạn vẫn tìm được trong nội dung bài học ở ô tìm phía trên.</p>
+}
+else
+{
+<ul class="hv-tep">
+@foreach (var t in Model.TaiLieu)
+{
+<li><a href="/Home/TaiLieu/Mo/@t.Id" target="_blank" rel="noopener"><span class="hv-tep-loai">@t.LoaiTep.ToUpperInvariant()</span><b>@t.Ten</b></a>
+<span class="hv-phu">@(t.Bai ?? "Tài liệu chung") · @Co(t.KichThuoc)@(t.DocDuocChu ? "" : " · chưa tìm được nội dung bên trong")</span></li>
+}
+</ul>
+}
+</section>
+}
+</main>
+</div>

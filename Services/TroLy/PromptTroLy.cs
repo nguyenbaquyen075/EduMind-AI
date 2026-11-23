@@ -31,9 +31,20 @@ public class PromptTroLy
     }
 
     /// <summary>Mẫu tin nhắn Phần 2.</summary>
-    public static string GhepTinNhan(IReadOnlyList<DoanTaiLieu> doan, string cauHoi)
+    public static string GhepTinNhan(IReadOnlyList<DoanTaiLieu> doan, string cauHoi, IReadOnlyList<SuDia.Web.Models.LuotHoi>? lichSu = null)
     {
-        var sb = new StringBuilder("<tai_lieu>\n");
+        var sb = new StringBuilder();
+        // Hội thoại gần nhất chỉ để hiểu học sinh đang nói về điều gì ("nó", "cái thứ hai", "so với lúc nãy");
+        // thông tin trả lời vẫn chỉ được lấy từ <tai_lieu>
+        if (lichSu is { Count: > 0 })
+        {
+            sb.Append("<hoi_thoai_truoc>\n(Chỉ để hiểu ngữ cảnh. Mọi thông tin trong câu trả lời vẫn phải lấy từ <tai_lieu>.)\n");
+            foreach (var l in lichSu.TakeLast(3))
+                sb.Append("Học sinh: ").Append(LamSach(l.CauHoi)).Append("\nTrợ lý: ")
+                  .Append(LamSach(l.TraLoi.Length > 700 ? l.TraLoi[..700] + "…" : l.TraLoi)).Append('\n');
+            sb.Append("</hoi_thoai_truoc>\n\n");
+        }
+        sb.Append("<tai_lieu>\n");
         for (var i = 0; i < doan.Count; i++)
             sb.Append('[').Append(i + 1).Append("] (").Append(doan[i].Nguon).Append(")\n")
               .Append(doan[i].NoiDung).Append("\n\n");

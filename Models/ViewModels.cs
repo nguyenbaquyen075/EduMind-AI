@@ -26,6 +26,9 @@ public record GoiHoc(
 
 public record DongSoSanh(string QuyenLoi, string HocThu, string MotMon, string TronBo);
 
+/// <summary>Giảng viên hiện ở trang chủ. Mon: nhãn môn dạy (để trống thì hiện "Giảng viên")</summary>
+public record GiangVienTrangChu(string HoTen, string Mon);
+
 public class TrangChuViewModel
 {
     public IReadOnlyList<string> CauHoiGoiY { get; init; } = [];
@@ -33,6 +36,7 @@ public class TrangChuViewModel
     public IReadOnlyList<MonHoc> MonHoc { get; init; } = [];
     public IReadOnlyList<GoiHoc> GoiHoc { get; init; } = [];
     public IReadOnlyList<DongSoSanh> SoSanh { get; init; } = [];
+    public IReadOnlyList<GiangVienTrangChu> GiangVien { get; init; } = [];
 }
 
 // ======================================================= Tổng quan
@@ -211,6 +215,7 @@ public class LamDeViewModel
 {
     public int Id { get; init; }
     public string KhoaId { get; init; } = "";
+    public string TenKhoa { get; init; } = "";      // tên khoá hiện trên đầu trang làm bài
     public string TenDe { get; init; } = "";
     public bool LaDeThi { get; init; }
     public int? SoPhut { get; init; }              // đề thi thử có giờ; bài tập không giới hạn

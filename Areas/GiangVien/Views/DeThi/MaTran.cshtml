@@ -1,0 +1,51 @@
+@model MaTranViewModel
+@{
+    ViewData["Title"] = "Ra đề theo ma trận – Giảng viên";
+    ViewData["TieuDe"] = "Ra đề theo ma trận";
+    ViewData["Muc"] = "DeThi";
+    ViewData["Crumb"] = "<a href=\"/GiangVien/DeThi\">Đề thi thử</a> · " + Model.Khoa.Ten;
+}
+<form method="post" asp-action="TaoMaTran" class="ql-form" id="maTran">
+<input type="hidden" name="KhoaId" value="@Model.Khoa.Id">
+<div asp-validation-summary="All" class="ql-tong-loi"></div>
+<section class="ql-khoi ql-khoi-than">
+<div class="ql-truong"><label for="ten">Tên đề</label><input id="ten" name="Ten" value="@Model.Form.Ten" maxlength="200" required></div>
+<div class="ql-truong"><label for="soPhut">Thời gian làm bài (phút)</label><input id="soPhut" name="SoPhut" type="number" min="5" max="240" value="@Model.Form.SoPhut" required></div>
+<p class="ql-phu">Nhập số câu dễ / trung bình / khó muốn lấy ở từng bài. Hệ thống bốc ngẫu nhiên từ ngân hàng câu hỏi của khoá và tạo đề nháp (đang đóng) để bạn xem lại. Độ khó của từng câu đặt ở phần soạn câu hỏi.</p>
+</section>
+<section class="ql-khoi">
+@if (Model.Bai.Count == 0)
+{
+<p class="ql-trong">Khoá chưa có câu hỏi nào trong ngân hàng. <a href="/GiangVien/CauHoi?khoa=@Model.Khoa.Id">Soạn câu hỏi</a>.</p>
+}
+else
+{
+<table class="ql-bang so">
+<thead><tr><th>Bài</th><th class="so">Dễ</th><th class="so">Trung bình</th><th class="so">Khó</th><th class="so">Lấy</th></tr></thead>
+<tbody>
+@for (var i = 0; i < Model.Bai.Count; i++)
+{
+    var b = Model.Bai[i];
+    var d = Model.Form.Dong.FirstOrDefault(x => x.BaiId == b.BaiId);
+<tr><td>Bài @b.So. @b.Ten<input type="hidden" name="Dong[@i].BaiId" value="@b.BaiId"></td>
+<td class="so"><input type="number" name="Dong[@i].De" min="0" max="@b.SoDe" value="@(d?.De ?? 0)" @(b.SoDe == 0 ? "disabled" : "") aria-label="Số câu dễ bài @b.So" style="width:64px"> <span class="ql-phu" style="display:inline">/ @b.SoDe</span></td>
+<td class="so"><input type="number" name="Dong[@i].TB" min="0" max="@b.SoTB" value="@(d?.TB ?? 0)" @(b.SoTB == 0 ? "disabled" : "") aria-label="Số câu trung bình bài @b.So" style="width:64px"> <span class="ql-phu" style="display:inline">/ @b.SoTB</span></td>
+<td class="so"><input type="number" name="Dong[@i].Kho" min="0" max="@b.SoKho" value="@(d?.Kho ?? 0)" @(b.SoKho == 0 ? "disabled" : "") aria-label="Số câu khó bài @b.So" style="width:64px"> <span class="ql-phu" style="display:inline">/ @b.SoKho</span></td>
+<td class="so"><b data-tong-dong>0</b></td></tr>
+}
+</tbody>
+<tfoot><tr><td colspan="4"><b>Tổng số câu của đề</b></td><td class="so"><b id="tongDe">0</b></td></tr></tfoot>
+</table>
+}
+</section>
+<div class="ql-chan"><button class="ql-nut">Tạo đề nháp</button><a href="/GiangVien/DeThi" class="ql-nut phu">Huỷ</a></div>
+</form>
+@section Scripts {
+<script>
+(() => {
+  const form = document.getElementById('maTran');
+  const tinh = () => { let tong = 0; form.querySelectorAll('tbody tr').forEach(tr => { const s = [...tr.querySelectorAll('input[type=number]')].reduce((a, i) => a + (parseInt(i.value, 10) || 0), 0); tr.querySelector('[data-tong-dong]').textContent = s; tong += s; }); document.getElementById('tongDe').textContent = tong; };
+  form.addEventListener('input', tinh); tinh();
+})();
+</script>
+}

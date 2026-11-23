@@ -1,0 +1,31 @@
+@{
+    ViewData["Title"] = "Lớp học – Giảng viên";
+    ViewData["TieuDe"] = "Lớp học";
+    ViewData["Muc"] = "Lop";
+    var ds = (IReadOnlyList<SuDia.Web.Models.LopTomTat>)ViewBag.Lop;
+}
+@section Actions {
+<a href="/GiangVien/Lop/Tao" class="ql-nut">+ Tạo lớp</a>
+}
+<section class="ql-khoi">
+<div class="ql-khoi-dau"><h2>Các lớp</h2><p>Học viên vào lớp bằng mã, rồi trò chuyện trong nhóm chat của lớp.</p></div>
+@if (ds.Count == 0)
+{
+<p class="ql-trong">Chưa có lớp nào. <a href="/GiangVien/Lop/Tao">Tạo lớp đầu tiên</a>.</p>
+}
+else
+{
+<table class="ql-bang">
+<thead><tr><th>Lớp</th><th>Mã tham gia</th><th>Học viên</th><th>Tin nhắn</th><th></th></tr></thead>
+<tbody>
+@foreach (var l in ds)
+{
+<tr><td><a href="/GiangVien/Lop/ChiTiet/@l.Id"><b>@l.Ten</b></a><span class="ql-phu">@l.Khoa</span></td>
+<td><code>@l.MaThamGia</code>@if (!l.DangMo) {<span class="ql-chip">Ngừng nhận</span>}</td>
+<td>@l.SoHocVien</td><td>@l.SoTinNhan</td>
+<td class="hanh-dong"><span class="ql-hang-nut" style="justify-content: flex-end"><a href="/Lop/@l.Id" class="ql-nut phu nho">Nhóm chat</a><a href="/GiangVien/Lop/ChiTiet/@l.Id" class="ql-nut phu nho">Quản lý</a></span></td></tr>
+}
+</tbody>
+</table>
+}
+</section>

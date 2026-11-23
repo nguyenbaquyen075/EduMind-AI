@@ -1,0 +1,34 @@
+@model TinThongBaoViewModel
+@{ ViewData["Title"] = "Thông báo · Sử Địa"; var chuaDoc = Model.Tin.Count(t => !t.DaDoc); }
+@section Head {
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500;1,600&display=swap">
+<link rel="stylesheet" href="~/css/hoc-vien.css" asp-append-version="true">
+}
+<div class="hv-trang">
+<partial name="_MenuTaiKhoan" model="Model.Menu" />
+<main class="hv-main">
+<h1>Thông báo</h1>
+<p class="hv-mo-ta">Trả lời trong lớp, bài tập mới, khoá sắp hết hạn và bài sắp đến hạn nộp.</p>
+<section class="hv-khoi">
+<div class="hv-khoi-dau"><h2>@(chuaDoc > 0 ? $"{chuaDoc} chưa đọc" : "Đã đọc hết")</h2>
+@if (chuaDoc > 0) { <form method="post" action="/ThongBao/DocHet"><button class="hv-nut phu nho">Đánh dấu đã đọc hết</button></form> }
+</div>
+@if (Model.Tin.Count == 0)
+{
+<p class="hv-trong">Chưa có thông báo nào.</p>
+}
+else
+{
+<ul class="tb-ds">
+@foreach (var t in Model.Tin)
+{
+<li class="@(t.DaDoc ? "tb-da-doc" : "")">
+<form method="post" action="/ThongBao/Mo/@t.Id"><button class="tb-tin"><span class="tb-cham" aria-hidden="true"></span>
+<span><span class="tb-tieu-de">@t.TieuDe</span><span class="tb-noi-dung">@t.NoiDung</span><span class="tb-gio">@DinhDang.GioNgay(t.NgayTao.ToLocalTime())</span></span></button></form>
+</li>
+}
+</ul>
+}
+</section>
+</main>
+</div>

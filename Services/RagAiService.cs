@@ -72,11 +72,11 @@ public class RagAiService : IAiService
         var cauHoi = lichSu.Count == 0 ? request.CauHoi.Trim() : await VietLaiCauHoiAsync(request.CauHoi, lichSu, ct);
 
         // 2. Tìm đoạn tài liệu. Không có đoạn nào liên quan thì từ chối luôn, khỏi gọi model
-        var doan = _kho.TimKiem(cauHoi, request.KhoaId, _opt.SoDoan);
+        var doan = await _kho.TimKiemAsync(cauHoi, request.KhoaId, _opt.SoDoan, ct);
         if (doan.Count == 0) return TuChoi();
 
         // 3. Gọi model trả lời
-        var traLoi = await TraLoiAsync(doan, cauHoi, ct);
+        var traLoi = await TraLoiAsync(doan, cauHoi, lichSu, ct);
         if (traLoi is null) return TuChoi();
 
         // 4. Kiểm tra bằng code
@@ -104,12 +104,12 @@ public class RagAiService : IAiService
 
         var dung = kq.NguonDaDung.Select(n => doan[n - 1]).ToList();
         var nguon = string.Join("\n", kq.NguonDaDung.Select(n => $"[{n}] {doan[n - 1].Nguon}"));
-        return new HoiAiResponse("Trợ lý · " + dung[0].Mon, kq.ThanBai, "", nguon, false);
+        return new HoiAiResponse("Trợ lý · " + dung[0].Mon, KiemTraCauTraLoi.BoNguonTrongPhuongAn(kq.ThanBai), "", nguon, false);
     }
 
     // ---------------------------------------------------------------- Gọi model
 
-    private async Task<string?> TraLoiAsync(IReadOnlyList<DoanTaiLieu> doan, string cauHoi, CancellationToken ct)
+    private async Task<string?> TraLoiAsync(IReadOnlyList<DoanTaiLieu> doan, string cauHoi, IReadOnlyList<LuotHoi> lichSu, CancellationToken ct)
     {
         var res = await _client.Beta.Messages.Create(new Beta.MessageCreateParams
         {
@@ -120,7 +120,7 @@ public class RagAiService : IAiService
             Fallbacks = new Beta.Default(),
             System = _prompt.HeThong,
             OutputConfig = new Beta.BetaOutputConfig { Effort = MucSuyNghiBeta() },
-            Messages = [new Beta.BetaUserMessageParam { Content = PromptTroLy.GhepTinNhan(doan, cauHoi) }],
+            Messages = [new Beta.BetaUserMessageParam { Content = PromptTroLy.GhepTinNhan(doan, cauHoi, lichSu) }],
         }, ct);
 
         if (res.StopReason == "refusal")

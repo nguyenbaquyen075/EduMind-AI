@@ -21,7 +21,7 @@ public static class KhoiTaoDuLieu
         foreach (var r in VaiTro.TatCa)
             if (!await roles.RoleExistsAsync(r)) await roles.CreateAsync(new IdentityRole(r));
 
-        if (!await db.Khoa.AnyAsync()) await NapNoiDungMauAsync(db);
+        if (!await db.Khoa.AnyAsync()) { await NapNoiDungMauAsync(db); await db.DongBoMaTuTangAsync(); }
         if (!await db.GoiBan.AnyAsync()) await NapGoiMauAsync(db);
         if (laDev) await TaoTaiKhoanMauAsync(scope.ServiceProvider, db, matKhauMau);
     }
@@ -39,7 +39,7 @@ public static class KhoiTaoDuLieu
             db.GoiBan.Add(new GoiBan
             {
                 Ten = g.Ten, Nhan = g.Nhan, MauNhan = g.MauNhan, NoiBat = g.NoiBat, ThuTu = thuTu++, QuyenLoi = g.QuyenLoi.ToList(),
-                KhoaIds = cungTen.Count > 0 ? cungTen : khoa.Select(k => k.Id).ToList(),
+                KhoaTrongGoi = (cungTen.Count > 0 ? cungTen : khoa.Select(k => k.Id)).Select(id => new GoiBanKhoa { KhoaId = id }).ToList(),
             });
         }
         await db.SaveChangesAsync();

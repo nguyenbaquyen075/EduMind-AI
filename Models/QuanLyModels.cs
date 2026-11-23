@@ -74,6 +74,7 @@ public class CauHoiForm
     [Required(ErrorMessage = "Nhập phương án D")] public string D { get; set; } = "";
     [Required(ErrorMessage = "Chọn đáp án đúng")] [RegularExpression("^[ABCD]$")] public string DapAn { get; set; } = "";
     [Required(ErrorMessage = "Nhập lời giải thích")] public string GiaiThich { get; set; } = "";
+    [Range(1, 3, ErrorMessage = "Độ khó từ 1 đến 3")] public int DoKho { get; set; } = 2;
 }
 
 public class DeThiForm
@@ -164,4 +165,18 @@ public class SuaNguoiDungForm
     public string Id { get; set; } = "";
     [Required(ErrorMessage = "Nhập họ tên"), StringLength(150)] public string HoTen { get; set; } = "";
     [Required(ErrorMessage = "Nhập email"), EmailAddress(ErrorMessage = "Email chưa đúng")] public string Email { get; set; } = "";
+}
+
+// ======================================================= Kho tài liệu (giảng viên)
+public record BaiChon(int Id, string Ten);
+public record GvTaiLieuDong(int Id, string Ten, string TenTep, string LoaiTep, long KichThuoc, string TrangThai, string? LoiDoc,
+    bool HienChoHocVien, string? Bai, string? NguoiTai, DateTime TaiLuc, int SoKyTu);
+
+public class GvKhoTaiLieuViewModel
+{
+    public IReadOnlyList<(string Id, string Ten)> DsKhoa { get; init; } = [];
+    public string? KhoaId { get; init; }
+    public string? TuKhoa { get; init; }
+    public IReadOnlyList<BaiChon> Bai { get; init; } = [];
+    public IReadOnlyList<GvTaiLieuDong> TaiLieu { get; init; } = [];
 }

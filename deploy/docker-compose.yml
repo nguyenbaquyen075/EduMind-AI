@@ -1,0 +1,58 @@
+# Chạy SuDia trên một máy chủ: web + PostgreSQL + Caddy (tự cấp chứng chỉ HTTPS Let's Encrypt).
+# Dùng: cd deploy && cp .env.example .env (điền) && docker compose up -d --build
+name: sudia
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: sudia
+      POSTGRES_USER: sudia
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Cần đặt POSTGRES_PASSWORD trong .env}
+    volumes:
+      - csdl:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sudia -d sudia"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    # Không mở cổng CSDL ra ngoài; chỉ web trong mạng nội bộ của compose dùng được
+
+  web:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file: .env
+    environment:
+      ConnectionStrings__SuDia: "Host=db;Database=sudia;Username=sudia;Password=${POSTGRES_PASSWORD}"
+      SauProxy: "true"
+      DataProtection__ThuMuc: "App_Data/khoa-bao-ve"
+    volumes:
+      - du-lieu-web:/app/App_Data
+    # Chỉ Caddy gọi vào web, không mở cổng 8080 ra Internet
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    depends_on:
+      - web
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      TEN_MIEN: ${TEN_MIEN:?Cần đặt TEN_MIEN trong .env}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-du-lieu:/data
+      - caddy-cau-hinh:/config
+
+volumes:
+  csdl:
+  du-lieu-web:
+  caddy-du-lieu:
+  caddy-cau-hinh:

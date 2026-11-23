@@ -17,8 +17,14 @@ public static class VaiTro
     public static readonly string[] TatCa = [HocVien, GiangVien, Admin];
 }
 
+/// <summary>Bảng có cột CapNhatLuc: AppDbContext tự ghi giờ mỗi lần thêm/sửa.</summary>
+public interface ICoCapNhat
+{
+    DateTime CapNhatLuc { get; set; }
+}
+
 // ======================================================= Nội dung khoá học
-public class Khoa
+public class Khoa : ICoCapNhat
 {
     public string Id { get; set; } = "";          // "lich-su-12"
     public string Ten { get; set; } = "";
@@ -33,9 +39,10 @@ public class Khoa
     public string? GiangVienId { get; set; }      // giảng viên phụ trách
     public NguoiDung? GiangVien { get; set; }
     public List<ChuDe> ChuDe { get; set; } = [];
+    public DateTime CapNhatLuc { get; set; } = DateTime.UtcNow;
 }
 
-public class ChuDe
+public class ChuDe : ICoCapNhat
 {
     public int Id { get; set; }
     public string KhoaId { get; set; } = "";
@@ -43,11 +50,12 @@ public class ChuDe
     public string Ten { get; set; } = "";          // "Chủ đề 1 · Thế giới …"
     public int ThuTu { get; set; }
     public List<Bai> Bai { get; set; } = [];
+    public DateTime CapNhatLuc { get; set; } = DateTime.UtcNow;
 }
 
-public class Bai
+public class Bai : ICoCapNhat
 {
-    public int Id { get; set; }                    // giữ mã cũ: Lịch sử = số bài, Địa lí = 100 + số bài
+    public int Id { get; set; }                    // tự tăng; bài mẫu giữ mã cũ (Lịch sử = số bài, Địa lí = 100 + số bài)
     public int ChuDeId { get; set; }
     public ChuDe? ChuDe { get; set; }
     public int So { get; set; }
@@ -59,9 +67,10 @@ public class Bai
     public bool DaXuatBan { get; set; } = true;
     public List<Muc> Muc { get; set; } = [];
     public List<CauHoi> CauHoi { get; set; } = [];
+    public DateTime CapNhatLuc { get; set; } = DateTime.UtcNow;
 }
 
-public class Muc
+public class Muc : ICoCapNhat
 {
     public int Id { get; set; }
     public int BaiId { get; set; }
@@ -71,6 +80,7 @@ public class Muc
     public string TieuDe { get; set; } = "";
     public int SoPhut { get; set; }
     public List<Phan> Phan { get; set; } = [];
+    public DateTime CapNhatLuc { get; set; } = DateTime.UtcNow;
 }
 
 public class Phan
@@ -97,7 +107,7 @@ public class MocThoiGian
 }
 
 // ======================================================= Câu hỏi & đề
-public class CauHoi
+public class CauHoi : ICoCapNhat
 {
     public int Id { get; set; }
     public int BaiId { get; set; }
@@ -109,11 +119,19 @@ public class CauHoi
     public string GiaiThich { get; set; } = "";
     public int? Muc { get; set; }
     public string NguonHienThi { get; set; } = "";
+    public int DoKho { get; set; } = 2;               // 1 dễ, 2 trung bình, 3 khó (dùng để ra đề theo ma trận)
+    public DateTime CapNhatLuc { get; set; } = DateTime.UtcNow;
 }
 
-public class DeThi
+public static class DoKhoCau
 {
-    public int Id { get; set; }                    // 1001+ Lịch sử, 2001+ Địa lí
+    public const int De = 1, TrungBinh = 2, Kho = 3;
+    public static string Ten(int d) => d switch { 1 => "Dễ", 3 => "Khó", _ => "Trung bình" };
+}
+
+public class DeThi : ICoCapNhat
+{
+    public int Id { get; set; }                    // tự tăng; đề mẫu giữ mã cũ 1001+ Lịch sử, 2001+ Địa lí
     public string KhoaId { get; set; } = "";
     public Khoa? Khoa { get; set; }
     public string Ten { get; set; } = "";
@@ -122,6 +140,7 @@ public class DeThi
     public int? BaiTapGiaoId { get; set; } // đề mới dùng chung bộ soạn TN/ĐS/TL với bài tập
     public BaiTapGiao? BaiTapGiao { get; set; }
     public List<DeThiCau> Cau { get; set; } = [];
+    public DateTime CapNhatLuc { get; set; } = DateTime.UtcNow;
 }
 
 public class DeThiCau
@@ -148,7 +167,9 @@ public enum TrangThaiHoc { DangHoc = 1, DaHoc = 2 }
 public class TienDoBai
 {
     public string NguoiDungId { get; set; } = "";
+    public NguoiDung? NguoiDung { get; set; }
     public int BaiId { get; set; }
+    public Bai? Bai { get; set; }
     public TrangThaiHoc TrangThai { get; set; }
     public DateTime CapNhat { get; set; } = DateTime.UtcNow;
 }
@@ -158,7 +179,11 @@ public class BaiLam
     public int Id { get; set; }
     public string NguoiDungId { get; set; } = "";
     public NguoiDung? NguoiDung { get; set; }
-    public int MaDe { get; set; }                  // mã bài (bài tập) hoặc mã đề thi
+    // Luyện tập theo bài: BaiId; đề thi thử: DeThiId (đúng một trong hai, có ràng buộc kiểm tra)
+    public int? BaiId { get; set; }
+    public Bai? Bai { get; set; }
+    public int? DeThiId { get; set; }
+    public DeThi? DeThi { get; set; }
     public bool LaDeThi { get; set; }
     public string TenDe { get; set; } = "";
     public int SoCau { get; set; }
@@ -172,6 +197,7 @@ public class CauTraLoi
     public int Id { get; set; }
     public int BaiLamId { get; set; }
     public int CauHoiId { get; set; }
+    public CauHoi? CauHoi { get; set; }
     public int ThuTu { get; set; }
     public string? DaChon { get; set; }
     public bool Dung { get; set; }

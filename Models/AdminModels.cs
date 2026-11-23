@@ -68,10 +68,16 @@ public record AdminTaiLieu(string Ten, string Mon, int SoBai, int SoMuc, long So
 public class AdminTroLyViewModel
 {
     public bool BanXemThu { get; init; }
+    /// <summary>Nhà cung cấp và model trợ lý đang thật sự dùng, ví dụ "Gemini · gemini-2.5-flash".</summary>
+    public string DangDung { get; init; } = "";
     public required SuDia.Web.Services.TroLy.TroLyOptions CauHinh { get; init; }
     public List<AdminTaiLieu> TaiLieu { get; init; } = [];
     public int SoCauKiemThu { get; init; }
     public bool CoPrompt { get; init; }
+    /// <summary>Chỉ mục tài liệu của trợ lý; null khi chạy bản xem thử (chưa có khoá API).</summary>
+    public SuDia.Web.Services.TroLy.KhoTaiLieu.ThongKeChiMuc? ChiMuc { get; init; }
+    /// <summary>Chỗ dữ liệu nhập vào còn thiếu nên trợ lý sẽ không trả lời được hoặc trả lời sai.</summary>
+    public List<string> CanBoSung { get; init; } = [];
 }
 
 /// <summary>Thẻ chọn giảng viên → khoá ở Nội dung / Bài tập / Lịch dạy (Admin); mã "none" = các khoá chưa phân công.</summary>

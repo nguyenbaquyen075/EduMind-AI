@@ -31,7 +31,7 @@
 {
     i++;
 <li class="ql-khoi bt-cau">
-<div class="bt-dau"><span class="bt-so">Câu @i</span><span class="ql-phu" style="margin: 0">@c.NguonHienThi</span>
+<div class="bt-dau"><span class="bt-so">Câu @i</span><span class="ql-phu" style="margin: 0">@c.NguonHienThi</span><span class="ql-chip @(c.DoKho == 1 ? "xanh" : c.DoKho == 3 ? "do" : "vang")">@DoKhoCau.Ten(c.DoKho)</span>
 <span class="bt-ti-le">@(c.Lam == 0 ? "Chưa có lượt làm" : $"{Math.Round(c.Dung * 100.0 / c.Lam)}% làm đúng · {c.Lam} lượt")</span>
 <details class="ql-ba-cham">
 <summary aria-label="Thao tác với câu @i" title="Thao tác"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/></svg></summary>

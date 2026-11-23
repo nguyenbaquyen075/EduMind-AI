@@ -19,6 +19,7 @@
             ("Học viên", "GhiDanh", "Ghi danh & hạn học", "/Admin/GhiDanh", "M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"),
             ("Học viên", "BaoCao", "Báo cáo hoạt động", "/Admin/BaoCao", "M3 3v18h18M7 16v-5M12 16V7M17 16V4"),
             ("Kinh doanh", "DoanhThu", "Doanh thu & đơn hàng", "/Admin/DoanhThu", "M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"),
+            ("Kinh doanh", "ThongBao", "Thông báo & duyệt đơn", "/Admin/ThongBao", "M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"),
             ("Kinh doanh", "GoiHoc", "Gói học & giá", "/Admin/GoiHoc", "M20 12v9H4v-9M2 7h20v5H2zM12 21V7"),
             ("Hệ thống", "NguoiDung", "Tài khoản & phân quyền", "/Admin/NguoiDung", "M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8M22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"),
             ("Hệ thống", "TroLy", "Trợ lý AI & tài liệu", "/Admin/TroLy", "M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"),
@@ -30,7 +31,9 @@
             ("Soạn cho học viên", "CauHoi", "Bài tập & nộp bài", "/GiangVien/CauHoi", "M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"),
             ("Soạn cho học viên", "DeThi", "Đề thi thử", "/GiangVien/DeThi", "M12 21a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM12 9v4l2 2M9 2h6"),
             ("Soạn cho học viên", "LichDay", "Lịch dạy online", "/GiangVien/LichDay", "M2 6h14v12H2zM16 10l6-3v10l-6-3z"),
-            ("Theo dõi", "HocVien", "Lớp học", "/GiangVien/HocVien", "M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8"),
+            ("Soạn cho học viên", "TaiLieu", "Kho tài liệu", "/GiangVien/TaiLieu", "M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM12 11v6M9 14l3 3 3-3"),
+            ("Theo dõi", "Lop", "Lớp học & nhóm chat", "/GiangVien/Lop", "M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8M23 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"),
+            ("Theo dõi", "HocVien", "Học viên & điểm", "/GiangVien/HocVien", "M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8"),
         };
     string? nhomTruoc = null;
 }
@@ -47,7 +50,7 @@
 <a href="@(khu == "Admin" ? "/Admin" : "/GiangVien")" class="ql-global-brand" aria-label="Sử Địa"><b>Sử<span>·</span>Địa</b></a>
 <div class="ql-global-search-wrap" data-global-search><label class="ql-global-search"><svg aria-hidden="true" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg><input type="search" placeholder="Tìm trang, chức năng…" aria-label="Tìm trang và chức năng"></label><div class="ql-ket-qua-tim" role="listbox" hidden></div></div>
 <div class="ql-global-tools">
-<button class="ql-thong-bao-nut" type="button" aria-label="Thông báo" title="Thông báo"><svg aria-hidden="true" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg></button>
+<a class="ql-thong-bao-nut" href="/ThongBao" aria-label="Thông báo" title="Thông báo"><svg aria-hidden="true" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"></path><path d="M10 21h4"></path></svg><span class="tb-so" data-tb-dem hidden></span></a>
 <details class="ql-tai-khoan">
 <summary class="ql-nguoi" title="@nd?.Email" aria-label="Mở menu tài khoản">
 <span class="ql-avatar" aria-hidden="true">@((nd?.HoTen ?? "?").Split(' ', StringSplitOptions.RemoveEmptyEntries).LastOrDefault()?[..1].ToUpper())</span>
@@ -136,5 +139,6 @@ document.addEventListener('keydown', (e) => {
     if (d) { d.open = false; d.querySelector('summary').focus(); }
 });
 </script>
+<script src="~/js/chuong-thong-bao.js" asp-append-version="true" defer></script>
 @await RenderSectionAsync("Scripts", required: false)
 }
