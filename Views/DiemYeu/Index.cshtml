@@ -1,0 +1,103 @@
+@model DiemYeuViewModel
+@using SuDia.Web.Services
+@{
+    ViewData["Title"] = "Điểm yếu của tôi · Sử Địa";
+    var coDuLieu = Model.TatCa.Count > 0;
+    var bieuDo = Model.TatCa.Where(d => d.SoCau >= PhanTichDiemYeuService.SoCauToiThieu).Take(8).Select(d => new DiemBieuDo("Bài " + d.BaiSo, Math.Round(d.TiLe), $"{d.SoDung}/{d.SoCau} câu đúng · {d.BaiTen}")).ToList();
+    var bd = bieuDo.Count == 0 ? null : new BieuDoModel { MoTa = "Tỉ lệ làm đúng theo bài, từ bài yếu nhất", DonVi = "% đúng", CotGiaTri = "% đúng", Max = 100, Diem = bieuDo };
+}
+@section Head {
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500;1,600&display=swap">
+<link rel="stylesheet" href="~/css/hoc-vien.css" asp-append-version="true">
+<link rel="stylesheet" href="~/css/bieu-do.css" asp-append-version="true">
+}
+<div class="hv-trang">
+<partial name="_MenuTaiKhoan" model="Model.Menu" />
+<main class="hv-main">
+<h1>Điểm yếu của tôi</h1>
+<p class="hv-mo-ta">Tính từ các câu bạn đã làm trong 120 ngày gần đây. Cần ít nhất @PhanTichDiemYeuService.SoCauToiThieu câu mỗi bài mới đánh giá được.</p>
+@Html.AntiForgeryToken()
+
+@if (!coDuLieu)
+{
+<section class="hv-khoi"><p class="hv-trong">Bạn chưa làm câu luyện tập nào. <a asp-controller="Home" asp-action="LuyenDe" asp-route-id="">Luyện đề</a> vài bài rồi quay lại đây để xem mình mạnh yếu ở đâu.</p></section>
+}
+else
+{
+<section class="hv-khoi">
+<div class="hv-khoi-dau"><h2>Tỉ lệ làm đúng theo bài</h2><span>Từ bài yếu nhất</span></div>
+@if (bd is null) { <p class="bd-trong">Chưa bài nào đủ @PhanTichDiemYeuService.SoCauToiThieu câu để đánh giá. Làm thêm vài câu nhé.</p> }
+else { <partial name="_BieuDoCot" model="bd" /> }
+</section>
+
+<section class="hv-khoi">
+<div class="hv-khoi-dau"><h2>Cần ôn thêm</h2>
+@if (Model.Yeu.Count > 0) { <a class="hv-nut" href="/DiemYeu/DeOn">Làm đề ôn riêng (10 câu)</a> }
+</div>
+@if (Model.Yeu.Count == 0)
+{
+<p class="hv-trong">Chưa có bài nào dưới @PhanTichDiemYeuService.NguongYeu.ToString("0")% đúng. Tiếp tục phát huy!</p>
+}
+else
+{
+<ul class="dy-ds">
+@foreach (var d in Model.Yeu)
+{
+<li data-bai="@d.BaiId">
+<div class="dy-dong"><div><b>@d.Nhan</b><span class="dy-phu">@d.Khoa · @d.SoDung/@d.SoCau câu đúng</span></div>
+<span class="dy-tile sai">@d.TiLe.ToString("0")%</span></div>
+<div class="dy-nut"><a class="hv-nut phu nho" href="/Home/BaiHoc/@d.BaiId">Đọc lại bài</a>
+@if (Model.CoAi) { <button type="button" class="hv-nut phu nho" data-ai-cau>AI tạo 5 câu mới</button> }</div>
+<div class="dy-cau" data-ket-qua></div>
+</li>
+}
+</ul>
+}
+</section>
+
+@if (Model.Manh.Count > 0)
+{
+<section class="hv-khoi">
+<div class="hv-khoi-dau"><h2>Điểm mạnh</h2><span>Từ @PhanTichDiemYeuService.NguongManh.ToString("0")% đúng trở lên</span></div>
+<ul class="dy-ds">
+@foreach (var d in Model.Manh)
+{
+<li><div class="dy-dong"><div><b>@d.Nhan</b><span class="dy-phu">@d.Khoa · @d.SoDung/@d.SoCau câu đúng</span></div><span class="dy-tile tot">@d.TiLe.ToString("0")%</span></div></li>
+}
+</ul>
+</section>
+}
+}
+</main>
+</div>
+<script>
+(() => {
+  const chu = 'ABCD';
+  const token = document.querySelector('input[name=__RequestVerificationToken]')?.value;
+  const the = (c, i) => {
+    const el = document.createElement('article'); el.className = 'hv-cau';
+    const de = document.createElement('p'); de.className = 'de'; de.textContent = `${i + 1}. ${c.noiDung}`; el.append(de);
+    const ul = document.createElement('ul'); ul.className = 'hv-pa';
+    c.phuongAn.forEach((p, k) => { const li = document.createElement('li'); const b = document.createElement('b'); b.textContent = chu[k] + '. '; li.append(b, p); if (chu[k] === c.dapAn) li.dataset.dung = '1'; ul.append(li); });
+    el.append(ul);
+    const btn = document.createElement('button'); btn.type = 'button'; btn.className = 'hv-nut phu'; btn.textContent = 'Xem đáp án';
+    const giai = document.createElement('div'); giai.className = 'hv-giai'; const b = document.createElement('b'); b.textContent = `Đáp án ${c.dapAn}. `; giai.append(b, c.giaiThich);
+    btn.addEventListener('click', () => { el.classList.add('hien'); ul.querySelector('[data-dung]')?.classList.add('dung'); });
+    el.append(btn, giai); return el;
+  };
+  document.querySelectorAll('[data-ai-cau]').forEach(nut => nut.addEventListener('click', async () => {
+    const li = nut.closest('li'), kq = li.querySelector('[data-ket-qua]');
+    nut.disabled = true; nut.textContent = 'AI đang soạn câu hỏi…'; kq.replaceChildren();
+    try {
+      const r = await fetch('/DiemYeu/AiCauHoi', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded', RequestVerificationToken: token }, body: 'baiId=' + li.dataset.bai });
+      if (r.status === 429) throw new Error('Bạn thao tác hơi nhanh. Vui lòng đợi một phút rồi thử lại.');
+      if (!r.ok) throw new Error('Không tạo được câu hỏi. Vui lòng tải lại trang.');
+      const d = await r.json();
+      if (d.loi) throw new Error(d.loi);
+      const ghiChu = document.createElement('p'); ghiChu.className = 'hv-ghi-chu'; ghiChu.textContent = 'Câu do AI tạo từ nội dung bài học, chỉ để ôn tập và không được lưu. Hãy đối chiếu với bài học nếu thấy nghi ngờ.';
+      kq.append(ghiChu, ...d.cau.map(the));
+    } catch (e) { const p = document.createElement('p'); p.className = 'hv-thong-bao loi'; p.textContent = e.message; kq.append(p); }
+    finally { nut.disabled = false; nut.textContent = 'AI tạo 5 câu mới'; }
+  }));
+})();
+</script>

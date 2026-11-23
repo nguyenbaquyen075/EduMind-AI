@@ -120,6 +120,20 @@ public class GiaoBaiController(AppDbContext db, SuDia.Web.Services.TinThongBaoSe
         return View("~/Views/BaiTap/Lam.cshtml", new LamBaiGiaoViewModel { BaiTap = bt, Cau = f.Cau, XemTruoc = true });
     }
 
+    // AI gợi ý nhận xét + điểm cho một câu tự luận của một bài nộp (chỉ là gợi ý, giảng viên quyết định điểm)
+    [HttpPost, ValidateAntiForgeryToken, Microsoft.AspNetCore.RateLimiting.EnableRateLimiting("tro-ly")]
+    public async Task<IActionResult> AiNhanXet(int nopId, string cauId, [FromServices] SuDia.Web.Services.AiHocTapService ai, CancellationToken ct)
+    {
+        var n = await Db.BaiNopGiao.AsNoTracking().FirstOrDefaultAsync(x => x.Id == nopId, ct);
+        if (n is null || !await CuaToi().AnyAsync(b => b.Id == n.BaiTapGiaoId, ct)) return NotFound();
+        var bt = await Db.BaiTapGiao.AsNoTracking().FirstAsync(b => b.Id == n.BaiTapGiaoId, ct);
+        var cau = NoiDungBaiTap.Doc(bt.NoiDungJson).FirstOrDefault(c => c.Id == cauId && c.Kieu == "TL");
+        if (cau is null) return NotFound();
+        var traLoi = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, string>>(n.TraLoiJson) ?? new();
+        var (kq, loi) = await ai.NhanXetTuLuanAsync(cau.NoiDung, cau.LoiGiai, cau.Diem, traLoi.GetValueOrDefault(cauId, ""), ct);
+        return Json(new { loi, kq });
+    }
+
     public async Task<IActionResult> BaiNop(int id)
     {
         var bt = await CuaToi().AsNoTracking().FirstOrDefaultAsync(b => b.Id == id);
